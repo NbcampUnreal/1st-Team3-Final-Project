@@ -1,5 +1,5 @@
-name: "✨ feature"
-description: "feature 작업 사항을 입력해주세요."
+name: "✨ Add"
+description: "Add 작업 사항을 입력해주세요."
 title: "✨ [feat] "
 body:
   - type: textarea
