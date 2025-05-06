@@ -1,0 +1,20 @@
+name: "🐛 fix"
+description: "fix 발생 시 작성해 주세요."
+title: "🐛 [fix] "
+labels: ["fix"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: 🐛 문제 설명
+      description: 어떤 문제가 발생했는지 설명해 주세요. (이미지를 첨부하셔도 좋습니다!)
+    validations:
+      required: true
+  - type: textarea
+    id: fix
+    attributes:
+      label: 🔧 수정된 내용
+      description: 수정된 내용을 설명해 주세요.
+      placeholder: 간결하게 적을수록 좋습니다!
+    validations:
+      required: true
