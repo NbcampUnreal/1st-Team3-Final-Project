@@ -1,9 +1,0 @@
-{
-	"SourceFiles": [
-		"F:\\GitHub\\1st-Team3-Final-Project\\Zone064\\Source\\Zone064\\Zone064.Build.cs",
-		"F:\\GitHub\\1st-Team3-Final-Project\\Zone064\\Plugins\\UEGitPlugin-3.16\\Source\\GitSourceControl\\GitSourceControl.Build.cs",
-		"F:\\GitHub\\1st-Team3-Final-Project\\Zone064\\Source\\Zone064.Target.cs",
-		"F:\\GitHub\\1st-Team3-Final-Project\\Zone064\\Source\\Zone064Editor.Target.cs"
-	],
-	"EngineVersion": "5.5.4"
-}
