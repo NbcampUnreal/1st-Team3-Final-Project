@@ -1,0 +1,14 @@
+{
+	"Targets": [
+		{
+			"Name": "Zone064",
+			"Path": "..\\Source\\Zone064.Target.cs",
+			"Type": "Game"
+		},
+		{
+			"Name": "Zone064Editor",
+			"Path": "..\\Source\\Zone064Editor.Target.cs",
+			"Type": "Editor"
+		}
+	]
+}
