@@ -20,6 +20,9 @@ ACityBlockBase::ACityBlockBase()
 
     EnemySpawnPoint = CreateDefaultSubobject<UArrowComponent>(TEXT("EnemySpawnPoint"));
     EnemySpawnPoint->SetupAttachment(RootComponent);
+
+    SplineBuildingSpot = CreateDefaultSubobject<USplineComponent>(TEXT("SplineBuildingSpot"));
+    SplineBuildingSpot->SetupAttachment(RootComponent);
 }
 
 void ACityBlockBase::BeginPlay()

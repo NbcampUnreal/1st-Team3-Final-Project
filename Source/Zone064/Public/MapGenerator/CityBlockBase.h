@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Components/SplineComponent.h"
 #include "CityBlockBase.generated.h"
 
 class UBoxComponent;
@@ -46,6 +47,10 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "City Block")
     TSubclassOf<AActor> EnemyClass;
+
+    // Spawn Random Building
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PCG")
+    USplineComponent* SplineBuildingSpot;
 
     UFUNCTION(BlueprintCallable)
     void SetGridPosition(FIntPoint InGridPos);
