@@ -12,4 +12,7 @@ class ZONE064_API AZNInGameGameMode : public AGameMode
 	
 public:
 	AZNInGameGameMode();
+
+	virtual void HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer) override;
+	virtual void Logout(AController* Exiting) override;
 };
