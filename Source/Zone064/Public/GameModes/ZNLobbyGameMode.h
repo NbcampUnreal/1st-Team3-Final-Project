@@ -1,17 +1,21 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
 #pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameMode.h"
-#include "ZNInGameGameMode.generated.h"
+#include "ZNLobbyGameMode.generated.h"
 
-
+/**
+ * 
+ */
 UCLASS()
-class ZONE064_API AZNInGameGameMode : public AGameMode
+class ZONE064_API AZNLobbyGameMode : public AGameMode
 {
 	GENERATED_BODY()
 	
 public:
-	AZNInGameGameMode();
+	AZNLobbyGameMode();
 
 	virtual void HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer) override;
 	virtual void Logout(AController* Exiting) override;
