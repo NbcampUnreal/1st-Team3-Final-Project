@@ -8,6 +8,7 @@ class UCanvasPanel;
 class USizeBox;
 class UBorder;
 class UImage;
+class AZNInventoryTestCharacter;
 
 UCLASS()
 class ZONE064_API UZNItemWidget : public UUserWidget
@@ -16,11 +17,21 @@ class ZONE064_API UZNItemWidget : public UUserWidget
 
 protected:
 	UPROPERTY(VisibleAnywhere, meta = (BindWidget), Category = "UI")
-	UCanvasPanel* Canvas;
+	TObjectPtr<UCanvasPanel> Canvas;
 	UPROPERTY(VisibleAnywhere, meta = (BindWidget), Category = "UI")
-	USizeBox* BackgroundSizebox;
+	TObjectPtr<USizeBox> BackgroundSizebox;
 	UPROPERTY(VisibleAnywhere, meta = (BindWidget), Category = "UI")
-	UBorder* BackgroundBorder;
+	TObjectPtr<UBorder> BackgroundBorder;
 	UPROPERTY(VisibleAnywhere, meta = (BindWidget), Category = "UI")
-	UImage* ItemImage;
+	TObjectPtr<UImage> ItemImage;
+
+	TObjectPtr<AZNInventoryTestCharacter> CharacterReference;
+
+	FVector2D Size;
+
+protected:
+	virtual void NativeConstruct() override;
+
+	// 아이템 위젯의 세팅 조정(아이콘, 크기 등)
+	void Refresh(AActor* ItemToAdd);
 };

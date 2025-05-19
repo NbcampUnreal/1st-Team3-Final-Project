@@ -5,6 +5,7 @@
 #include "ZNInventoryComponent.generated.h"
 
 class AZNInventoryTestBaseItem;
+class UZNInventoryGridWidget;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class ZONE064_API UZNInventoryComponent : public UActorComponent
@@ -18,9 +19,17 @@ public:
 	int32 Rows;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Info|Inventory TileSize")
 	float TileSize;
-	
+
+	// 실제 인벤토리
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory|Items")
 	TArray<AZNInventoryTestBaseItem*> Items;
+
+	bool bAddedItem = false;
+	TObjectPtr<UZNInventoryGridWidget> InventoryGridWidgetReference;
+
+protected:
+	// 아이템과 저장 위치 저장
+	TMap<AZNInventoryTestBaseItem*, FIntPoint> AllItems;
 
 public:	
 	UZNInventoryComponent();
@@ -39,6 +48,10 @@ public:
 	AZNInventoryTestBaseItem* GetItemAtIndex(int32 Index);
 
 	void AddItemAt(AZNInventoryTestBaseItem* Item, int32 TopLeftIndex);
+
+	TMap<AZNInventoryTestBaseItem*, FIntPoint> GetAllItems();
+
+	void SetInventoryGridWidget(UZNInventoryGridWidget* GridWidget);
 
 protected:
 	virtual void BeginPlay() override;

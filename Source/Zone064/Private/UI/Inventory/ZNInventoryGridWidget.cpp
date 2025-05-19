@@ -1,6 +1,7 @@
 #include "UI/Inventory/ZNInventoryGridWidget.h"
 #include "Character/Inventory/ZNInventoryDataStruct.h"
 #include "Character/Inventory/ZNInventoryComponent.h"
+#include "Character/Inventory/ZNInventoryTestCharacter.h"
 #include "Components/Border.h"
 #include "Components/CanvasPanel.h"
 #include "Components/CanvasPanelSlot.h"
@@ -12,21 +13,18 @@ void UZNInventoryGridWidget::NativeConstruct()
 	Super::NativeConstruct();
 
 	// 캐릭터 가져오기
-	//TObjectPtr<ACharacter> CharacterReference;
-	//CharacterReference = Cast<ACharacter>(GetOwningPlayerPawn());
+	CharacterReference = Cast<AZNInventoryTestCharacter>(GetOwningPlayerPawn());
+	InventoryComponent = CharacterReference->InventoryComponent;
 
-	//TObjectPtr<UZNInventoryComponent> InventoryComponent;
-	//InventoryComponent = CharacterReference->InventoryComponent;
+	if (!CharacterReference)
+		return;
 
-	//if (!CharacterReference)
-	//	return;
+	Columns = InventoryComponent->Columns;
+	Rows = InventoryComponent->Rows;
+	TileSize = InventoryComponent->TileSize;
 
-	//Columns = InventoryComponent->Columns;
-	//Rows = InventoryComponent->Rows;
-	//TileSize = InventoryComponent->TileSize;
-
-	//float NewWidth = Columns * TileSize;
-	//float NewHeight = Rows * TileSize;
+	float NewWidth = Columns * TileSize;
+	float NewHeight = Rows * TileSize;
 
 	LineStructData = MakeShared<FLines>();
 	StartX = {};
@@ -34,14 +32,16 @@ void UZNInventoryGridWidget::NativeConstruct()
 	EndX = {};
 	EndY = {};
 
-	//UCanvasPanelSlot* BorderAsCanvasSlot = UWidgetLayoutLibrary::SlotAsCanvasSlot(GridBorder);
-	//BorderAsCanvasSlot->SetSize(FVector2D(NewWidth, NewHeight));
+	UCanvasPanelSlot* BorderAsCanvasSlot = UWidgetLayoutLibrary::SlotAsCanvasSlot(GridBorder);
+	BorderAsCanvasSlot->SetSize(FVector2D(NewWidth, NewHeight));
 
 	// GridBorder의 Width와 Height를 변경
-	UCanvasPanelSlot* BorderAsCanvasSlot = UWidgetLayoutLibrary::SlotAsCanvasSlot(GridBorder);
-	BorderAsCanvasSlot->SetSize(FVector2D(Width, Height));
+	//UCanvasPanelSlot* BorderAsCanvasSlot = UWidgetLayoutLibrary::SlotAsCanvasSlot(GridBorder);
+	//BorderAsCanvasSlot->SetSize(FVector2D(Width, Height));
 
 	CreateLineSegments();
+
+	InventoryComponent->SetInventoryGridWidget(this);
 }
 
 int32 UZNInventoryGridWidget::NativePaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
@@ -109,4 +109,26 @@ void UZNInventoryGridWidget::CreateLineSegments()
 	//	GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Cyan, FString::Printf(TEXT("StartX : %.2f, StartY : %.2f"), StartX[i], StartY[i]));
 	//	GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Cyan, FString::Printf(TEXT("EndX : %.2f, EndY : %.2f"), EndX[i], EndY[i]));
 	//}
+}
+
+void UZNInventoryGridWidget::Refresh()
+{
+	TArray<AZNInventoryTestBaseItem*> Keys;
+	InventoryComponent->GetAllItems().GetKeys(Keys);
+
+	if (CharacterReference->ItemWidgetClass)
+	{
+		CharacterReference->ItemWidgetInstance = CreateWidget(GetWorld(), CharacterReference->ItemWidgetClass);
+		
+		for (AZNInventoryTestBaseItem* AddedItem : Keys)
+		{
+			CharacterReference->ItemWidgetInstance->SetOwningPlayer(GetOwningPlayer());
+			int32 X = InventoryComponent->GetAllItems()[AddedItem].X * InventoryComponent->TileSize;
+			int32 Y = InventoryComponent->GetAllItems()[AddedItem].Y * InventoryComponent->TileSize;
+
+			PanelSlot = GridCanvasPanel->AddChild(CharacterReference->ItemWidgetInstance);
+			Cast<UCanvasPanelSlot>(PanelSlot)->SetAutoSize(true);
+			Cast<UCanvasPanelSlot>(PanelSlot)->SetPosition(FVector2D(X,Y));
+		}
+	}
 }

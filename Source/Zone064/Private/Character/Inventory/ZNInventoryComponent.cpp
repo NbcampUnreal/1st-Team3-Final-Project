@@ -1,5 +1,6 @@
 #include "Character/Inventory/ZNInventoryComponent.h"
 #include "Item/Test/ZNInventoryTestBaseItem.h"
+#include "UI/Inventory/ZNInventoryGridWidget.h"
 
 UZNInventoryComponent::UZNInventoryComponent()
 {
@@ -18,6 +19,11 @@ void UZNInventoryComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+	if (bAddedItem)
+	{
+		InventoryGridWidgetReference->Refresh();
+		bAddedItem = false;
+	}
 }
 
 bool UZNInventoryComponent::TryAddItem(AZNInventoryTestBaseItem* Item)
@@ -136,5 +142,27 @@ void UZNInventoryComponent::AddItemAt(AZNInventoryTestBaseItem* Item, int32 TopL
 			Items[TileToIndex(FIntPoint(x, y))] = Item;
 		}
 	}
+
+	bAddedItem = true;
 }
 
+TMap<AZNInventoryTestBaseItem*, FIntPoint> UZNInventoryComponent::GetAllItems()
+{
+	for (int32 i = 0; i < Items.Num(); i++)
+	{
+		if (Items[i])
+		{
+			if (!AllItems.Contains(Items[i]))
+			{
+				AllItems.Add(Items[i], IndexToTile(i));
+			}
+		}
+	}
+
+	return AllItems;
+}
+
+void UZNInventoryComponent::SetInventoryGridWidget(UZNInventoryGridWidget* GridWidget)
+{
+	InventoryGridWidgetReference = GridWidget;
+}
