@@ -7,7 +7,7 @@
 #include "Interfaces/OnlineSessionInterface.h"
 #include "Kismet/GameplayStatics.h"
 #include "Engine/Engine.h"
-#include "GameModes/ZNSessionGameInstance.h"
+#include "GameInstance/ZNSessionGameInstance.h"
 #include "GameFramework/GameStateBase.h"
 
 FString UZNSessionLibrary::GenerateUniqueSessionName(UObject* WorldContextObject)
