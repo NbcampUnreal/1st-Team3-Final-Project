@@ -17,38 +17,39 @@ class ZONE064_API UZNSessionLibrary : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 public:
-    // °íÀ¯ÇÑ ¼¼¼Ç ÀÌ¸§ »ı¼º + GameInstance¿¡ ÀúÀå
+    // ê³ ìœ  ì„¸ì…˜ ì´ë¦„ ìƒì„±
     UFUNCTION(BlueprintCallable, Category = "Session", meta = (WorldContext = "WorldContextObject"))
     static FString GenerateUniqueSessionName(UObject* WorldContextObject);
 
-    // ÀúÀåµÈ ¼¼¼Ç ÀÌ¸§ ±â¹İ ¼¼¼Ç Á¦°Å
-    UFUNCTION(BlueprintCallable, Category = "Session", meta = (WorldContext = "WorldContextObject"))
-    static void SafeDestroySession(UObject* WorldContextObject);
-
-    // ÀúÀåµÈ ¼¼¼Ç ÀÌ¸§ Á¶È¸
-    UFUNCTION(BlueprintCallable, Category = "Session", meta = (WorldContext = "WorldContextObject"))
-    static FName GetCurrentSessionName(UObject* WorldContextObject);
-
-    // ¼¼¼Ç ÇÊÅÍ¸µ
-    UFUNCTION(BlueprintCallable, Category = "Session")
-    static TArray<FBlueprintSessionResult> FilterValidSessions(const TArray<FBlueprintSessionResult>& SessionResults);
-
-    // ¼¼¼Ç »ı¼º
+    // ì„¸ì…˜ ìƒì„±
     UFUNCTION(BlueprintCallable, meta = (WorldContext = "WorldContextObject"))
     static bool CreateFullSession(UObject* WorldContextObject, int32 MaxPlayers, const FString& GameName);
 
-    // ¼¼¼Ç Âü°¡
+    // ì„¸ì…˜ ì°¸ê°€
     UFUNCTION(BlueprintCallable, meta = (WorldContext = "WorldContextObject"))
     static bool JoinNamedSession(UObject* WorldContextObject, const FBlueprintSessionResult& SearchResult);
 
-    // ¹öÆ° ¿¬¼Ó Å¬¸¯ ¹æÁö
-    UFUNCTION(BlueprintCallable, Category = "UI|Utils")
-    static void TemporarilyDisableButton(UButton* TargetButton, float DisableDuration = 1.0f);
+    // ì„¸ì…˜ê³¼ì˜ ì—°ê²° ë‹¨ì ˆ
+    UFUNCTION(BlueprintCallable, Category = "Session", meta = (WorldContext = "WorldContextObject"))
+    static void SafeDestroySession(UObject* WorldContextObject);
 
-    // ¼¼¼Ç ÀÎ¿ø¼ö Àû¿ë
+    // ì„¸ì…˜ ì´ë¦„ ê°€ì ¸ì˜¤ê¸°
+    UFUNCTION(BlueprintCallable, Category = "Session", meta = (WorldContext = "WorldContextObject"))
+    static FName GetCurrentSessionName(UObject* WorldContextObject);
+
+    // ì„¸ì…˜ í•„í„°ë§
+    UFUNCTION(BlueprintCallable, Category = "Session")
+    static TArray<FBlueprintSessionResult> FilterValidSessions(const TArray<FBlueprintSessionResult>& SessionResults);
+
+    // ì¸ì›ìˆ˜ UI ë³€ê²½
     UFUNCTION(BlueprintPure, Category = "Session")
     static FText GetFormattedSessionPlayerCount(const FBlueprintSessionResult& SessionResult);
 
+    // ì¸ì›ìˆ˜ ì²´í¬
     UFUNCTION(BlueprintCallable, Category = "Session")
     static void UpdatePlayerCountInSession(UObject* WorldContextObject, int32 Delta);
+
+    // ë²„íŠ¼ ì—°ì† í´ë¦­ ë°©ì§€
+    UFUNCTION(BlueprintCallable, Category = "UI|Utils")
+    static void TemporarilyDisableButton(UButton* TargetButton, float DisableDuration = 1.0f);
 };
