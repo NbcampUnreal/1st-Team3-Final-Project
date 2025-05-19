@@ -12,7 +12,7 @@ class ZONE064_API ARandomBuildingBase : public AActor
 public:
     ARandomBuildingBase();
 
-    // °Ç¹° Å©±â ¼³Á¤
+    // ê±´ë¬¼ í¬ê¸° ì„¤ì •
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Generation")
     int32 Width = 3;
 
@@ -22,7 +22,7 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Generation")
     int32 Floors = 2;
 
-    // ¸Ş½Ã ¿¡¼Â
+    // ë©”ì‹œ ì—ì…‹
     UPROPERTY(EditAnywhere, Category = "Generation")
     UStaticMesh* WallMesh;
 
@@ -35,7 +35,7 @@ public:
     UPROPERTY(EditAnywhere, Category = "Generation")
     UStaticMesh* StairMesh;
 
-    // °İÀÚ À§Ä¡ ¼³Á¤ (¿ÜºÎ¿¡¼­ È£Ãâ)
+    // ê²©ì ìœ„ì¹˜ ì„¤ì • (ì™¸ë¶€ì—ì„œ í˜¸ì¶œ)
     UFUNCTION(BlueprintCallable)
     void SetGridPosition(FIntPoint InGridPos);
 
@@ -47,6 +47,6 @@ protected:
 
     void GenerateStructure();
 
-    // °¢ ÃşÀÇ °è´Ü À§Ä¡ ÀúÀå (Ãş ¹øÈ£ ¡æ (X,Y))
+    // ê° ì¸µì˜ ê³„ë‹¨ ìœ„ì¹˜ ì €ì¥ (ì¸µ ë²ˆí˜¸ â†’ (X,Y))
     TMap<int32, FIntPoint> StairPositions;
 };
