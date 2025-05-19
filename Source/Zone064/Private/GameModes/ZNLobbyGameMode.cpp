@@ -11,6 +11,7 @@ AZNLobbyGameMode::AZNLobbyGameMode()
     PlayerControllerClass = AZNPlayerController::StaticClass();
 }
 
+// 세션에 참가하면 세션의 인원수를 추가
 void AZNLobbyGameMode::HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer)
 {
     Super::HandleStartingNewPlayer_Implementation(NewPlayer);
@@ -23,6 +24,7 @@ void AZNLobbyGameMode::HandleStartingNewPlayer_Implementation(APlayerController*
     UZNSessionLibrary::UpdatePlayerCountInSession(this, +1);
 }
 
+// 세션에 나갔을 경우 인원수 감소
 void AZNLobbyGameMode::Logout(AController* Exiting)
 {
     Super::Logout(Exiting);
