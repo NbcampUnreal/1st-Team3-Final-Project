@@ -6,7 +6,6 @@
 USTRUCT(BlueprintType)
 struct FLines {
 
-	// 내부적으로 GENERATED_BODY()
 	GENERATED_USTRUCT_BODY()
 
 	FLines() {

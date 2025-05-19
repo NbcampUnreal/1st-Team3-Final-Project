@@ -78,7 +78,7 @@ bool UZNInventoryComponent::IsRoomAvailable(AZNInventoryTestBaseItem* Item, int3
 
 FIntPoint UZNInventoryComponent::IndexToTile(int32 Index)
 {
-	// ¾ÆÀÌÅÛ ¹è¿­ÀÇ index¸¦ ÁÂÇ¥·Î º¯È¯(== [Columns, Rows])
+	// ì•„ì´í…œ ë°°ì—´ì˜ indexë¥¼ ì¢Œí‘œë¡œ ë³€í™˜(== [Columns, Rows])
 	return FIntPoint(Index % Columns, Index / Columns);
 }
 
@@ -101,7 +101,7 @@ bool UZNInventoryComponent::IsTileValid(FIntPoint Tile)
 
 bool UZNInventoryComponent::IsIndexValid(int32 Index)
 {
-	// IsValidIndex : TArray ³»Àå ÇÔ¼ö
+	// IsValidIndex : TArray ë‚´ì¥ í•¨ìˆ˜
 	if (Items.IsValidIndex(Index))
 	{
 		return true;

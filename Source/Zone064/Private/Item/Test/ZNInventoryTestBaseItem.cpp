@@ -32,3 +32,8 @@ FIntPoint AZNInventoryTestBaseItem::GetDimensions() const
 {
 	return Dimensions;
 }
+
+UMaterialInterface* AZNInventoryTestBaseItem::GetIcon()
+{
+	return Icon;
+}

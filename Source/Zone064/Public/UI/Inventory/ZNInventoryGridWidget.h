@@ -21,8 +21,8 @@ protected:
 	UPROPERTY(VisibleAnywhere, meta = (BindWidget), Category = "UI")
 	TObjectPtr<UCanvasPanel> GridCanvasPanel;
 
-	// ³ªÁß¿¡ Ä³¸¯ÅÍ ÇÁ·ÎÅäÅ¸ÀÔ ±¸ÇöµÇ°í ³ª¸é UPROPERTY(), Width, Height Áö¿ì°í
-	// NativeConstruct()¿¡ ÀÖ´Â ÁÖ¼® Ç®±â
+	// ë‚˜ì¤‘ì— ìºë¦­í„° í”„ë¡œí† íƒ€ì… êµ¬í˜„ë˜ê³  ë‚˜ë©´ UPROPERTY(), Width, Height ì§€ìš°ê³ 
+	// NativeConstruct()ì— ìˆëŠ” ì£¼ì„ í’€ê¸°
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Info")
 	int32 Columns;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Info")
@@ -51,7 +51,7 @@ protected:
 		const FWidgetStyle& InWidgetStyle,
 		bool bParentEnabled) const override;
 
-	// ±×¸®µå ¼±À» ±×¸± ¶§ »ç¿ëÇÒ ÁÂÇ¥¸¦ ±¸ÇÏ´Â ÇÔ¼ö
+	// ê·¸ë¦¬ë“œ ì„ ì„ ê·¸ë¦´ ë•Œ ì‚¬ìš©í•  ì¢Œí‘œë¥¼ êµ¬í•˜ëŠ” í•¨ìˆ˜
 	void CreateLineSegments();
 
 	

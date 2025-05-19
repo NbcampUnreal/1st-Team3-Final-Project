@@ -11,7 +11,7 @@ void UZNInventoryGridWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	// ƒ≥∏Ø≈Õ ∞°¡Æø¿±‚
+	// Ï∫êÎ¶≠ÌÑ∞ Í∞ÄÏ†∏Ïò§Í∏∞
 	//TObjectPtr<ACharacter> CharacterReference;
 	//CharacterReference = Cast<ACharacter>(GetOwningPlayerPawn());
 
@@ -37,7 +37,7 @@ void UZNInventoryGridWidget::NativeConstruct()
 	//UCanvasPanelSlot* BorderAsCanvasSlot = UWidgetLayoutLibrary::SlotAsCanvasSlot(GridBorder);
 	//BorderAsCanvasSlot->SetSize(FVector2D(NewWidth, NewHeight));
 
-	// GridBorder¿« WidthøÕ Height∏¶ ∫Ø∞Ê
+	// GridBorderÏùò WidthÏôÄ HeightÎ•º Î≥ÄÍ≤Ω
 	UCanvasPanelSlot* BorderAsCanvasSlot = UWidgetLayoutLibrary::SlotAsCanvasSlot(GridBorder);
 	BorderAsCanvasSlot->SetSize(FVector2D(Width, Height));
 
@@ -48,13 +48,13 @@ int32 UZNInventoryGridWidget::NativePaint(const FPaintArgs& Args, const FGeometr
 {
 	Super::NativePaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
 
-	// UI º±¿ª ±◊∏Æ±‚ ¿ß«ÿ « ø‰«— Context
+	// UI ÏÑ†ÏùÑ Í∑∏Î¶¨Í∏∞ ÏúÑÌï¥ ÌïÑÏöîÌïú Context
 	FPaintContext PaintContext(AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
-	// º±¿« custom ªˆªÛ
-	FLinearColor CustomColor(0.5f, 0.5f, 0.5f, 0.5f);	// R, G, B, A(∫“≈ı∏Ìµµ)
+	// ÏÑ†Ïùò custom ÏÉâÏÉÅ
+	FLinearColor CustomColor(0.5f, 0.5f, 0.5f, 0.5f);	// R, G, B, A(Î∂àÌà¨Î™ÖÎèÑ)
 
-	// ¿Œ∫•≈‰∏Æ ±◊∏ÆµÂ øﬁ¬  ªÛ¥‹ ¿ßƒ°
-	// - Border¿« ∑Œƒ√ (0, 0)¿Ã øﬁ¬  ªÛ¥‹¿”, ¿Ã ¿ßƒ°∏¶ ¿¸√º »≠∏Èø°º≠¿« ¿ßƒ°∑Œ ∫Ø∞Ê«ÿº≠ π›»Ø
+	// Ïù∏Î≤§ÌÜ†Î¶¨ Í∑∏Î¶¨Îìú ÏôºÏ™Ω ÏÉÅÎã® ÏúÑÏπò
+	// - BorderÏùò Î°úÏª¨ (0, 0)Ïù¥ ÏôºÏ™Ω ÏÉÅÎã®ÏûÑ, Ïù¥ ÏúÑÏπòÎ•º Ï†ÑÏ≤¥ ÌôîÎ©¥ÏóêÏÑúÏùò ÏúÑÏπòÎ°ú Î≥ÄÍ≤ΩÌï¥ÏÑú Î∞òÌôò
 	FVector2D TopLeftCorner = GridBorder->GetCachedGeometry().GetLocalPositionAtCoordinates(FVector2D(0.0f, 0.0f));
 
 	if (LineStructData.IsValid())
@@ -68,22 +68,22 @@ int32 UZNInventoryGridWidget::NativePaint(const FPaintArgs& Args, const FGeometr
 	return int32();
 }
 
-// Start, End TArray √§øÏ±‚ = ∞›¿⁄ ¡Ÿø° ¥Î«— ¡¬«• ±∏«œ±‚
+// Start, End TArray Ï±ÑÏö∞Í∏∞ = Í≤©Ïûê Ï§ÑÏóê ÎåÄÌïú Ï¢åÌëú Íµ¨ÌïòÍ∏∞
 void UZNInventoryGridWidget::CreateLineSegments()
 {
 	GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Blue, FString::Printf(TEXT("Columns : %d, Rows : %d"), Columns, Rows));
 
-	// ºº∑Œ ¡Ÿ(x = columns)
+	// ÏÑ∏Î°ú Ï§Ñ(x = columns)
 	for (int32 i = 0; i <= Columns; i++)
 	{
 		float x = i * TileSize;	// float x(i * TileSize);
 
-		LineStructData->XLines.Add(FVector2D(x, x));					// FVector2D¿« X = Ω√¿€ ¡¬«•¿« X ∞™ == Y = ≥° ¡¬«•¿« X ∞™
-		LineStructData->YLines.Add(FVector2D(0.0f, Rows * TileSize));	// FVector2D¿« X = Ω√¿€ ¡¬«•¿« Y ∞™,   Y = ≥° ¡¬«•¿« Y ∞™
-																		// => x¡¬«•¥¬ ∞∞∞Ì, y¡¬«•¥¬ ¥Ÿ∏ß == (0, 0) ~ (0, 10) => ºº∑Œ ¡Ÿ
+		LineStructData->XLines.Add(FVector2D(x, x));					// FVector2DÏùò X = ÏãúÏûë Ï¢åÌëúÏùò X Í∞í == Y = ÎÅù Ï¢åÌëúÏùò X Í∞í
+		LineStructData->YLines.Add(FVector2D(0.0f, Rows * TileSize));	// FVector2DÏùò X = ÏãúÏûë Ï¢åÌëúÏùò Y Í∞í,   Y = ÎÅù Ï¢åÌëúÏùò Y Í∞í
+																		// => xÏ¢åÌëúÎäî Í∞ôÍ≥†, yÏ¢åÌëúÎäî Îã§Î¶Ñ == (0, 0) ~ (0, 10) => ÏÑ∏Î°ú Ï§Ñ
 	}
 
-	// ∞°∑Œ ¡Ÿ(y = rows)
+	// Í∞ÄÎ°ú Ï§Ñ(y = rows)
 	for (int32 i = 0; i <= Rows; i++)
 	{
 		float y = i * TileSize;

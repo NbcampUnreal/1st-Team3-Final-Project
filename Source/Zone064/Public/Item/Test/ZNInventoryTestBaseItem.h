@@ -20,18 +20,23 @@ public:
 	TObjectPtr<USphereComponent> Sphere;
 	
 protected:
-	// ÀÎº¥Åä¸®¿¡¼­ ¾ÆÀÌÅÛÀÌ Â÷ÁöÇÒ °İÀÚ Å©±â
+	// ì¸ë²¤í† ë¦¬ì—ì„œ ì•„ì´í…œì´ ì°¨ì§€í•  ê²©ì í¬ê¸°
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Info | Dimensions")
 	FIntPoint Dimensions;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Info | Icon")
+	UMaterialInterface* Icon;
 
 public:	
 	AZNInventoryTestBaseItem();
 
 	virtual void Tick(float DeltaTime) override;
 
-	// Dimensions ¹İÈ¯ ÇÔ¼ö
-	// - ÀÎº¥Åä¸®¿¡ ÃæºĞÇÑ Å©±â°¡ ÀÖ´ÂÁö, ¾ÆÀÌÅÛÀÌ ¾ó¸¶³ª Å«Áö µîµî¿¡ »ç¿ë
+	// Dimensions ë°˜í™˜ í•¨ìˆ˜
+	// - ì¸ë²¤í† ë¦¬ì— ì¶©ë¶„í•œ í¬ê¸°ê°€ ìˆëŠ”ì§€, ì•„ì´í…œì´ ì–¼ë§ˆë‚˜ í°ì§€ ë“±ë“±ì— ì‚¬ìš©
 	FIntPoint GetDimensions() const;
+
+	UMaterialInterface* GetIcon();
 
 protected:
 	virtual void BeginPlay() override;

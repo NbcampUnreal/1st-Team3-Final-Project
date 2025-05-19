@@ -390,7 +390,7 @@ void AMapGenerator::GenerateMap()
         AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(Selected, Location, Rotation);
         if (ACityBlockBase* Block = Cast<ACityBlockBase>(SpawnedActor))
         {
-            Block->InitializeBlock(GridPos, Cell.bIsCrossroad, Cell.RoadDirection);
+            //Block->InitializeBlock(GridPos, Cell.bIsCrossroad, Cell.RoadDirection);
         }
 
         UE_LOG(LogTemp, Log, TEXT("Spawned (infra): %s at (%d, %d)"), *Selected->GetName(), GridPos.X, GridPos.Y);

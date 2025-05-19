@@ -29,7 +29,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	bool TryAddItem(AZNInventoryTestBaseItem* Item);
-	// TopLeftIndex : ¾ÆÀÌÅÛÀÌ ÀÎº¥Åä¸®¿¡ µé¾î°¬À» ¶§ÀÇ ¿ŞÂÊ »ó´Ü TileÀÇ index
+	// TopLeftIndex : ì•„ì´í…œì´ ì¸ë²¤í† ë¦¬ì— ë“¤ì–´ê°”ì„ ë•Œì˜ ì™¼ìª½ ìƒë‹¨ Tileì˜ index
 	bool IsRoomAvailable(AZNInventoryTestBaseItem* Item, int32 TopLeftIndex);
 
 	FIntPoint IndexToTile(int32 Index);
