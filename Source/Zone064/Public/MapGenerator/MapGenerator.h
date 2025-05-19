@@ -6,6 +6,77 @@
 #include "Engine/AssetManager.h"
 #include "MapGenerator.generated.h"
 
+
+UENUM(BlueprintType)
+enum class EZoneType : uint8
+{
+    None                UMETA(DisplayName = "None"),
+    Road                UMETA(DisplayName = "Road"), // 차도
+    Road_Sidewalk       UMETA(DisplayName = "Road_Sidewalk"),  // 인도
+    Road_Crosswalk      UMETA(DisplayName = "Road_Crosswalk"), // 횡단보도
+    Road_Intersection   UMETA(DisplayName = "Road_Intersection"), //교차로
+    HighRise            UMETA(DisplayName = "High Rise"),
+    LowRise             UMETA(DisplayName = "Low Rise"),
+    Alley               UMETA(DisplayName = "Alley"),
+    Plant               UMETA(DisplayName = "Plant"),
+    Special             UMETA(DisplayName = "Special")
+};
+
+UENUM(BlueprintType)
+enum class ERoadDirection : uint8
+{
+    None,
+    Horizontal,
+    Vertical,
+    Crossroad
+};
+
+USTRUCT(BlueprintType)
+struct FGridCellData
+{
+    GENERATED_BODY()
+
+    EZoneType ZoneType = EZoneType::None;
+    FRotator PreferredRotation = FRotator::ZeroRotator;
+    bool bIsCrossroad = false;
+
+    UPROPERTY(BlueprintReadOnly)
+    ERoadDirection RoadDirection = ERoadDirection::None; 
+};
+
+USTRUCT(BlueprintType)
+struct FZonePrefabSet
+{
+    GENERATED_BODY()
+
+    UPROPERTY(EditAnywhere)
+    EZoneType ZoneType;
+
+    UPROPERTY(EditAnywhere)
+    TArray<TSoftClassPtr<AActor>> Prefabs;
+};
+
+USTRUCT(BlueprintType)
+struct FBuildingSpawnData
+{
+    GENERATED_BODY()
+
+    UPROPERTY()
+    FIntPoint Origin;
+    
+    UPROPERTY()
+    int32 Width;
+
+    UPROPERTY()
+    int32 Height;
+
+    UPROPERTY()
+    EZoneType ZoneType;
+
+    UPROPERTY()
+    FRotator Rotation;
+};
+
 UCLASS()
 class ZONE064_API AMapGenerator : public AActor
 {
@@ -18,34 +89,85 @@ protected:
     virtual void BeginPlay() override;
 
 public:
-    // �� ũ��
+    // 맵 크기
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Generation")
-    int32 GridWidth = 5;
+    int32 GridWidth;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Generation")
-    int32 GridHeight = 5;
+    int32 GridHeight;
 
-    // ���� �� ����
+    // 블럭 간 간격
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Generation")
-    float TileSize = 1000.0f;
+    float TileSize;
 
-    // Soft reference ����Ʈ
+    // 에디터에서 사용할 소프트 레퍼 리스트
     UPROPERTY(EditAnywhere, Category = "Generation")
-    TArray<TSoftClassPtr<AActor>> BlockPrefabAssets;
+    TArray<FZonePrefabSet> BlockPrefabSets;
+ 
+    TMap<EZoneType, TArray<TSoftClassPtr<AActor>>> BlockPrefabAssetsByZone;
+    TMap<EZoneType, TArray<TSubclassOf<AActor>>> CachedPrefabsByZone;
 
-    // ��Ÿ�� ĳ�̵� ���� Ŭ����
-    TArray<TSubclassOf<AActor>> CachedPrefabs;
+    UPROPERTY(EditAnywhere, Category = "Generation|Props")
+    TArray<TSubclassOf<AActor>> PropClasses;
 
-    // �񵿱� �ε� �� �ݹ�
+    UPROPERTY(EditAnywhere, Category = "Generation|Props")
+    TArray<TSubclassOf<AActor>> TreePrefabs;
+    UPROPERTY(EditAnywhere, Category = "Generation|Props")
+    TArray<TSubclassOf<AActor>> LightPrefabs;
+    UPROPERTY(EditAnywhere, Category = "Generation|Props")
+    TArray<TSubclassOf<AActor>> TrashPrefabs;
+
+
+    // 비동기 로딩 후 콜백
     void OnPrefabsLoaded();
 
-    // ���� �õ�
+    // 랜덤 시드
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Generation")
-    int32 Seed = 42;
+    int32 Seed;
+
+    void AssignSpecialClusters();
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Generation|Special")
+    int32 RequiredClusterSize;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Generation|Special")
+    float SpecialChance;
+
+    bool IsAreaAvailable(FIntPoint TopLeft, int32 Width, int32 Height, const TArray<EZoneType>& BlockedTypes);
+    
+    void MarkZone(FIntPoint TopLeft, int32 Width, int32 Height, EZoneType ZoneType, FRotator Rotation);
+
+    UFUNCTION(BlueprintCallable)
+    void DrawDebugZoneMap();
+
+    void SpawnSidewalkProps();
+
+    void TrySpawnProps(AActor* Target, FIntPoint GridPos);
+    
+    // 회전값 고려한 좌상단 구하기
+    FIntPoint GetTopLeftFromOrigin(FIntPoint center, int32 width, int32 height, const FRotator& Rotation);
+    FVector GetWorldCenterFromTopLeft(FIntPoint TopLeft, int32 Width, int32 Height, FRotator Rotation);
+    FVector GetWorldFromGrid(FIntPoint GridPos);
 
 private:
     FRandomStream RandomStream;
     FStreamableManager AssetLoader;
+    // 구역 맵
+    TMap<FIntPoint, FGridCellData> ZoneMap;
+
+    // 건물 스폰 리스트
+    TArray<FBuildingSpawnData> BuildingSpawnList;
 
     void GenerateMap();
+    void GenerateZoneMap();
+    void AddtoBuildingSpawnList(FIntPoint Pos, int32 Width, int32 Height, EZoneType ZoneType, FRotator Rotation);
+
+    // 교차로 최소 간격
+    int32 CrossroadMinSpacing;
+
+    float TreeSpawnChance;
+    float LightSpawnChance;
+    float TrashSpawnChance;
+
+    // 프랍 최소 간격
+    int32 LightSpawnSpacing;
+    int32 TreeSpawnSpacing;
 };
