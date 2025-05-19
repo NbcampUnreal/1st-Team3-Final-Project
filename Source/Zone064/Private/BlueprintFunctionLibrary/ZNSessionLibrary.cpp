@@ -7,7 +7,7 @@
 #include "Interfaces/OnlineSessionInterface.h"
 #include "Kismet/GameplayStatics.h"
 #include "Engine/Engine.h"
-#include "GameModes/ZNSessionGameInstance.h"
+#include "GameInstance/ZNSessionGameInstance.h"
 #include "GameFramework/GameStateBase.h"
 
 FString UZNSessionLibrary::GenerateUniqueSessionName(UObject* WorldContextObject)
@@ -136,19 +136,16 @@ bool UZNSessionLibrary::CreateFullSession(UObject* WorldContextObject, int32 Max
     Settings.bIsLANMatch = false;
 
     Settings.bUseLobbiesIfAvailable = true;
-    // 보이스 쳇
     Settings.bUseLobbiesVoiceChatIfAvailable = true;
     Settings.bAllowJoinViaPresenceFriendsOnly = false;
     Settings.bIsDedicated = false;
     Settings.bUsesStats = false;
     Settings.bAntiCheatProtected = false;
 
-    // ExtraSetting: UI에 표시될 방 이름
     Settings.Set(TEXT("GameName"), GameName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 
     Settings.Set(FName("CURRENT_PLAYERS"), 1, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 
-    // 세션 생성
     if (UWorld* World = GEngine->GetWorldFromContextObjectChecked(WorldContextObject))
     {
         if (APlayerController* PC = World->GetFirstPlayerController())
@@ -160,15 +157,10 @@ bool UZNSessionLibrary::CreateFullSession(UObject* WorldContextObject, int32 Max
                 {
                     return SessionInterface->CreateSession(*NetID, GetCurrentSessionName(WorldContextObject), Settings);
                 }
-                else
-                {
-                    UE_LOG(LogTemp, Warning, TEXT("CreateFullSession: NetID is invalid."));
-                }
             }
         }
     }
 
-    UE_LOG(LogTemp, Warning, TEXT("CreateFullSession: Failed to get World/PC/LocalPlayer."));
     return false;
 }
 
@@ -176,7 +168,6 @@ bool UZNSessionLibrary::JoinNamedSession(UObject* WorldContextObject, const FBlu
 {
     if (!SearchResult.OnlineResult.IsValid())
     {
-        UE_LOG(LogTemp, Warning, TEXT("JoinNamedSession: Invalid session result"));
         return false;
     }
 
@@ -186,7 +177,6 @@ bool UZNSessionLibrary::JoinNamedSession(UObject* WorldContextObject, const FBlu
     IOnlineSessionPtr Sessions = Subsystem->GetSessionInterface();
     if (!Sessions.IsValid()) return false;
 
-    // Get the current session name from GameInstance
     FName SessionName = NAME_GameSession;
     if (UWorld* World = GEngine->GetWorldFromContextObjectChecked(WorldContextObject))
     {
@@ -210,10 +200,6 @@ bool UZNSessionLibrary::JoinNamedSession(UObject* WorldContextObject, const FBlu
                                 {
                                     PC->ClientTravel(ConnectString, TRAVEL_Absolute);
                                 }
-                            }
-                            else
-                            {
-                                UE_LOG(LogTemp, Warning, TEXT("JoinNamedSession: Join failed."));
                             }
                         })
                 );
