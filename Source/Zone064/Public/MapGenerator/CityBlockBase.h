@@ -2,6 +2,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Components/SplineComponent.h"
+#include "MapGenerator/MapGenerator.h"
 #include "CityBlockBase.generated.h"
 
 class UBoxComponent;
@@ -24,28 +26,59 @@ protected:
         bool bFromSweep, const FHitResult& SweepResult);
 
 public:
-    // Å½»ö °¡´ÉÇÑ ºí·°ÀÎÁö ¿©ºÎ
+    // íƒìƒ‰ ê°€ëŠ¥í•œ ë¸”ëŸ­ì¸ì§€ ì—¬ë¶€
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "City Block")
     bool bIsSearchable = true;
 
-    // Å½»ö Æ®¸®°Å ¿µ¿ª
+    // íƒìƒ‰ íŠ¸ë¦¬ê±° ì˜ì—­
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "City Block")
     UBoxComponent* ExplorationTrigger;
 
-    // ¾ÆÀÌÅÛ ½ºÆù Æ÷ÀÎÆ®
+    // ì•„ì´í…œ ìŠ¤í° í¬ì¸íŠ¸
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "City Block")
     UArrowComponent* ItemSpawnPoint;
 
-    // Àû ½ºÆù Æ÷ÀÎÆ®
+    // ì  ìŠ¤í° í¬ì¸íŠ¸
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "City Block")
     UArrowComponent* EnemySpawnPoint;
 
-    // ¾ÆÀÌÅÛ/Àû Å¬·¡½º ÁöÁ¤
+    // ì•„ì´í…œ/ì  í´ë˜ìŠ¤ ì§€ì •
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "City Block")
     TSubclassOf<AActor> ItemClass;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "City Block")
     TSubclassOf<AActor> EnemyClass;
+
+    // Spawn Random Building
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PCG")
+    USplineComponent* SplineBuildingSpot;
+
+    // ë„ë¡œ ì†Œí’ˆ í”„ë¦¬íŒ¹ 
+    UPROPERTY(EditAnywhere, Category = "Props")
+    TArray<TSubclassOf<AActor>> TrashPrefabs;
+    UPROPERTY(EditAnywhere, Category = "Props")
+    TArray<TSubclassOf<AActor>> TreePrefabs;
+    UPROPERTY(EditAnywhere, Category = "Props")
+    TArray<TSubclassOf<AActor>> LightPrefabs;
+
+    // ì†Œí’ˆ ìŠ¤í° ì§€ì 
+    UPROPERTY(EditAnywhere, Category = "Props|Points")
+    TArray<USceneComponent*> TreePoints;
+
+    UPROPERTY(EditAnywhere, Category = "Props|Points")
+    TArray<USceneComponent*> LightPoints;
+
+    UPROPERTY(EditAnywhere, Category = "Props|Points")
+    TArray<USceneComponent*> TrashPoints;
+
+    UPROPERTY(EditAnywhere, Category = "Props|Chance")
+    float TreeSpawnChance;
+
+    UPROPERTY(EditAnywhere, Category = "Props|Chance")
+    float LightSpawnChance;
+
+    UPROPERTY(EditAnywhere, Category = "Props|Chance")
+    float TrashSpawnChance;
 
     UFUNCTION(BlueprintCallable)
     void SetGridPosition(FIntPoint InGridPos);
@@ -53,7 +86,20 @@ public:
     UPROPERTY(BlueprintReadOnly)
     FIntPoint GridPosition;
 
+    UFUNCTION(BlueprintCallable)
+    void InitializeBlock(FIntPoint InGridPos, bool bCrossroad, ERoadDirection InDirection);
+
+    float GetRandomChance();
+
 protected:
-    // ¿À¹ö·¦ ½Ã ½ÇÁ¦ Å½»ö ÀÌº¥Æ® (È®Àå¿ë)
+    // ì˜¤ë²„ë© ì‹œ ì‹¤ì œ íƒìƒ‰ ì´ë²¤íŠ¸ (í™•ì¥ìš©)
     virtual void OnPlayerEnterBlock();
+
+    void SpawnRoadsideProps();
+
+    UPROPERTY(BlueprintReadOnly, Category = "City Block")
+    bool bIsCrossroad = false;
+
+    ERoadDirection RoadDirection;
+
 };

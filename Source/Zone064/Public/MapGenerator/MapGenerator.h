@@ -13,6 +13,7 @@ enum class EZoneType : uint8
     None                UMETA(DisplayName = "None"),
     Road                UMETA(DisplayName = "Road"), // 차도
     Road_Sidewalk       UMETA(DisplayName = "Road_Sidewalk"),  // 인도
+    Road_Sidewalk_Traffic       UMETA(DisplayName = "Road_Sidewalk_Traffic"),  // 신호등있는 인도
     Road_Crosswalk      UMETA(DisplayName = "Road_Crosswalk"), // 횡단보도
     Road_Intersection   UMETA(DisplayName = "Road_Intersection"), //교차로
     HighRise            UMETA(DisplayName = "High Rise"),
@@ -39,7 +40,7 @@ struct FGridCellData
     EZoneType ZoneType = EZoneType::None;
     FRotator PreferredRotation = FRotator::ZeroRotator;
     bool bIsCrossroad = false;
-
+    int32 CrossroadSize = 0;
     UPROPERTY(BlueprintReadOnly)
     ERoadDirection RoadDirection = ERoadDirection::None; 
 };
@@ -115,6 +116,8 @@ public:
     UPROPERTY(EditAnywhere, Category = "Generation|Props")
     TArray<TSubclassOf<AActor>> LightPrefabs;
     UPROPERTY(EditAnywhere, Category = "Generation|Props")
+    TArray<TSubclassOf<AActor>> TrafficPrefabs;
+    UPROPERTY(EditAnywhere, Category = "Generation|Props")
     TArray<TSubclassOf<AActor>> TrashPrefabs;
 
 
@@ -153,6 +156,12 @@ private:
     // 구역 맵
     TMap<FIntPoint, FGridCellData> ZoneMap;
 
+    // 4방향 탐색용 오프셋
+    TArray<FIntPoint> SearchOffsetList;
+    // 대각선 방향 탐색용 오프셋
+    TArray<FIntPoint> CornerOffsetList;
+    TMap<FIntPoint, float> CornerYawMap;
+
     // 건물 스폰 리스트
     TArray<FBuildingSpawnData> BuildingSpawnList;
 
@@ -162,10 +171,13 @@ private:
 
     // 교차로 최소 간격
     int32 CrossroadMinSpacing;
+    // 후생성 횡단보도 확률
+    float CrosswalkChance;
 
     float TreeSpawnChance;
     float LightSpawnChance;
     float TrashSpawnChance;
+    float TrafficSpawnChance;
 
     // 프랍 최소 간격
     int32 LightSpawnSpacing;
