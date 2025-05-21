@@ -14,6 +14,8 @@ AZNInventoryTestBaseItem::AZNInventoryTestBaseItem()
 
 	Sphere = CreateDefaultSubobject<USphereComponent>(TEXT("Sphere"));
 	Sphere->SetupAttachment(Mesh);
+
+	isRotated = false;
 }
 
 void AZNInventoryTestBaseItem::BeginPlay()
@@ -30,10 +32,39 @@ void AZNInventoryTestBaseItem::Tick(float DeltaTime)
 
 FIntPoint AZNInventoryTestBaseItem::GetDimensions() const
 {
-	return Dimensions;
+	if (!isRotated)
+	{
+		return Dimensions;
+	}
+	else
+	{
+		return FIntPoint(Dimensions.Y, Dimensions.X);
+	}
 }
 
 UMaterialInterface* AZNInventoryTestBaseItem::GetIcon()
 {
 	return Icon;
+}
+
+UMaterialInterface* AZNInventoryTestBaseItem::GetRotatedIcon()
+{
+	return RotatedIcon;
+}
+
+bool AZNInventoryTestBaseItem::GetIsRotated()
+{
+	return isRotated;
+}
+
+void AZNInventoryTestBaseItem::RotateItem()
+{
+	if (isRotated)
+	{
+		isRotated = false;
+	}
+	else
+	{
+		isRotated = true;
+	}
 }

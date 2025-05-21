@@ -17,6 +17,19 @@ struct FLines {
 	TArray<FVector2D> YLines;
 };
 
+USTRUCT(BlueprintType)
+struct FMousePositionInTile {
+
+	GENERATED_USTRUCT_BODY()
+
+	FMousePositionInTile() {
+
+	};
+
+	bool Right;
+	bool Down;
+};
+
 class ZONE064_API ZNInventoryDataStruct
 {
 public:

@@ -6,12 +6,11 @@
 #include "Item/Test/ZNInventoryTestBaseItem.h"
 #include "ZNTestAK47.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class ZONE064_API AZNTestAK47 : public AZNInventoryTestBaseItem
 {
 	GENERATED_BODY()
-	
+
+public:
+	AZNTestAK47();
 };

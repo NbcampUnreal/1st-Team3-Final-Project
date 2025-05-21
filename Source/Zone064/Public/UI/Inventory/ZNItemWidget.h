@@ -9,6 +9,7 @@ class USizeBox;
 class UBorder;
 class UImage;
 class AZNInventoryTestCharacter;
+class AZNInventoryTestBaseItem;
 
 UCLASS()
 class ZONE064_API UZNItemWidget : public UUserWidget
@@ -29,9 +30,19 @@ protected:
 
 	FVector2D Size;
 
+	TObjectPtr<AZNInventoryTestBaseItem> Item;
+
+public:
+	// 아이템 위젯의 세팅 조정(아이콘, 크기 등)
+	void Refresh(AActor* ItemToAdd);
+
 protected:
 	virtual void NativeConstruct() override;
 
-	// 아이템 위젯의 세팅 조정(아이콘, 크기 등)
-	void Refresh(AActor* ItemToAdd);
+	// Hover
+	virtual void NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+	virtual void NativeOnMouseLeave(const FPointerEvent& InMouseEvent) override;
+	// Drag & Drop
+	virtual void NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation) override;
+	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 };

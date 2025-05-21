@@ -39,6 +39,20 @@ bool UZNInventoryComponent::TryAddItem(AZNInventoryTestBaseItem* Item)
 			}
 		}
 
+		// 기본 방향으로 넣기 실패하면, 90도 회전한 상태로도 시도
+		Item->RotateItem();
+		for (int32 i = 0; i < Items.Num(); i++)
+		{
+			if (IsRoomAvailable(Item, i))
+			{
+				AddItemAt(Item, i);
+				return true;
+			}
+		}
+
+		// 회전 상태 시도도 실패하면, 아이템 원상복구
+		Item->RotateItem();
+
 		return false;
 	}
 
@@ -165,4 +179,34 @@ TMap<AZNInventoryTestBaseItem*, FIntPoint> UZNInventoryComponent::GetAllItems()
 void UZNInventoryComponent::SetInventoryGridWidget(UZNInventoryGridWidget* GridWidget)
 {
 	InventoryGridWidgetReference = GridWidget;
+}
+
+void UZNInventoryComponent::RemoveItem(AZNInventoryTestBaseItem* ItemToRemove)
+{
+	if (ItemToRemove)
+	{
+		for (int32 i = 0; i < Items.Num(); i++)
+		{
+			if (Items[i] == ItemToRemove)
+			{
+				Items[i] = nullptr;
+			}
+		}
+	}
+}
+
+void UZNInventoryComponent::RefreshAllItems()
+{
+	AllItems.Empty();
+
+	for (int32 i = 0; i < Items.Num(); i++)
+	{
+		if (Items[i])
+		{
+			if (!AllItems.Contains(Items[i]))
+			{
+				AllItems.Add(Items[i], IndexToTile(i));
+			}
+		}
+	}
 }

@@ -53,6 +53,10 @@ public:
 
 	void SetInventoryGridWidget(UZNInventoryGridWidget* GridWidget);
 
+	void RemoveItem(AZNInventoryTestBaseItem* ItemToRemove);
+
+	void RefreshAllItems();
+
 protected:
 	virtual void BeginPlay() override;
 	

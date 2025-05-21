@@ -18,7 +18,7 @@ public:
 	TObjectPtr<UStaticMeshComponent> Mesh;
 	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Item")
 	TObjectPtr<USphereComponent> Sphere;
-	
+		
 protected:
 	// 인벤토리에서 아이템이 차지할 격자 크기
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Info | Dimensions")
@@ -26,6 +26,10 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Info | Icon")
 	UMaterialInterface* Icon;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Info | Icon")
+	UMaterialInterface* RotatedIcon;
+
+	bool isRotated;
 
 public:	
 	AZNInventoryTestBaseItem();
@@ -37,6 +41,10 @@ public:
 	FIntPoint GetDimensions() const;
 
 	UMaterialInterface* GetIcon();
+	UMaterialInterface* GetRotatedIcon();
+	bool GetIsRotated();
+
+	void RotateItem();
 
 protected:
 	virtual void BeginPlay() override;

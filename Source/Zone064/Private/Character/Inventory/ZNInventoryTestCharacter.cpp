@@ -3,6 +3,7 @@
 #include "Character/Inventory/ZNInventoryTestCharacter.h"
 #include "Character/Inventory/ZNInventoryComponent.h"
 #include "Item/Test/ZNInventoryTestBaseItem.h"
+#include "UI/Inventory/ZNInventoryGridWidget.h"
 #include "Controllers/ZNPlayerController.h"
 #include "EnhancedInputComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -93,6 +94,8 @@ void AZNInventoryTestCharacter::ToggleInventory()
 void AZNInventoryTestCharacter::OnBeginOverlap(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
     ItemToAdd = OtherActor;
+
+    InventoryComponent->InventoryGridWidgetReference->bDropped = false;
 
     AZNInventoryTestBaseItem* Item = Cast<AZNInventoryTestBaseItem>(OtherActor);
     if (Item)
