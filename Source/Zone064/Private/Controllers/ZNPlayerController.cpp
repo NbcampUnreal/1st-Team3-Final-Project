@@ -6,8 +6,8 @@ void AZNPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// ¸®½¼ ¼­¹öÀÏ¶§, ¼­¹ö ÃøÀº ¸ðµç PlayerController¸¦ °¡Áö°í ÀÖÀ½
-	// => ¼­¹ö Ãø Å¬¶óÀÇ PC ¿Ü¿¡´Â UI ¾øÀ½ => ¿¹¿Ü Ã³¸® ÇØ¾ßÇÔ
+	// ë¦¬ìŠ¨ ì„œë²„ì¼ë•Œ, ì„œë²„ ì¸¡ì€ ëª¨ë“  PlayerControllerë¥¼ ê°€ì§€ê³  ìžˆìŒ
+	// => ì„œë²„ ì¸¡ í´ë¼ì˜ PC ì™¸ì—ëŠ” UI ì—†ìŒ => ì˜ˆì™¸ ì²˜ë¦¬ í•´ì•¼í•¨
 	if (IsLocalController())
 	{
 		if (LobbyListUIClass)
@@ -20,10 +20,10 @@ void AZNPlayerController::BeginPlay()
 			CreateGameUIInstance = CreateWidget<UUserWidget>(this, CreateGameUIClass);
 		}
 
-		// ¿¡µðÅÍ°¡ ÄÑÁ³À» ¶§ default mapÀ» MenuLevel·Î ÁöÁ¤ÇØ³ùÀ½
-		// => °ÔÀÓ ½ÇÇà ½Ã Ã¹ È­¸éÀÌ MainMenuUI°¡ ¶ä
-		// => ¸¸¾à ¿¡µðÅÍ¿¡ ÄÑ³õÀº mapÀÌ MenuLevelÀÌ ¾Æ´Ï¸é ¹«½ÃÇÔ
-		// ¸Ç Ã³À½ È­¸éÀº Main Menu, ÀÌÈÄ·Î´Â ¹«½ÃµÉ °ÅÀÓ
+		// ì—ë””í„°ê°€ ì¼œì¡Œì„ ë•Œ default mapì„ MenuLevelë¡œ ì§€ì •í•´ë†¨ìŒ
+		// => ê²Œìž„ ì‹¤í–‰ ì‹œ ì²« í™”ë©´ì´ MainMenuUIê°€ ëœ¸
+		// => ë§Œì•½ ì—ë””í„°ì— ì¼œë†“ì€ mapì´ MenuLevelì´ ì•„ë‹ˆë©´ ë¬´ì‹œí•¨
+		// ë§¨ ì²˜ìŒ í™”ë©´ì€ Main Menu, ì´í›„ë¡œëŠ” ë¬´ì‹œë  ê±°ìž„
 		FString CurrentMapName = GetWorld()->GetMapName();
 		if (CurrentMapName.Contains("LobbyList"))
 		{

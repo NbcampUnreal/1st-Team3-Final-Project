@@ -9,13 +9,16 @@ public class Zone064 : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "UMG", "OnlineSubsystem", "OnlineSubsystemUtils", "NetCore" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "UMG", "OnlineSubsystem", "OnlineSubsystemUtils", "NetCore", "Slate", "SlateCore"});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 
-        DynamicallyLoadedModuleNames.Add("OnlineSubsystemSteam");
+        //PublicIncludePaths.AddRange(new string[] { "Zone064", });
+
         // Uncomment if you are using Slate UI
         // PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
+        
+        DynamicallyLoadedModuleNames.Add("OnlineSubsystemSteam");
 
         // Uncomment if you are using online features
         // PrivateDependencyModuleNames.Add("OnlineSubsystem");
