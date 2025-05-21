@@ -52,6 +52,9 @@ Plugins/**/Binaries/*
 # Builds
 Build/*
 
+# Assests
+Content/Assets/PostCity/*
+
 # Whitelist PakBlacklist-<BuildConfiguration>.txt files
 !Build/*/
 Build/*/**

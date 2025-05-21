@@ -19,15 +19,21 @@ AMapGenerator::AMapGenerator()
     RequiredClusterSize = 6;
     SpecialChance = 0.2f;
     CrossroadMinSpacing = 4;
+    CrosswalkChance = 0.3f;
 
     // 도로 프랍 스폰 확률
-    TreeSpawnChance = 0.4f;
-    LightSpawnChance = 0.4f;
+    TreeSpawnChance = 0.3f;
+    LightSpawnChance = 0.3f;
     TrashSpawnChance = 0.2f;
+    TrafficSpawnChance = 0.5f;
 
-    LightSpawnSpacing = 3;
-    TreeSpawnSpacing = 3;
 
+    LightSpawnSpacing = 4;
+    TreeSpawnSpacing = 5;
+
+    SearchOffsetList = { FIntPoint(1, 0), FIntPoint(-1, 0), FIntPoint(0, 1), FIntPoint(0, -1) };
+    CornerOffsetList = { FIntPoint(1, 1), FIntPoint(-1, 1), FIntPoint(1, 1), FIntPoint(-1, -1) };
+    CornerYawMap = { {FIntPoint(1, 1), -180.f}, { FIntPoint(-1, -1), 0.f }, { FIntPoint(-1, 1), -90.f }, { FIntPoint(1, -1), 90.f } };
 }
 
 void AMapGenerator::BeginPlay()
@@ -105,7 +111,7 @@ void AMapGenerator::AssignSpecialClusters()
                 FIntPoint Current;
                 Queue.Dequeue(Current);
 
-                for (FIntPoint Offset : {FIntPoint(1, 0), FIntPoint(-1, 0), FIntPoint(0, 1), FIntPoint(0, -1)})
+                for (FIntPoint Offset : SearchOffsetList)
                 {
                     FIntPoint Neighbor = Current + Offset;
                     if (Visited.Contains(Neighbor)) continue;
@@ -218,10 +224,13 @@ void AMapGenerator::SpawnSidewalkProps()
         {
             if (Pair.Value.ZoneType != EZoneType::Alley)
             {
-                continue;
+                if (Pair.Value.ZoneType != EZoneType::Road_Sidewalk_Traffic)
+                {
+                    continue;
+                }
             }
         }
-            
+
         FIntPoint GridPos = Pair.Key;
         FVector WorldLocation = GetActorLocation() + FVector(GridPos.X * TileSize, GridPos.Y * TileSize, 0.f);
 
@@ -279,6 +288,11 @@ void AMapGenerator::TrySpawnProps(AActor* Target, FIntPoint GridPos)
         {
             PropArray = &TrashPrefabs;
             Chance = TrashSpawnChance;
+        }
+        else if (Name.Contains(TEXT("Traffic")))
+        {
+            PropArray = &TrafficPrefabs;
+            Chance = TrafficSpawnChance;
         }
 
         if (PropArray && PropArray->Num() > 0 && RandomStream.FRand() < Chance)
@@ -493,6 +507,7 @@ void AMapGenerator::GenerateZoneMap()
     // 1. 교차로 생성
     int32 NumCrossroads = RandomStream.RandRange(2, 2);  // 교차로 개수 설정-> 현재 2개 고정
     TArray<FIntPoint> CrossroadCenters;
+    TSet<FIntPoint> UsedRoadCells;  // 교차로 확장되면서 겹치는 곳 교차로로 만들기 위해
     CrossroadMinSpacing = 6; // 교차로 간 최소 간격
     int32 RetryCount = 0;
     int32 MaxRetry = 100; // 최대 재시도 횟수
@@ -533,16 +548,16 @@ void AMapGenerator::GenerateZoneMap()
         // 교차로 크기 확률에 따라 결정
         float Rand = RandomStream.FRand(); 
         int32 CrossroadSize = 1;  
-        if (Rand < 0.3f)
-            CrossroadSize = 1;  // 30% 1x1
-        else if (Rand < 0.8f)
-            CrossroadSize = 2;  // 50% 2x2
+        if (Rand < 0.2f)
+            CrossroadSize = 1;  // 20% 1x1
+        else if (Rand < 0.6f)
+            CrossroadSize = 2;  // 40% 2x2
         else
-            CrossroadSize = 3;  // 20% 3x3
+            CrossroadSize = 3;  // 40% 3x3
 
         int32 Half = CrossroadSize / 2;
         FIntPoint TopLeft = Center - FIntPoint(Half, Half);
-
+        UE_LOG(LogTemp, Warning, TEXT("Crossroad Size : %i"), CrossroadSize);
         if (!IsAreaAvailable(TopLeft, CrossroadSize, CrossroadSize, Blocked))
             continue;
 
@@ -555,26 +570,81 @@ void AMapGenerator::GenerateZoneMap()
                 FGridCellData& Cell = ZoneMap.FindOrAdd(Pos);
                 Cell.ZoneType = EZoneType::Road;
                 Cell.bIsCrossroad = true;
+                Cell.CrossroadSize = CrossroadSize;
+            }
+        }
+
+        UE_LOG(LogTemp, Warning, TEXT("Crossroad Size: %d TopLeft: (%d,%d) Center: (%d,%d)"),
+            CrossroadSize, TopLeft.X, TopLeft.Y, Center.X, Center.Y);
+
+        for (int32 dx = 0; dx < CrossroadSize; ++dx) {
+            for (int32 dy = 0; dy < CrossroadSize; ++dy) {
+                FIntPoint P = TopLeft + FIntPoint(dx, dy);
+                UE_LOG(LogTemp, Warning, TEXT("Crossroad Covers: (%d,%d)"), P.X, P.Y);
+            }
+        }
+
+        //  교차로 둘레 횡단보도 설정
+        if (CrossroadSize > 1)
+        {
+            for (int32 dx = -1; dx <= CrossroadSize; dx++)
+            {
+                for (int32 dy = -1; dy <= CrossroadSize; dy++)
+                {
+                    bool IsBorder =
+                        ((dx == -1 || dx == CrossroadSize) && (dy >= 0 && dy < CrossroadSize)) ||
+                        ((dy == -1 || dy == CrossroadSize) && (dx >= 0 && dx < CrossroadSize));
+                    if (!IsBorder) continue;
+                    FIntPoint Outer = TopLeft + FIntPoint(dx, dy);
+                    if (!ZoneMap.Contains(Outer))
+                    {
+                        //  이 시점에 ZoneMap에는 교차로 말고는 없으므로 없으면 새로 추가하면서 지정
+                        FGridCellData& Cell = ZoneMap.FindOrAdd(Outer);
+                        Cell.ZoneType = EZoneType::Road_Crosswalk;
+                        float CrosswalkRotatorYaw = (dx == -1 || dx == CrossroadSize) ? 0.f : 90.f;
+                        Cell.PreferredRotation = FRotator(0.f, CrosswalkRotatorYaw, 0.f);
+                    }
+                }
             }
         }
 
         CrossroadCenters.Add(Center);
 
         // 교차로를 기준으로 도로 확장
-        for (int32 dx = -Half; dx <= Half; ++dx)
+        for(int32 dx = -Half; dx < Half + (CrossroadSize % 2 == 1 ? 1 : 0); ++dx)
         {
             for (int32 x = 0; x < GridWidth; ++x)
             {
                 FIntPoint RoadPos(x, Center.Y + dx);
+                if (ZoneMap.Contains(RoadPos)) 
+                {
+                    // 이미 다른 도로가 있으면 교차로로 설정
+                    FGridCellData& Cell = ZoneMap[RoadPos];
+                    if (Cell.ZoneType == EZoneType::Road_Crosswalk) continue;
+                    Cell.bIsCrossroad = true;
+                    Cell.ZoneType = EZoneType::Road;
+                    continue;
+                }
                 FGridCellData& Cell = ZoneMap.FindOrAdd(RoadPos);
                 Cell.ZoneType = EZoneType::Road;
+                Cell.CrossroadSize = CrossroadSize;
             }
 
             for (int32 y = 0; y < GridHeight; ++y)
             {
                 FIntPoint RoadPos(Center.X + dx, y);
+                if (ZoneMap.Contains(RoadPos))
+                {
+                    // 이미 다른 도로가 있으면 교차로로 설정
+                    FGridCellData& Cell = ZoneMap[RoadPos];
+                    if (Cell.ZoneType == EZoneType::Road_Crosswalk) continue;
+                    Cell.bIsCrossroad = true;
+                    Cell.ZoneType = EZoneType::Road;
+                    continue;
+                }
                 FGridCellData& Cell = ZoneMap.FindOrAdd(RoadPos);
                 Cell.ZoneType = EZoneType::Road;
+                Cell.CrossroadSize = CrossroadSize;
             }
         }
     }
@@ -583,19 +653,15 @@ void AMapGenerator::GenerateZoneMap()
     TArray<FIntPoint> RoadCells;
     for (const auto& Pair : ZoneMap)
     {
-        if (Pair.Value.ZoneType == EZoneType::Road)
+        if (Pair.Value.ZoneType == EZoneType::Road || Pair.Value.ZoneType == EZoneType::Road_Crosswalk)
         {
             RoadCells.Add(Pair.Key);
         }
     }
 
-    TArray<FIntPoint> RoadOffsets = {
-        FIntPoint(1, 0), FIntPoint(-1, 0), FIntPoint(0, 1), FIntPoint(0, -1)
-    };
-
     for (const FIntPoint& Pos : RoadCells)
     {
-        for (const FIntPoint& Offset : RoadOffsets)
+        for (const FIntPoint& Offset : SearchOffsetList)
         {
             FIntPoint SidePos = Pos + Offset;
 
@@ -605,13 +671,39 @@ void AMapGenerator::GenerateZoneMap()
             {
                 continue;
             }
-
+            //  인도 지정
             if (!ZoneMap.Contains(SidePos))
             {
+                // 교차로 꼭짓점 체크
+                bool bIsTrafficCorner = false;
+                float TrafficYaw = 0.f;
+                for (const FIntPoint& CornerOffset : CornerOffsetList)
+                {
+                    FIntPoint MaybeCrossroad = SidePos + CornerOffset;
+                    if (ZoneMap.Contains(MaybeCrossroad) && ZoneMap[MaybeCrossroad].bIsCrossroad && ZoneMap[MaybeCrossroad].CrossroadSize > 1)
+                    {
+                        bIsTrafficCorner = true;
+                        if (CornerYawMap.Contains(CornerOffset))
+                        {
+                            TrafficYaw = CornerYawMap[CornerOffset];
+                        }
+                        break;
+                    }
+                }
+
                 FGridCellData& Cell = ZoneMap.Add(SidePos);
-                Cell.ZoneType = EZoneType::Road_Sidewalk;
-                float Yaw = FMath::Atan2((float)Offset.Y, (float)Offset.X) * 180.f / PI - 90.f;
-                Cell.PreferredRotation = FRotator(0.f, Yaw, 0.f);
+
+                if (bIsTrafficCorner)
+                {
+                    Cell.ZoneType = EZoneType::Road_Sidewalk_Traffic;
+                    Cell.PreferredRotation = FRotator(0.f, TrafficYaw, 0.f);
+                }
+                else
+                {
+                    Cell.ZoneType = EZoneType::Road_Sidewalk;
+                    float Yaw = FMath::Atan2((float)Offset.Y, (float)Offset.X) * 180.f / PI - 90.f;
+                    Cell.PreferredRotation = FRotator(0.f, Yaw, 0.f);
+                }
             }
         }
     }
@@ -619,7 +711,7 @@ void AMapGenerator::GenerateZoneMap()
     // 3. 도로 방향 설정
     for (auto& Pair : ZoneMap)
     {
-        if (Pair.Value.ZoneType != EZoneType::Road) continue;
+        if (Pair.Value.ZoneType != EZoneType::Road && Pair.Value.ZoneType != EZoneType::Road_Crosswalk) continue;
 
         if (Pair.Value.bIsCrossroad)
         {
@@ -629,10 +721,11 @@ void AMapGenerator::GenerateZoneMap()
 
         FIntPoint Pos = Pair.Key;
 
-        bool bLeft = ZoneMap.Contains(Pos + FIntPoint(-1, 0)) && ZoneMap[Pos + FIntPoint(-1, 0)].ZoneType == EZoneType::Road;
-        bool bRight = ZoneMap.Contains(Pos + FIntPoint(1, 0)) && ZoneMap[Pos + FIntPoint(1, 0)].ZoneType == EZoneType::Road;
-        bool bUp = ZoneMap.Contains(Pos + FIntPoint(0, 1)) && ZoneMap[Pos + FIntPoint(0, 1)].ZoneType == EZoneType::Road;
-        bool bDown = ZoneMap.Contains(Pos + FIntPoint(0, -1)) && ZoneMap[Pos + FIntPoint(0, -1)].ZoneType == EZoneType::Road;
+        // b{방향} == true -> {방향}쪽 그리드가 도로이다
+        bool bLeft = ZoneMap.Contains(Pos + FIntPoint(-1, 0)) && (ZoneMap[Pos + FIntPoint(-1, 0)].ZoneType == EZoneType::Road || ZoneMap[Pos + FIntPoint(-1, 0)].ZoneType == EZoneType::Road_Crosswalk);
+        bool bRight = ZoneMap.Contains(Pos + FIntPoint(1, 0)) && (ZoneMap[Pos + FIntPoint(1, 0)].ZoneType == EZoneType::Road || ZoneMap[Pos + FIntPoint(1, 0)].ZoneType == EZoneType::Road_Crosswalk);
+        bool bUp = ZoneMap.Contains(Pos + FIntPoint(0, 1)) && (ZoneMap[Pos + FIntPoint(0, 1)].ZoneType == EZoneType::Road || ZoneMap[Pos + FIntPoint(0, 1)].ZoneType == EZoneType::Road_Crosswalk);
+        bool bDown = ZoneMap.Contains(Pos + FIntPoint(0, -1)) &&( ZoneMap[Pos + FIntPoint(0, -1)].ZoneType == EZoneType::Road || ZoneMap[Pos + FIntPoint(0, -1)].ZoneType == EZoneType::Road_Crosswalk);
 
         if ((bLeft || bRight) && !(bUp || bDown))
         {
@@ -642,11 +735,50 @@ void AMapGenerator::GenerateZoneMap()
         {
             Pair.Value.RoadDirection = ERoadDirection::Vertical;
         }
-        else
+        /*else 
         {
             Pair.Value.RoadDirection = ERoadDirection::Crossroad;
+        }*/
+    }
+
+    /*  후 생성 횡단보도 만들기
+    *   1. 전체 ZoneMap 순회 - >EZoneType == Road인 셀만 순회 
+    *   2. 4방향 셀 조회 -> ERoadDirection == Crossroad 라면 현재 그리드 ZoneType을 Road_Crosswalk로 변경
+    *   3. 현재 그리드와 교차로의 상대 위치에 따라 PrefferdRotation 설정
+    *   3-1. CrossroadSize  > 1 무조건 횡단보도 설치
+    *   3-2. 1칸 짜리 도로면 확률에 따라 횡단보도 설치
+    */
+    for (auto& Pair : ZoneMap)
+    {
+        //  EZoneType::Road 만 순회
+        if (Pair.Value.ZoneType != EZoneType::Road) continue;
+        if (Pair.Value.bIsCrossroad == true) continue;
+        if (Pair.Value.ZoneType == EZoneType::Road_Crosswalk) continue;
+
+        FIntPoint CurrentGrid = Pair.Key;
+
+        for (auto& Offset : SearchOffsetList)
+        {
+            FIntPoint SearchOffset = CurrentGrid + Offset;
+            if (ZoneMap.Contains(SearchOffset) && ZoneMap[SearchOffset].bIsCrossroad == true && ZoneMap[CurrentGrid].ZoneType != EZoneType::Road_Crosswalk)
+            {
+                if (ZoneMap[CurrentGrid].CrossroadSize >= 2 || RandomStream.FRand() < CrosswalkChance)
+                {
+                    FGridCellData& Cell = ZoneMap[CurrentGrid];
+                    Cell.ZoneType = EZoneType::Road_Crosswalk;
+                    /*  아래 방법으로 회전시키려고 했는데 아무리 해봐도 RoadDirection이 none으로 나옴
+                    *   CurrentGrid 기준으로 bIsCrossroad == true인 SearchOffset 방향으로 회전시켜야 겠음
+                    */
+                    //float RotationYaw = (Cell.RoadDirection == ERoadDirection::Horizontal) ? 0.f : 90.f;
+                    float RotationYaw = (Offset.X != 0 && Offset.Y == 0) ? 0.f : 90.f;
+                    Cell.PreferredRotation = FRotator(0, RotationYaw, 0);
+
+                }
+
+            }
         }
     }
+
 
     // 4. 고층 건물 배치
     for (int32 X = 0; X < GridWidth; ++X)
@@ -661,13 +793,13 @@ void AMapGenerator::GenerateZoneMap()
             // 1) 인도 주변 셀인지 검사하고 유효한 회전 리스트 수집
             bool bNearSidewalk = false;
             TArray<FRotator> ValidRotations;
-            for (const FIntPoint& Off : { FIntPoint(1,0), FIntPoint(-1,0), FIntPoint(0,1), FIntPoint(0,-1) })
+            for (const FIntPoint& Offset : SearchOffsetList)
             {
-                FIntPoint N = Pos + Off;
+                FIntPoint N = Pos + Offset;
                 if (ZoneMap.Contains(N) && ZoneMap[N].ZoneType == EZoneType::Road_Sidewalk)
                 {
                     bNearSidewalk = true;
-                    float Yaw = FMath::Atan2((float)Off.Y, (float)Off.X) * 180.f / PI - 90.f;
+                    float Yaw = FMath::Atan2((float)Offset.Y, (float)Offset.X) * 180.f / PI - 90.f;
                     ValidRotations.Add(FRotator(0.f, Yaw, 0.f));
                 }
             }
@@ -758,9 +890,9 @@ void AMapGenerator::GenerateZoneMap()
 
             // 인도 인접 여부 판단
             bool bNearSidewalk = false;
-            for (const FIntPoint& Off : { FIntPoint(1,0), FIntPoint(-1,0), FIntPoint(0,1), FIntPoint(0,-1) })
+            for (const FIntPoint& Offset : SearchOffsetList)
             {
-                if (ZoneMap.Contains(Pos + Off) && ZoneMap[Pos + Off].ZoneType == EZoneType::Road_Sidewalk)
+                if (ZoneMap.Contains(Pos + Offset) && ZoneMap[Pos + Offset].ZoneType == EZoneType::Road_Sidewalk)
                 {
                     bNearSidewalk = true;
                     break;
