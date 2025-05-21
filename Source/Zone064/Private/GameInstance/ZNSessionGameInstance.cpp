@@ -5,6 +5,17 @@
 #include "OnlineSubsystem.h"
 #include "Interfaces/OnlineSessionInterface.h"
 
+void UZNSessionGameInstance::Init()
+{
+	Super::Init();
+	if (GEngine)
+	{
+		GEngine->OnNetworkFailure().AddUObject(this, &UZNSessionGameInstance::HandleNetworkFailure);
+		GEngine->OnTravelFailure().AddUObject(this, &UZNSessionGameInstance::HandleTravelFailure);
+	}
+	OnInit();
+}
+
 void UZNSessionGameInstance::Shutdown()
 {
 	IOnlineSessionPtr SessionInterface = Online::GetSessionInterface(GetWorld());
@@ -17,4 +28,15 @@ void UZNSessionGameInstance::Shutdown()
 		}
 	}
 	Super::Shutdown();
+}
+
+void UZNSessionGameInstance::HandleNetworkFailure(UWorld* World, UNetDriver* NetDriver, ENetworkFailure::Type FailureType, const FString& ErrorString)
+{
+	const bool bIsServer = World && (World->GetNetMode() != NM_Client);
+	OnNetworkError(FailureType, bIsServer);
+}
+
+void UZNSessionGameInstance::HandleTravelFailure(UWorld* World, ETravelFailure::Type FailureType, const FString& ErrorString)
+{
+	OnTravelError(FailureType);
 }
