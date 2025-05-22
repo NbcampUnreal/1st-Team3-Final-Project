@@ -119,6 +119,12 @@ public:
     TArray<TSubclassOf<AActor>> TrafficPrefabs;
     UPROPERTY(EditAnywhere, Category = "Generation|Props")
     TArray<TSubclassOf<AActor>> TrashPrefabs;
+    UPROPERTY(EditAnywhere, Category = "Generation|Props")
+    TSubclassOf<AActor> FencePrefab;
+    UPROPERTY(EditAnywhere, Category = "Generation|Props")
+    TSubclassOf<AActor> BuildingGroundPrefab;
+    UPROPERTY(EditAnywhere, Category = "Generation|Props")
+    TArray<TSubclassOf<AActor>> InfraPrefabs;
 
 
     // 비동기 로딩 후 콜백
@@ -144,6 +150,7 @@ public:
     void SpawnSidewalkProps();
 
     void TrySpawnProps(AActor* Target, FIntPoint GridPos);
+    void TrySpawnBorder(const FVector& Location, const FIntPoint& GridPos);
     
     // 회전값 고려한 좌상단 구하기
     FIntPoint GetTopLeftFromOrigin(FIntPoint center, int32 width, int32 height, const FRotator& Rotation);
@@ -162,6 +169,12 @@ private:
     TArray<FIntPoint> CornerOffsetList;
     TMap<FIntPoint, float> CornerYawMap;
 
+    // 데브리 스폰용 Road Array
+    TArray<FIntPoint> FinalRoadArray;
+    // Road Debris InstancedStaticMeshComponent
+
+    
+
     // 건물 스폰 리스트
     TArray<FBuildingSpawnData> BuildingSpawnList;
 
@@ -178,8 +191,10 @@ private:
     float LightSpawnChance;
     float TrashSpawnChance;
     float TrafficSpawnChance;
+    float InfraSpawnChance;
 
     // 프랍 최소 간격
     int32 LightSpawnSpacing;
     int32 TreeSpawnSpacing;
+    int32 InfraSpawnSpacing;
 };

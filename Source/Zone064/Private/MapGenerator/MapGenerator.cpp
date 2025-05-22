@@ -26,13 +26,15 @@ AMapGenerator::AMapGenerator()
     LightSpawnChance = 0.3f;
     TrashSpawnChance = 0.2f;
     TrafficSpawnChance = 0.5f;
+    InfraSpawnChance = 0.7f;
 
 
     LightSpawnSpacing = 4;
     TreeSpawnSpacing = 5;
+    InfraSpawnSpacing = 15;
 
     SearchOffsetList = { FIntPoint(1, 0), FIntPoint(-1, 0), FIntPoint(0, 1), FIntPoint(0, -1) };
-    CornerOffsetList = { FIntPoint(1, 1), FIntPoint(-1, 1), FIntPoint(1, 1), FIntPoint(-1, -1) };
+    CornerOffsetList = { FIntPoint(1, 1), FIntPoint(-1, 1), FIntPoint(1, -1), FIntPoint(-1, -1) };
     CornerYawMap = { {FIntPoint(1, 1), -180.f}, { FIntPoint(-1, -1), 0.f }, { FIntPoint(-1, 1), -90.f }, { FIntPoint(1, -1), 90.f } };
 }
 
@@ -218,23 +220,30 @@ void AMapGenerator::DrawDebugZoneMap()
 
 void AMapGenerator::SpawnSidewalkProps()
 {
+    // 관심있는 타입 한 번에 묶어놓기
+    TSet<EZoneType> SidewalkTypes = {
+        EZoneType::Road_Sidewalk,
+        EZoneType::Road_Sidewalk_Traffic,
+        EZoneType::Alley,
+        EZoneType::Plant
+    };
+
     for (const auto& Pair : ZoneMap)
     {
-        if (Pair.Value.ZoneType != EZoneType::Road_Sidewalk)
-        {
-            if (Pair.Value.ZoneType != EZoneType::Alley)
-            {
-                if (Pair.Value.ZoneType != EZoneType::Road_Sidewalk_Traffic)
-                {
-                    continue;
-                }
-            }
-        }
+        if (!SidewalkTypes.Contains(Pair.Value.ZoneType))
+            continue;
 
         FIntPoint GridPos = Pair.Key;
         FVector WorldLocation = GetActorLocation() + FVector(GridPos.X * TileSize, GridPos.Y * TileSize, 0.f);
 
-        // AABB 검사로 해당 위치 프리팹 찾기
+        // Alley 구역은 경계도 추가로 스폰
+        if (Pair.Value.ZoneType == EZoneType::Alley)
+        {
+            TrySpawnBorder(WorldLocation, GridPos);
+            //continue;
+        }
+
+        // 기존 프리팹 처리
         FBox QueryBox = FBox::BuildAABB(WorldLocation, FVector(100.f, 100.f, 100.f));
         TArray<AActor*> FoundActors;
         UGameplayStatics::GetAllActorsOfClass(GetWorld(), AActor::StaticClass(), FoundActors);
@@ -243,13 +252,80 @@ void AMapGenerator::SpawnSidewalkProps()
         {
             if (Actor && QueryBox.IsInside(Actor->GetActorLocation()))
             {
-                TrySpawnProps(Actor, GridPos); 
+                TrySpawnProps(Actor, GridPos);
                 break;
             }
         }
     }
 }
 
+void AMapGenerator::TrySpawnBorder(const FVector& Location, const FIntPoint& GridPos)
+{
+    // AABB
+    FBox QueryBox = FBox::BuildAABB(Location, FVector(100.f, 100.f, 100.f));
+    TArray<AActor*> FoundActors;
+    UGameplayStatics::GetAllActorsOfClass(GetWorld(), AActor::StaticClass(), FoundActors);
+
+    for (AActor* Actor : FoundActors)
+    {
+        // 프리팹 감지 실패 -> 스킵
+        if (!Actor || !QueryBox.IsInside(Actor->GetActorLocation())) continue;
+
+        const TArray<TPair<FString, FIntPoint>> ArrowOffset = 
+        {
+            {TEXT("Left"),    FIntPoint(0, 1)},
+            {TEXT("Right"),  FIntPoint(0, -1)},
+            {TEXT("Up"),  FIntPoint(-1, 0)},
+            {TEXT("Down"), FIntPoint(1, 0)},
+        };
+
+        for (const auto& Pair : ArrowOffset)
+        {
+            FString ArrowName = Pair.Key.ToLower();
+            FIntPoint Direction = Pair.Value;
+            FIntPoint SearchPos = GridPos + Direction;
+
+            // 인도 검사 -> 펜스 스폰
+            if (ZoneMap.Contains(SearchPos) &&
+                (ZoneMap[SearchPos].ZoneType == EZoneType::Plant || 
+                    ZoneMap[SearchPos].ZoneType == EZoneType::Road_Sidewalk))
+            {
+
+                TArray<USceneComponent*> Components;
+                Actor->GetComponents<USceneComponent>(Components);
+                
+                for(USceneComponent* Comp : Components)
+                {
+                    if (!Comp) continue;
+
+                    FString Name = Comp->GetName().ToLower();
+                    if (Name.Contains(ArrowName))
+                    {
+                        FTransform SpawnTransform = Comp->GetComponentTransform();
+
+                        AActor* SpawnedFence = nullptr;
+                        if (FencePrefab)
+                        {
+                            SpawnedFence = GetWorld()->SpawnActor<AActor>(FencePrefab, SpawnTransform);
+                            if (SpawnedFence)
+                            {
+                                FVector CompScale = Comp->GetComponentScale();
+                                if (SpawnedFence->GetRootComponent())
+                                {
+                                    SpawnedFence->GetRootComponent()->SetWorldScale3D(CompScale);
+                                }
+                            }
+
+                        }
+                        //break;
+                    }
+                }
+                
+            }
+        }
+      
+    }
+}
 
 void AMapGenerator::TrySpawnProps(AActor* Target, FIntPoint GridPos)
 {
@@ -260,6 +336,8 @@ void AMapGenerator::TrySpawnProps(AActor* Target, FIntPoint GridPos)
 
     TArray<USceneComponent*> Components;
     Target->GetComponents<USceneComponent>(Components);
+    
+    bool bIsInfraSpawned = InfraSpawnChance <= FMath::FRand();
 
     for (USceneComponent* Comp : Components)
     {
@@ -269,48 +347,67 @@ void AMapGenerator::TrySpawnProps(AActor* Target, FIntPoint GridPos)
 
         TArray<TSubclassOf<AActor>>* PropArray = nullptr;
         float Chance = 1.f;
+        FVector RandomScale = FVector(1.0f, 1.0f, 1.0f);
+        
 
-        if (Name.Contains(TEXT("Tree")))
+        if (bIsInfraSpawned && Name.Contains(TEXT("Infra")))
+        {
+            if ((GridPos.X + GridPos.Y) % InfraSpawnSpacing != 0) continue;
+
+            PropArray = &InfraPrefabs;
+            Chance = InfraSpawnChance;
+        }
+        if (!bIsInfraSpawned && Name.Contains(TEXT("Tree")))
         {
             if ((GridPos.X + GridPos.Y) % TreeSpawnSpacing != 0) continue;
 
             PropArray = &TreePrefabs;
             Chance = TreeSpawnChance;
+            float TreeScaleXY = FMath::FRandRange(0.5f, 0.8f);
+            float TreeScaleZ = FMath::FRandRange(0.7f, 0.8f);
+            RandomScale = FVector(TreeScaleXY, TreeScaleXY, TreeScaleZ);
         }
-        else if (Name.Contains(TEXT("Light")))
+
+        if (!bIsInfraSpawned && Name.Contains(TEXT("Light")))
         {
             if ((GridPos.X + GridPos.Y) % LightSpawnSpacing != 0) continue;
-            
+
             PropArray = &LightPrefabs;
             Chance = LightSpawnChance;
         }
-        else if (Name.Contains(TEXT("Trash")))
+        if (Name.Contains(TEXT("Trash")))
         {
             PropArray = &TrashPrefabs;
             Chance = TrashSpawnChance;
         }
-        else if (Name.Contains(TEXT("Traffic")))
+        
+        if (Name.Contains(TEXT("Traffic")))
         {
             PropArray = &TrafficPrefabs;
             Chance = TrafficSpawnChance;
         }
 
+
         if (PropArray && PropArray->Num() > 0 && RandomStream.FRand() < Chance)
         {
             int32 Index = RandomStream.RandRange(0, PropArray->Num() - 1);
             TSubclassOf<AActor> Selected = (*PropArray)[Index];
+            AActor* Spawned = nullptr;
 
             if (Selected)
             {
-                World->SpawnActor<AActor>(
+                Spawned = World->SpawnActor<AActor>(
                     Selected,
                     Comp->GetComponentLocation(),
                     Comp->GetComponentRotation()
                 );
+                Spawned->GetRootComponent()->SetWorldScale3D(RandomScale);
             }
         }
     }
 }
+
+
 
 FIntPoint AMapGenerator::GetTopLeftFromOrigin(FIntPoint Origin, int32 Width, int32 Height, const FRotator& Rotation)
 {
@@ -383,13 +480,7 @@ void AMapGenerator::GenerateMap()
         const FIntPoint& GridPos = Pair.Key;
         const FGridCellData& Cell = Pair.Value;
 
-        // 건물은 건너뜀 (HighRise, LowRise, Special)
-        if (Cell.ZoneType == EZoneType::HighRise ||
-            Cell.ZoneType == EZoneType::LowRise ||
-            Cell.ZoneType == EZoneType::Special)
-        {
-            continue;
-        }
+
 
         const TArray<TSubclassOf<AActor>>* PrefabArray = CachedPrefabsByZone.Find(Cell.ZoneType);
         if (!PrefabArray || PrefabArray->Num() == 0) continue;
@@ -397,6 +488,14 @@ void AMapGenerator::GenerateMap()
         int32 Index = RandomStream.RandRange(0, PrefabArray->Num() - 1);
         TSubclassOf<AActor> Selected = (*PrefabArray)[Index];
         if (!Selected) continue;
+
+        // 건물 바닥
+        if (Cell.ZoneType == EZoneType::HighRise ||
+            Cell.ZoneType == EZoneType::LowRise ||
+            Cell.ZoneType == EZoneType::Special)
+        {
+            Selected = BuildingGroundPrefab;
+        }
 
         FVector Location = GetActorLocation() + FVector(GridPos.X * TileSize, GridPos.Y * TileSize, 0.f);
         FRotator Rotation = Cell.PreferredRotation;
@@ -680,7 +779,7 @@ void AMapGenerator::GenerateZoneMap()
                 for (const FIntPoint& CornerOffset : CornerOffsetList)
                 {
                     FIntPoint MaybeCrossroad = SidePos + CornerOffset;
-                    if (ZoneMap.Contains(MaybeCrossroad) && ZoneMap[MaybeCrossroad].bIsCrossroad && ZoneMap[MaybeCrossroad].CrossroadSize > 1)
+                    if (ZoneMap.Contains(MaybeCrossroad) && ZoneMap[MaybeCrossroad].bIsCrossroad /* && ZoneMap[MaybeCrossroad].CrossroadSize > 1*/)
                     {
                         bIsTrafficCorner = true;
                         if (CornerYawMap.Contains(CornerOffset))
