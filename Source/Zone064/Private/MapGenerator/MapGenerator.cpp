@@ -8,7 +8,7 @@
 AMapGenerator::AMapGenerator()
 {
     PrimaryActorTick.bCanEverTick = false;
-    
+
     GridWidth = 10;
     GridHeight = 10;
     TileSize = 500;
@@ -36,6 +36,7 @@ AMapGenerator::AMapGenerator()
     SearchOffsetList = { FIntPoint(1, 0), FIntPoint(-1, 0), FIntPoint(0, 1), FIntPoint(0, -1) };
     CornerOffsetList = { FIntPoint(1, 1), FIntPoint(-1, 1), FIntPoint(1, -1), FIntPoint(-1, -1) };
     CornerYawMap = { {FIntPoint(1, 1), -180.f}, { FIntPoint(-1, -1), 0.f }, { FIntPoint(-1, 1), -90.f }, { FIntPoint(1, -1), 90.f } };
+
 }
 
 void AMapGenerator::BeginPlay()
@@ -48,11 +49,13 @@ void AMapGenerator::BeginPlay()
     }
     RandomStream.Initialize(Seed);
 
+
     // BlockPrefabSets -> BlockPrefabAssetsByZone 변환
     for (const FZonePrefabSet& Set : BlockPrefabSets)
     {
         BlockPrefabAssetsByZone.FindOrAdd(Set.ZoneType) = Set.Prefabs;
     }
+
 
     // 소프트 레퍼런스 로딩
     TArray<FSoftObjectPath> AssetPaths;
@@ -101,7 +104,9 @@ void AMapGenerator::AssignSpecialClusters()
             if (!ZoneMap.Contains(Start)) continue;
             if (ZoneMap[Start].ZoneType != EZoneType::LowRise) continue;
 
+
             // Flood fill 시작
+
             TSet<FIntPoint> Cluster;
             TQueue<FIntPoint> Queue;
             Queue.Enqueue(Start);
@@ -112,6 +117,7 @@ void AMapGenerator::AssignSpecialClusters()
             {
                 FIntPoint Current;
                 Queue.Dequeue(Current);
+
 
                 for (FIntPoint Offset : SearchOffsetList)
                 {
@@ -128,6 +134,7 @@ void AMapGenerator::AssignSpecialClusters()
                 }
             }
 
+
             // 조건 만족 + 확률 충족 시 특수부지로 전체 전환
             if (Cluster.Num() >= RequiredClusterSize && RandomStream.FRand() < SpecialChance)
             {
@@ -141,6 +148,7 @@ void AMapGenerator::AssignSpecialClusters()
         }
     }
 }
+
 
 bool AMapGenerator::IsAreaAvailable(FIntPoint TopLeft, int32 Width, int32 Height, const TArray<EZoneType>& BlockedTypes)
 {
@@ -464,6 +472,7 @@ FVector AMapGenerator::GetWorldFromGrid(FIntPoint GridPos)
 
 
 
+
 void AMapGenerator::GenerateMap()
 {
     if (CachedPrefabsByZone.Num() == 0)
@@ -471,6 +480,7 @@ void AMapGenerator::GenerateMap()
         UE_LOG(LogTemp, Warning, TEXT("MapGenerator: CachedPrefabsByZone is empty!"));
         return;
     }
+
 
     GenerateZoneMap(); // ZoneMap + BuildingSpawnList 구성
 
@@ -932,6 +942,7 @@ void AMapGenerator::GenerateZoneMap()
     }
 
     // 5. 남은 빈 공간에 저층 배치
+
     for (int32 X = 0; X < GridWidth; ++X)
     {
         for (int32 Y = 0; Y < GridHeight; ++Y)

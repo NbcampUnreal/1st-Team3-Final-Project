@@ -24,7 +24,8 @@
 			]
 		},
 		{
-			"Name": "AnimationWarping",
+
+			"Name": "AnimationWarping", "PCG",
 			"Enabled": true
 		}
 	]

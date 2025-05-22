@@ -37,6 +37,7 @@ struct FGridCellData
 {
     GENERATED_BODY()
 
+
     EZoneType ZoneType = EZoneType::None;
     FRotator PreferredRotation = FRotator::ZeroRotator;
     bool bIsCrossroad = false;
@@ -78,6 +79,7 @@ struct FBuildingSpawnData
     FRotator Rotation;
 };
 
+
 UCLASS()
 class ZONE064_API AMapGenerator : public AActor
 {
@@ -99,6 +101,7 @@ public:
 
     // 블럭 간 간격
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Generation")
+
     float TileSize;
 
     // 에디터에서 사용할 소프트 레퍼 리스트
@@ -125,7 +128,6 @@ public:
     TSubclassOf<AActor> BuildingGroundPrefab;
     UPROPERTY(EditAnywhere, Category = "Generation|Props")
     TArray<TSubclassOf<AActor>> InfraPrefabs;
-
 
     // 비동기 로딩 후 콜백
     void OnPrefabsLoaded();
@@ -157,9 +159,11 @@ public:
     FVector GetWorldCenterFromTopLeft(FIntPoint TopLeft, int32 Width, int32 Height, FRotator Rotation);
     FVector GetWorldFromGrid(FIntPoint GridPos);
 
+
 private:
     FRandomStream RandomStream;
     FStreamableManager AssetLoader;
+    
     // 구역 맵
     TMap<FIntPoint, FGridCellData> ZoneMap;
 
