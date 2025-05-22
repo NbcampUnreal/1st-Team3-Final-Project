@@ -2,6 +2,7 @@
 #include "Components/BoxComponent.h"
 #include "Components/ArrowComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Engine/World.h"
 
 ACityBlockBase::ACityBlockBase()
 {
@@ -23,13 +24,17 @@ ACityBlockBase::ACityBlockBase()
 
     SplineBuildingSpot = CreateDefaultSubobject<USplineComponent>(TEXT("SplineBuildingSpot"));
     SplineBuildingSpot->SetupAttachment(RootComponent);
+
+    TreeSpawnChance = 0.8f;
+    LightSpawnChance = 0.3f;
+    TrashSpawnChance = 0.3f;
+
 }
 
 void ACityBlockBase::BeginPlay()
 {
     Super::BeginPlay();
 
-    // √ ±‚ ≈Ωªˆ ∞°¥… ø©∫Œø° µ˚∂Û Ω∫∆˘
     if (bIsSearchable)
     {
         if (ItemClass && FMath::RandBool())
@@ -48,7 +53,6 @@ void ACityBlockBase::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor*
     UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
     bool bFromSweep, const FHitResult& SweepResult)
 {
-    // «√∑π¿ÃæÓ ∞®¡ˆ («√∑π¿ÃæÓ √º≈©¥¬ «¡∑Œ¡ß∆Æø° ∏¬∞‘ ºˆ¡§)
     if (OtherActor && OtherActor != this)
     {
         OnPlayerEnterBlock();
@@ -63,5 +67,99 @@ void ACityBlockBase::SetGridPosition(FIntPoint InGridPos)
 void ACityBlockBase::OnPlayerEnterBlock()
 {
     UE_LOG(LogTemp, Log, TEXT("Player entered city block: %s"), *GetName());
-    // ø©±‚º≠ ≈Ωªˆ ¿Ã∫•∆Æ, UI æÀ∏≤, ƒ˘Ω∫∆Æ ∆Æ∏Æ∞≈ µÓ Ω««‡ ∞°¥…
 }
+
+void ACityBlockBase::SpawnRoadsideProps()
+{
+    // ÍµêÏ∞®Î°úÎ©¥ Ïä§Ìè∞ ÏïàÌï® -> ÎÇòÏ§ëÏóê ÏàòÏ†ïÌï¥ÏïºÌï®
+    if (bIsCrossroad) return;
+
+    // Í≤©Ïûê ÏúÑÏπò Í∏∞Î∞ò Î∞∞Ïπò Ï†úÌïú
+    switch (RoadDirection)
+    {
+    case ERoadDirection::Horizontal:
+        if (GridPosition.X % 2 == 0) return;
+        break;
+    case ERoadDirection::Vertical:
+        if (GridPosition.Y % 2 == 1) return;
+        break;
+    default:
+        return;
+    }
+
+    UWorld* World = GetWorld();
+    if (!World) return;
+
+    TArray<USceneComponent*> Components;
+    GetComponents<USceneComponent>(Components);
+
+    for (USceneComponent* Comp : Components)
+    {
+        if (!Comp) continue;
+
+        const FString Name = Comp->GetName();
+
+        // Î∞©Ìñ• ÌïÑÌÑ∞
+        bool bDirectionMatch = false;
+        if (RoadDirection == ERoadDirection::Horizontal && (Name.Contains(TEXT("Horizontal"))))
+        {
+            bDirectionMatch = true;
+        }
+        else if (RoadDirection == ERoadDirection::Vertical && (Name.Contains(TEXT("Vertical"))))
+        {
+            bDirectionMatch = true;
+        }
+
+        if (!bDirectionMatch) continue;
+
+        TArray<TSubclassOf<AActor>>* PropArray = nullptr;
+        float Chance = 1.f;
+        // Ïä§Ìè∞ Ï¢ÖÎ•ò ÌïÑÌÑ∞
+        if (Name.Contains(TEXT("Trash")))
+        {
+            PropArray = &TrashPrefabs;
+            Chance = TrashSpawnChance;
+        }
+        else if (Name.Contains(TEXT("Tree")))
+        {
+            PropArray = &TreePrefabs;
+            Chance = TreeSpawnChance;
+        }
+        else if (Name.Contains(TEXT("Light")))
+        {
+            PropArray = &LightPrefabs;
+            Chance = LightSpawnChance;
+        }
+
+        if (PropArray && PropArray->Num() > 0 && GetRandomChance() < Chance)
+        {
+            int32 Index = FMath::RandRange(0, PropArray->Num() - 1);
+            TSubclassOf<AActor> Selected = (*PropArray)[Index];
+
+            if (Selected)
+            {
+                World->SpawnActor<AActor>(
+                    Selected,
+                    Comp->GetComponentLocation(),
+                    Comp->GetComponentRotation()
+                );
+            }
+        }
+    }
+}
+
+
+
+void ACityBlockBase::InitializeBlock(FIntPoint InGridPos, bool bCrossroad, ERoadDirection InDirection)
+{
+    GridPosition = InGridPos;
+    bIsCrossroad = bCrossroad;
+    RoadDirection = InDirection;
+    //SpawnRoadsideProps();
+}
+
+float ACityBlockBase::GetRandomChance()
+{
+    return FMath::FRand();
+}
+
