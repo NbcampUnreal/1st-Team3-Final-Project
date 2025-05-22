@@ -111,38 +111,40 @@ void ABaseDebrisSpawner::GenerateInstances()
 
             FVector SpawnLocation = HitResult.ImpactPoint;
             FRotator RandomRot(0, FMath::FRandRange(0.f, 360.f), 0);
-            FTransform InstanceTransform(RandomRot, SpawnLocation);
 
-            //// 자기 스포너 내에서 충돌 검사
-            //bool bBlocked = false;
-            //for (int32 i = 0; i < PlacedLocations.Num(); ++i)
-            //{
-            //    float MinDist = InstanceRadius + PlacedRadii[i];
-            //    if (FVector::DistSquared(PlacedLocations[i], SpawnLocation) < FMath::Square(MinDist))
-            //    {
-            //        bBlocked = true;
-            //        break;
-            //    }
-            //}
-            //if (bBlocked) continue;
+            // 자기 스포너 내에서 충돌 검사
+            bool bBlocked = false;
+            for (int32 i = 0; i < PlacedLocations.Num(); ++i)
+            {
+                float MinDist = InstanceRadius + PlacedRadii[i];
+                if (FVector::DistSquared(PlacedLocations[i], SpawnLocation) < FMath::Square(MinDist))
+                {
+                    bBlocked = true;
+                    break;
+                }
+            }
+            if (bBlocked) continue;
 
             UInstancedStaticMeshComponent* MeshComp = GetOrCreateInstancedMeshComponent(ChosenMesh);
             if (!MeshComp) continue;
 
-            /////// 디버그
-            //FVector BoxExtent = ChosenMesh->GetBounds().BoxExtent;
-            ////FVector DebugLocation = HitResult.ImpactPoint;
+            FVector LocalPosition = MeshComp->GetComponentTransform().InverseTransformPosition(SpawnLocation);
+            FTransform InstanceTransform(RandomRot, LocalPosition);
 
-            //DrawDebugBox(
-            //    GetWorld(),
-            //    SpawnLocation,
-            //    BoxExtent,
-            //    FColor::Red,
-            //    false,          // bPersistentLines: false → 시간 지나면 사라짐
-            //    30.0f,           // LifeTime
-            //    0,
-            //    2.0f            // 선 두께
-            //);
+            ///// 디버그
+            FVector BoxExtent = ChosenMesh->GetBounds().BoxExtent;
+            //FVector DebugLocation = HitResult.ImpactPoint;
+
+            DrawDebugBox(
+                GetWorld(),
+                SpawnLocation,
+                BoxExtent,
+                FColor::Red,
+                false,          // bPersistentLines: false → 시간 지나면 사라짐
+                30.0f,           // LifeTime
+                0,
+                2.0f            // 선 두께
+            );
 
             MeshComp->AddInstance(InstanceTransform);
 
