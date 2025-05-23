@@ -27,6 +27,7 @@ ABaseDebrisSpawner::ABaseDebrisSpawner()
 void ABaseDebrisSpawner::BeginPlay()
 {
     Super::BeginPlay();
+    
     GenerateInstances();
 }
 
@@ -77,6 +78,7 @@ void ABaseDebrisSpawner::GenerateInstances()
                 0.f
             );
 
+            // 지면 라인트레이스
             FVector Start = SpawnTransform.TransformPosition(LocalRandom + FVector(0, 0, 500.f));
             FVector End = SpawnTransform.TransformPosition(LocalRandom + FVector(0, 0, -1000.f));
 
@@ -116,9 +118,11 @@ void ABaseDebrisSpawner::GenerateInstances()
 
             FVector LocalPos = MeshComp->GetComponentTransform().InverseTransformPosition(SpawnLocation);
             FTransform InstanceTransform(RandomRot, LocalPos);
+            
+            // 추가전 SpawnLocation 로그
 
             MeshComp->AddInstance(InstanceTransform);
-            //DrawDebugBox(World, SpawnLocation, ChosenMesh->GetBounds().BoxExtent, FColor::Red, false, 30.0f, 0, 2.0f);
+            DrawDebugBox(World, SpawnLocation, ChosenMesh->GetBounds().BoxExtent, FColor::Red, false, 30.0f, 0, 2.0f);
 
             PlacedLocations.Add(SpawnLocation);
             PlacedRadii.Add(InstanceRadius);
@@ -186,7 +190,7 @@ void ABaseDebrisSpawner::GenerateInstances()
         bool bBlocked = false;
         for (int32 i = 0; i < PlacedLocations.Num(); ++i)
         {
-            float MinDist = InstanceRadius + PlacedRadii[i];
+            float MinDist = (InstanceRadius + PlacedRadii[i]) * 0.75f;
             if (FVector::DistSquared(PlacedLocations[i], SpawnLocation) < FMath::Square(MinDist))
             {
                 bBlocked = true;
@@ -229,12 +233,31 @@ UHierarchicalInstancedStaticMeshComponent* ABaseDebrisSpawner::GetOrCreateInstan
     FString Name = FString::Printf(TEXT("HISMC_%s"), *Mesh->GetName());
     UHierarchicalInstancedStaticMeshComponent* NewComp = NewObject<UHierarchicalInstancedStaticMeshComponent>(this, *Name);
     check(NewComp);
+    NewComp->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+    NewComp->SetRelativeTransform(FTransform::Identity);
     NewComp->RegisterComponent();
     NewComp->SetStaticMesh(Mesh);
     NewComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
     NewComp->SetCollisionResponseToAllChannels(ECR_Block);
-    NewComp->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 
     MeshToComponentMap.Add(Mesh, NewComp);
     return NewComp;
 }
+
+//void ABaseDebrisSpawner::OnConstruction(const FTransform& Transform)
+//{
+//    Super::OnConstruction(Transform);
+//
+//    for (auto& Pair : MeshToComponentMap)
+//    {
+//        if (Pair.Value)
+//        {
+//            Pair.Value->DestroyComponent();
+//        }
+//    }
+//
+//    MeshToComponentMap.Empty();
+//
+//    GenerateInstances();
+//
+//}

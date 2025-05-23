@@ -46,7 +46,7 @@ protected:
     TArray<UStaticMesh*> OtherMeshes;
 
     // 설정 값
-    UPROPERTY(EditAnywhere, Category = "Instancing")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Instancing")
     int32 NumInstances;
 
     UPROPERTY(EditAnywhere, Category = "Instancing", meta = (ClampMin = "0.0", ClampMax = "1.0"))
@@ -60,4 +60,6 @@ protected:
 
     UPROPERTY(EditAnywhere, Category = "Instancing")
     bool bUseSplitMeshArrays;
+
+    //virtual void OnConstruction(const FTransform& Transform) override;
 };
