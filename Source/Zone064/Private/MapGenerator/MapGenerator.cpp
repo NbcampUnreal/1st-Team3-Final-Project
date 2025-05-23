@@ -519,88 +519,93 @@ void AMapGenerator::GenerateMap()
         UE_LOG(LogTemp, Log, TEXT("Spawned (infra): %s at (%d, %d)"), *Selected->GetName(), GridPos.X, GridPos.Y);
     }
 
-    // 큐브메시 박스로 실험
-    UStaticMesh* CubeMesh = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Cube.Cube"));
-    if (!CubeMesh) return;
+    //// 큐브메시 박스로 실험
+    //UStaticMesh* CubeMesh = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Cube.Cube"));
+    //if (!CubeMesh) return;
 
-    for (const FBuildingSpawnData& Info : BuildingSpawnList)
-    {
-        // 여백 설정 (건물 사이로 골목이 보이게)
-        float PaddingX = FMath::FRandRange(0.00f, 0.06f);
-        float PaddingY = FMath::FRandRange(0.00f, 0.03f);
-
-        // 높이 결정
-        float HeightZ = (Info.ZoneType == EZoneType::HighRise) ? 1800.f + (200.f * FMath::RandRange(1, 5)) :
-            (Info.ZoneType == EZoneType::LowRise) ? 500.f + (200.f * FMath::RandRange(1, 3)) : 300.f;
-
-        // 구역 크기와 실제 건물 크기
-        float BlockX = Info.Width * TileSize;
-        float BlockY = Info.Height * TileSize;
-        float InnerX = BlockX * (1.0f - PaddingX * 2.0f);
-        float InnerY = BlockY * (1.0f - PaddingY * 2.0f);
-
-        // 크기(스케일) 계산
-        FVector Scale(
-            InnerX / 100.f,
-            InnerY / 100.f,
-            HeightZ / 100.f
-        );
-
-        // Top-Left 셀 중심 얻기
-        FVector TopLeftCenter = GetWorldFromGrid(Info.Origin);
-
-        // 블록 중심 오프셋: (Width-1)/2, (Height-1)/2 만큼
-        FVector CenterOffset(
-            (Info.Width - 1) * 0.5f * TileSize,
-            (Info.Height - 1) * 0.5f * TileSize,
-            HeightZ * 0.5f
-        );
-
-        // 최종 스폰 위치 (회전 영향 x)
-        FVector SpawnLocation = TopLeftCenter + CenterOffset;
-
-        // 액터 스폰 (Rotation 은 여기서만 적용)
-        AStaticMeshActor* MeshActor = GetWorld()->SpawnActor<AStaticMeshActor>(
-            SpawnLocation,
-            Info.Rotation
-        );
-        if (MeshActor)
-        {
-            auto* MeshComp = MeshActor->GetStaticMeshComponent();
-            MeshComp->SetMobility(EComponentMobility::Movable);
-            MeshComp->SetStaticMesh(CubeMesh);
-            MeshComp->SetWorldScale3D(Scale);
-            MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-        }
-    }
-
-
-    //// 건물 스폰 (영역 단위)
     //for (const FBuildingSpawnData& Info : BuildingSpawnList)
     //{
-    //    const TArray<TSubclassOf<AActor>>* PrefabArray = CachedPrefabsByZone.Find(Info.ZoneType);
-    //    if (!PrefabArray || PrefabArray->Num() == 0) continue;
+    //    // 여백 설정 (건물 사이로 골목이 보이게)
+    //    float PaddingX = FMath::FRandRange(0.00f, 0.06f);
+    //    float PaddingY = FMath::FRandRange(0.00f, 0.03f);
 
-    //    // 크기 일치하는 프리팹만 필터링 (추가 가능)
-    //    int32 Index = RandomStream.RandRange(0, PrefabArray->Num() - 1);
-    //    TSubclassOf<AActor> Selected = (*PrefabArray)[Index];
-    //    if (!Selected) continue;
+    //    // 높이 결정
+    //    float HeightZ = (Info.ZoneType == EZoneType::HighRise) ? 1800.f + (200.f * FMath::RandRange(1, 5)) :
+    //        (Info.ZoneType == EZoneType::LowRise) ? 500.f + (200.f * FMath::RandRange(1, 3)) : 300.f;
 
-    //    FVector Location = GetActorLocation() +
-    //        FVector(Info.Origin.X * TileSize + (Info.Width - 1) * 0.5f * TileSize,
-    //            Info.Origin.Y * TileSize + (Info.Height - 1) * 0.5f * TileSize,
-    //            0.f);
+    //    // 구역 크기와 실제 건물 크기
+    //    float BlockX = Info.Width * TileSize;
+    //    float BlockY = Info.Height * TileSize;
+    //    float InnerX = BlockX * (1.0f - PaddingX * 2.0f);
+    //    float InnerY = BlockY * (1.0f - PaddingY * 2.0f);
 
-    //    AActor* Spawned = GetWorld()->SpawnActor<AActor>(Selected, Location, Info.Rotation);
+    //    // 크기(스케일) 계산
+    //    FVector Scale(
+    //        InnerX / 100.f,
+    //        InnerY / 100.f,
+    //        HeightZ / 100.f
+    //    );
 
-    //    if (ACityBlockBase* Block = Cast<ACityBlockBase>(Spawned))
+    //    // Top-Left 셀 중심 얻기
+    //    FVector TopLeftCenter = GetWorldFromGrid(Info.Origin);
+
+    //    // 블록 중심 오프셋: (Width-1)/2, (Height-1)/2 만큼
+    //    FVector CenterOffset(
+    //        (Info.Width - 1) * 0.5f * TileSize,
+    //        (Info.Height - 1) * 0.5f * TileSize,
+    //        HeightZ * 0.5f
+    //    );
+
+    //    // 최종 스폰 위치 (회전 영향 x)
+    //    FVector SpawnLocation = TopLeftCenter + CenterOffset;
+
+    //    // 액터 스폰 (Rotation 은 여기서만 적용)
+    //    AStaticMeshActor* MeshActor = GetWorld()->SpawnActor<AStaticMeshActor>(
+    //        SpawnLocation,
+    //        Info.Rotation
+    //    );
+    //    if (MeshActor)
     //    {
-    //        Block->InitializeBlock(Info.Origin, false, ERoadDirection::None);
+    //        auto* MeshComp = MeshActor->GetStaticMeshComponent();
+    //        MeshComp->SetMobility(EComponentMobility::Movable);
+    //        MeshComp->SetStaticMesh(CubeMesh);
+    //        MeshComp->SetWorldScale3D(Scale);
+    //        MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
     //    }
-
-    //    UE_LOG(LogTemp, Log, TEXT("Spawned (building): %s at (%d,%d) size (%d x %d)"),
-    //        *Selected->GetName(), Info.Origin.X, Info.Origin.Y, Info.Width, Info.Height);
     //}
+
+
+    // 건물 스폰 (영역 단위)
+    for (const FBuildingSpawnData& Info : BuildingSpawnList)
+    {
+        const TArray<TSubclassOf<AActor>>* PrefabArray = CachedPrefabsByZone.Find(Info.ZoneType);
+        if (!PrefabArray || PrefabArray->Num() == 0) continue;
+
+        // 크기 일치하는 프리팹만 필터링 (추가 가능)
+        int32 Index = RandomStream.RandRange(0, PrefabArray->Num() - 1);
+        
+        // Info에 있는 가로세로(동일) 가져와서 인덱스로 사용
+        // 빈 칸으로 두면 크래시남 앞에 빈 액터라도 채워야 함
+        Index = Info.Height;
+
+        TSubclassOf<AActor> Selected = (*PrefabArray)[Index];
+        if (!Selected) continue;
+
+        FVector Location = GetActorLocation() +
+            FVector(Info.Origin.X * TileSize + (Info.Width - 1) * 0.5f * TileSize,
+                Info.Origin.Y * TileSize + (Info.Height - 1) * 0.5f * TileSize,
+                0.f);
+
+        AActor* Spawned = GetWorld()->SpawnActor<AActor>(Selected, Location, Info.Rotation);
+
+        if (ACityBlockBase* Block = Cast<ACityBlockBase>(Spawned))
+        {
+            Block->InitializeBlock(Info.Origin, false, ERoadDirection::None);
+        }
+
+        UE_LOG(LogTemp, Log, TEXT("Spawned (building): %s at (%d,%d) size (%d x %d)"),
+            *Selected->GetName(), Info.Origin.X, Info.Origin.Y, Info.Width, Info.Height);
+    }
 
     // 도로 프랍 스폰
     SpawnSidewalkProps();
