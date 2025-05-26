@@ -6,6 +6,7 @@
 #include "Engine/AssetManager.h"
 #include "MapGenerator.generated.h"
 
+DECLARE_MULTICAST_DELEGATE(FOnPropSpawnComplete);
 
 UENUM(BlueprintType)
 enum class EZoneType : uint8
@@ -13,6 +14,7 @@ enum class EZoneType : uint8
     None                UMETA(DisplayName = "None"),
     Road                UMETA(DisplayName = "Road"), // 차도
     Road_Sidewalk       UMETA(DisplayName = "Road_Sidewalk"),  // 인도
+    Road_Sidewalk_Traffic       UMETA(DisplayName = "Road_Sidewalk_Traffic"),  // 신호등있는 인도
     Road_Crosswalk      UMETA(DisplayName = "Road_Crosswalk"), // 횡단보도
     Road_Intersection   UMETA(DisplayName = "Road_Intersection"), //교차로
     HighRise            UMETA(DisplayName = "High Rise"),
@@ -36,10 +38,11 @@ struct FGridCellData
 {
     GENERATED_BODY()
 
+
     EZoneType ZoneType = EZoneType::None;
     FRotator PreferredRotation = FRotator::ZeroRotator;
     bool bIsCrossroad = false;
-
+    int32 CrossroadSize = 0;
     UPROPERTY(BlueprintReadOnly)
     ERoadDirection RoadDirection = ERoadDirection::None; 
 };
@@ -77,6 +80,7 @@ struct FBuildingSpawnData
     FRotator Rotation;
 };
 
+
 UCLASS()
 class ZONE064_API AMapGenerator : public AActor
 {
@@ -89,6 +93,9 @@ protected:
     virtual void BeginPlay() override;
 
 public:
+    // 스폰 완료시 호출할 델리게이트
+    FOnPropSpawnComplete OnPropSpawnComplete;
+
     // 맵 크기
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Generation")
     int32 GridWidth;
@@ -98,6 +105,7 @@ public:
 
     // 블럭 간 간격
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Generation")
+
     float TileSize;
 
     // 에디터에서 사용할 소프트 레퍼 리스트
@@ -115,8 +123,15 @@ public:
     UPROPERTY(EditAnywhere, Category = "Generation|Props")
     TArray<TSubclassOf<AActor>> LightPrefabs;
     UPROPERTY(EditAnywhere, Category = "Generation|Props")
+    TArray<TSubclassOf<AActor>> TrafficPrefabs;
+    UPROPERTY(EditAnywhere, Category = "Generation|Props")
     TArray<TSubclassOf<AActor>> TrashPrefabs;
-
+    UPROPERTY(EditAnywhere, Category = "Generation|Props")
+    TSubclassOf<AActor> FencePrefab;
+    UPROPERTY(EditAnywhere, Category = "Generation|Props")
+    TSubclassOf<AActor> BuildingGroundPrefab;
+    UPROPERTY(EditAnywhere, Category = "Generation|Props")
+    TArray<TSubclassOf<AActor>> InfraPrefabs;
 
     // 비동기 로딩 후 콜백
     void OnPrefabsLoaded();
@@ -141,17 +156,34 @@ public:
     void SpawnSidewalkProps();
 
     void TrySpawnProps(AActor* Target, FIntPoint GridPos);
+    void TrySpawnBorder(const FVector& Location, const FIntPoint& GridPos);
     
     // 회전값 고려한 좌상단 구하기
     FIntPoint GetTopLeftFromOrigin(FIntPoint center, int32 width, int32 height, const FRotator& Rotation);
     FVector GetWorldCenterFromTopLeft(FIntPoint TopLeft, int32 Width, int32 Height, FRotator Rotation);
     FVector GetWorldFromGrid(FIntPoint GridPos);
 
+    // 커스텀 플레이어 스타트 사용
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    TSubclassOf<APlayerStart> PlayerStartActor;
+    
+
 private:
     FRandomStream RandomStream;
     FStreamableManager AssetLoader;
+    
     // 구역 맵
     TMap<FIntPoint, FGridCellData> ZoneMap;
+
+    // 4방향 탐색용 오프셋
+    TArray<FIntPoint> SearchOffsetList;
+    // 대각선 방향 탐색용 오프셋
+    TArray<FIntPoint> CornerOffsetList;
+    TMap<FIntPoint, float> CornerYawMap;
+
+    // 데브리 스폰용 Road Array
+    TArray<FIntPoint> FinalRoadArray;
+    // Road Debris InstancedStaticMeshComponent
 
     // 건물 스폰 리스트
     TArray<FBuildingSpawnData> BuildingSpawnList;
@@ -162,12 +194,19 @@ private:
 
     // 교차로 최소 간격
     int32 CrossroadMinSpacing;
+    // 후생성 횡단보도 확률
+    float CrosswalkChance;
 
     float TreeSpawnChance;
     float LightSpawnChance;
     float TrashSpawnChance;
+    float TrafficSpawnChance;
+    float InfraSpawnChance;
 
     // 프랍 최소 간격
     int32 LightSpawnSpacing;
     int32 TreeSpawnSpacing;
+    int32 InfraSpawnSpacing;
+
+
 };

@@ -25,7 +25,13 @@
 			]
 		},
 		{
+
 			"Name": "AnimationWarping",
+			"Enabled": true
+		},
+		{
+
+			"Name": "PCG",
 			"Enabled": true
 		}
 	]

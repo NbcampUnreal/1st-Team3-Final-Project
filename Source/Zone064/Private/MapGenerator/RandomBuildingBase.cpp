@@ -25,7 +25,7 @@ void ARandomBuildingBase::GenerateStructure()
 
     for (int32 Z = 0; Z < Floors; ++Z)
     {
-        // ¾Æ·¡Ãþ °è´Ü À§Ä¡ °¡Á®¿À±â
+        // ì•„ëž˜ì¸µ ê³„ë‹¨ ìœ„ì¹˜ ê°€ì ¸ì˜¤ê¸°
         bool bHasStairBelow = StairPositions.Contains(Z - 1);
         FIntPoint BelowStair;
         if (bHasStairBelow)
@@ -37,7 +37,7 @@ void ARandomBuildingBase::GenerateStructure()
         {
             for (int32 Y = 0; Y < Depth; ++Y)
             {
-                // À§ÃþÀÇ °è´Ü À§Ä¡¿¡´Â ¹Ù´Ú »ý¼ºÇÏÁö ¾ÊÀ½
+                // ìœ„ì¸µì˜ ê³„ë‹¨ ìœ„ì¹˜ì—ëŠ” ë°”ë‹¥ ìƒì„±í•˜ì§€ ì•ŠìŒ
                 if (bHasStairBelow && X == BelowStair.X && Y == BelowStair.Y)
                 {
                     continue;
@@ -52,7 +52,7 @@ void ARandomBuildingBase::GenerateStructure()
             }
         }
 
-        // ¿Üº® »ý¼º
+        // ì™¸ë²½ ìƒì„±
         for (int32 X = 0; X < Width; ++X)
         {
             for (int32 Y = 0; Y < Depth; ++Y)
@@ -74,7 +74,7 @@ void ARandomBuildingBase::GenerateStructure()
             }
         }
 
-        // °è´Ü »ý¼º (¸¶Áö¸· Ãþ Á¦¿Ü)
+        // ê³„ë‹¨ ìƒì„± (ë§ˆì§€ë§‰ ì¸µ ì œì™¸)
         if (Z < Floors - 1 && StairMesh)
         {
             int32 StairX = FMath::RandRange(0, Width - 1);
@@ -94,7 +94,7 @@ void ARandomBuildingBase::GenerateStructure()
         }
     }
 
-    // ÀÔ±¸ ¹® (1Ãþ Á¤¸é Áß¾Ó)
+    // ìž…êµ¬ ë¬¸ (1ì¸µ ì •ë©´ ì¤‘ì•™)
     if (DoorMesh)
     {
         FVector DoorLocation = FVector((Width / 2) * UnitSize, -UnitSize / 2, 0.f);

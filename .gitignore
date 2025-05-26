@@ -52,6 +52,10 @@ Plugins/**/Binaries/*
 # Builds
 Build/*
 
+# Assests
+Content/Assets/PostCity/*
+Content/Assets/Zombie_02/*
+
 # Whitelist PakBlacklist-<BuildConfiguration>.txt files
 !Build/*/
 Build/*/**
@@ -72,3 +76,6 @@ Plugins/**/Intermediate/*
 
 # Cache files for the editor to use
 DerivedDataCache/*
+
+# Assets
+Content/Assets/PostCity/*

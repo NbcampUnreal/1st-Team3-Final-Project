@@ -8,7 +8,7 @@
 AMapGenerator::AMapGenerator()
 {
     PrimaryActorTick.bCanEverTick = false;
-    
+
     GridWidth = 10;
     GridHeight = 10;
     TileSize = 500;
@@ -19,14 +19,23 @@ AMapGenerator::AMapGenerator()
     RequiredClusterSize = 6;
     SpecialChance = 0.2f;
     CrossroadMinSpacing = 4;
+    CrosswalkChance = 0.3f;
 
     // 도로 프랍 스폰 확률
     TreeSpawnChance = 0.4f;
-    LightSpawnChance = 0.4f;
+    LightSpawnChance = 0.3f;
     TrashSpawnChance = 0.2f;
+    TrafficSpawnChance = 0.5f;
+    InfraSpawnChance = 0.7f;
 
-    LightSpawnSpacing = 3;
-    TreeSpawnSpacing = 3;
+
+    LightSpawnSpacing = 4;
+    TreeSpawnSpacing = 5;
+    InfraSpawnSpacing = 15;
+
+    SearchOffsetList = { FIntPoint(1, 0), FIntPoint(-1, 0), FIntPoint(0, 1), FIntPoint(0, -1) };
+    CornerOffsetList = { FIntPoint(1, 1), FIntPoint(-1, 1), FIntPoint(1, -1), FIntPoint(-1, -1) };
+    CornerYawMap = { {FIntPoint(1, 1), -180.f}, { FIntPoint(-1, -1), 0.f }, { FIntPoint(-1, 1), -90.f }, { FIntPoint(1, -1), 90.f } };
 
 }
 
@@ -40,11 +49,13 @@ void AMapGenerator::BeginPlay()
     }
     RandomStream.Initialize(Seed);
 
+
     // BlockPrefabSets -> BlockPrefabAssetsByZone 변환
     for (const FZonePrefabSet& Set : BlockPrefabSets)
     {
         BlockPrefabAssetsByZone.FindOrAdd(Set.ZoneType) = Set.Prefabs;
     }
+
 
     // 소프트 레퍼런스 로딩
     TArray<FSoftObjectPath> AssetPaths;
@@ -93,7 +104,9 @@ void AMapGenerator::AssignSpecialClusters()
             if (!ZoneMap.Contains(Start)) continue;
             if (ZoneMap[Start].ZoneType != EZoneType::LowRise) continue;
 
+
             // Flood fill 시작
+
             TSet<FIntPoint> Cluster;
             TQueue<FIntPoint> Queue;
             Queue.Enqueue(Start);
@@ -105,7 +118,8 @@ void AMapGenerator::AssignSpecialClusters()
                 FIntPoint Current;
                 Queue.Dequeue(Current);
 
-                for (FIntPoint Offset : {FIntPoint(1, 0), FIntPoint(-1, 0), FIntPoint(0, 1), FIntPoint(0, -1)})
+
+                for (FIntPoint Offset : SearchOffsetList)
                 {
                     FIntPoint Neighbor = Current + Offset;
                     if (Visited.Contains(Neighbor)) continue;
@@ -120,6 +134,7 @@ void AMapGenerator::AssignSpecialClusters()
                 }
             }
 
+
             // 조건 만족 + 확률 충족 시 특수부지로 전체 전환
             if (Cluster.Num() >= RequiredClusterSize && RandomStream.FRand() < SpecialChance)
             {
@@ -133,6 +148,7 @@ void AMapGenerator::AssignSpecialClusters()
         }
     }
 }
+
 
 bool AMapGenerator::IsAreaAvailable(FIntPoint TopLeft, int32 Width, int32 Height, const TArray<EZoneType>& BlockedTypes)
 {
@@ -212,20 +228,30 @@ void AMapGenerator::DrawDebugZoneMap()
 
 void AMapGenerator::SpawnSidewalkProps()
 {
+    // 관심있는 타입 한 번에 묶어놓기
+    TSet<EZoneType> SidewalkTypes = {
+        EZoneType::Road_Sidewalk,
+        EZoneType::Road_Sidewalk_Traffic,
+        EZoneType::Alley,
+        EZoneType::Plant
+    };
+
     for (const auto& Pair : ZoneMap)
     {
-        if (Pair.Value.ZoneType != EZoneType::Road_Sidewalk)
-        {
-            if (Pair.Value.ZoneType != EZoneType::Alley)
-            {
-                continue;
-            }
-        }
-            
+        if (!SidewalkTypes.Contains(Pair.Value.ZoneType))
+            continue;
+
         FIntPoint GridPos = Pair.Key;
         FVector WorldLocation = GetActorLocation() + FVector(GridPos.X * TileSize, GridPos.Y * TileSize, 0.f);
 
-        // AABB 검사로 해당 위치 프리팹 찾기
+        // Alley 구역은 경계도 추가로 스폰
+        if (Pair.Value.ZoneType == EZoneType::Alley)
+        {
+            TrySpawnBorder(WorldLocation, GridPos);
+            //continue;
+        }
+
+        // 기존 프리팹 처리
         FBox QueryBox = FBox::BuildAABB(WorldLocation, FVector(100.f, 100.f, 100.f));
         TArray<AActor*> FoundActors;
         UGameplayStatics::GetAllActorsOfClass(GetWorld(), AActor::StaticClass(), FoundActors);
@@ -234,13 +260,80 @@ void AMapGenerator::SpawnSidewalkProps()
         {
             if (Actor && QueryBox.IsInside(Actor->GetActorLocation()))
             {
-                TrySpawnProps(Actor, GridPos); 
+                TrySpawnProps(Actor, GridPos);
                 break;
             }
         }
     }
 }
 
+void AMapGenerator::TrySpawnBorder(const FVector& Location, const FIntPoint& GridPos)
+{
+    // AABB
+    FBox QueryBox = FBox::BuildAABB(Location, FVector(100.f, 100.f, 100.f));
+    TArray<AActor*> FoundActors;
+    UGameplayStatics::GetAllActorsOfClass(GetWorld(), AActor::StaticClass(), FoundActors);
+
+    for (AActor* Actor : FoundActors)
+    {
+        // 프리팹 감지 실패 -> 스킵
+        if (!Actor || !QueryBox.IsInside(Actor->GetActorLocation())) continue;
+
+        const TArray<TPair<FString, FIntPoint>> ArrowOffset = 
+        {
+            {TEXT("Left"),    FIntPoint(0, 1)},
+            {TEXT("Right"),  FIntPoint(0, -1)},
+            {TEXT("Up"),  FIntPoint(-1, 0)},
+            {TEXT("Down"), FIntPoint(1, 0)},
+        };
+
+        for (const auto& Pair : ArrowOffset)
+        {
+            FString ArrowName = Pair.Key.ToLower();
+            FIntPoint Direction = Pair.Value;
+            FIntPoint SearchPos = GridPos + Direction;
+
+            // 인도 검사 -> 펜스 스폰
+            if (ZoneMap.Contains(SearchPos) &&
+                (ZoneMap[SearchPos].ZoneType == EZoneType::Plant || 
+                    ZoneMap[SearchPos].ZoneType == EZoneType::Road_Sidewalk))
+            {
+
+                TArray<USceneComponent*> Components;
+                Actor->GetComponents<USceneComponent>(Components);
+                
+                for(USceneComponent* Comp : Components)
+                {
+                    if (!Comp) continue;
+
+                    FString Name = Comp->GetName().ToLower();
+                    if (Name.Contains(ArrowName))
+                    {
+                        FTransform SpawnTransform = Comp->GetComponentTransform();
+
+                        AActor* SpawnedFence = nullptr;
+                        if (FencePrefab)
+                        {
+                            SpawnedFence = GetWorld()->SpawnActor<AActor>(FencePrefab, SpawnTransform);
+                            if (SpawnedFence)
+                            {
+                                FVector CompScale = Comp->GetComponentScale();
+                                if (SpawnedFence->GetRootComponent())
+                                {
+                                    SpawnedFence->GetRootComponent()->SetWorldScale3D(CompScale);
+                                }
+                            }
+
+                        }
+                        //break;
+                    }
+                }
+                
+            }
+        }
+      
+    }
+}
 
 void AMapGenerator::TrySpawnProps(AActor* Target, FIntPoint GridPos)
 {
@@ -251,6 +344,9 @@ void AMapGenerator::TrySpawnProps(AActor* Target, FIntPoint GridPos)
 
     TArray<USceneComponent*> Components;
     Target->GetComponents<USceneComponent>(Components);
+    
+    float InfraSpawnChanceRandom = RandomStream.FRand();
+    bool bIsInfraSpawned = InfraSpawnChance <= InfraSpawnChanceRandom;
 
     for (USceneComponent* Comp : Components)
     {
@@ -260,43 +356,76 @@ void AMapGenerator::TrySpawnProps(AActor* Target, FIntPoint GridPos)
 
         TArray<TSubclassOf<AActor>>* PropArray = nullptr;
         float Chance = 1.f;
+        FVector RandomScale = FVector(1.0f, 1.0f, 1.0f);
+        
 
-        if (Name.Contains(TEXT("Tree")))
+        if (bIsInfraSpawned && Name.Contains(TEXT("Infra")))
+        {
+            if ((GridPos.X + GridPos.Y) % InfraSpawnSpacing != 0) continue;
+
+            PropArray = &InfraPrefabs;
+            Chance = InfraSpawnChance;
+        }
+        if (!bIsInfraSpawned && Name.Contains(TEXT("Tree")))
         {
             if ((GridPos.X + GridPos.Y) % TreeSpawnSpacing != 0) continue;
 
             PropArray = &TreePrefabs;
             Chance = TreeSpawnChance;
+            float TreeScaleXY = RandomStream.FRandRange(0.5f, 0.8f);
+            float TreeScaleZ = RandomStream.FRandRange(0.7f, 0.8f);
+            RandomScale = FVector(TreeScaleXY, TreeScaleXY, TreeScaleZ);
         }
-        else if (Name.Contains(TEXT("Light")))
+
+        if (!bIsInfraSpawned && Name.Contains(TEXT("Light")))
         {
             if ((GridPos.X + GridPos.Y) % LightSpawnSpacing != 0) continue;
-            
+
             PropArray = &LightPrefabs;
             Chance = LightSpawnChance;
         }
-        else if (Name.Contains(TEXT("Trash")))
+        if (Name.Contains(TEXT("Trash")))
         {
             PropArray = &TrashPrefabs;
             Chance = TrashSpawnChance;
         }
-
-        if (PropArray && PropArray->Num() > 0 && RandomStream.FRand() < Chance)
+        
+        if (Name.Contains(TEXT("Traffic")))
         {
-            int32 Index = RandomStream.RandRange(0, PropArray->Num() - 1);
-            TSubclassOf<AActor> Selected = (*PropArray)[Index];
+            PropArray = &TrafficPrefabs;
+            Chance = TrafficSpawnChance;
+        }
 
-            if (Selected)
+        bool bDoSpawn = false;
+        if (PropArray && PropArray->Num() > 0)
+        {
+            float Roll = RandomStream.FRand();
+            bDoSpawn = (Roll < Chance);
+
+            if (bDoSpawn)
             {
-                World->SpawnActor<AActor>(
-                    Selected,
-                    Comp->GetComponentLocation(),
-                    Comp->GetComponentRotation()
-                );
+                int32 Index = RandomStream.RandRange(0, PropArray->Num() - 1);
+                TSubclassOf<AActor> Selected = (*PropArray)[Index];
+                AActor* Spawned = nullptr;
+
+                if (Selected)
+                {
+                    Spawned = World->SpawnActor<AActor>(
+                        Selected,
+                        Comp->GetComponentLocation(),
+                        Comp->GetComponentRotation()
+                    );
+                    Spawned->GetRootComponent()->SetWorldScale3D(RandomScale);
+                }
             }
         }
     }
+
+    // 델리게이트 호출
+    OnPropSpawnComplete.Broadcast();
 }
+
+
 
 FIntPoint AMapGenerator::GetTopLeftFromOrigin(FIntPoint Origin, int32 Width, int32 Height, const FRotator& Rotation)
 {
@@ -353,6 +482,7 @@ FVector AMapGenerator::GetWorldFromGrid(FIntPoint GridPos)
 
 
 
+
 void AMapGenerator::GenerateMap()
 {
     if (CachedPrefabsByZone.Num() == 0)
@@ -360,6 +490,7 @@ void AMapGenerator::GenerateMap()
         UE_LOG(LogTemp, Warning, TEXT("MapGenerator: CachedPrefabsByZone is empty!"));
         return;
     }
+
 
     GenerateZoneMap(); // ZoneMap + BuildingSpawnList 구성
 
@@ -369,13 +500,7 @@ void AMapGenerator::GenerateMap()
         const FIntPoint& GridPos = Pair.Key;
         const FGridCellData& Cell = Pair.Value;
 
-        // 건물은 건너뜀 (HighRise, LowRise, Special)
-        if (Cell.ZoneType == EZoneType::HighRise ||
-            Cell.ZoneType == EZoneType::LowRise ||
-            Cell.ZoneType == EZoneType::Special)
-        {
-            continue;
-        }
+
 
         const TArray<TSubclassOf<AActor>>* PrefabArray = CachedPrefabsByZone.Find(Cell.ZoneType);
         if (!PrefabArray || PrefabArray->Num() == 0) continue;
@@ -384,100 +509,113 @@ void AMapGenerator::GenerateMap()
         TSubclassOf<AActor> Selected = (*PrefabArray)[Index];
         if (!Selected) continue;
 
+        // 건물 바닥
+        if (Cell.ZoneType == EZoneType::HighRise ||
+            Cell.ZoneType == EZoneType::LowRise ||
+            Cell.ZoneType == EZoneType::Special)
+        {
+            Selected = BuildingGroundPrefab;
+        }
+
         FVector Location = GetActorLocation() + FVector(GridPos.X * TileSize, GridPos.Y * TileSize, 0.f);
         FRotator Rotation = Cell.PreferredRotation;
 
         AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(Selected, Location, Rotation);
         if (ACityBlockBase* Block = Cast<ACityBlockBase>(SpawnedActor))
         {
-            Block->InitializeBlock(GridPos, Cell.bIsCrossroad, Cell.RoadDirection);
+            //Block->InitializeBlock(GridPos, Cell.bIsCrossroad, Cell.RoadDirection);
         }
 
         UE_LOG(LogTemp, Log, TEXT("Spawned (infra): %s at (%d, %d)"), *Selected->GetName(), GridPos.X, GridPos.Y);
     }
 
-    // 큐브메시 박스로 실험
-    UStaticMesh* CubeMesh = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Cube.Cube"));
-    if (!CubeMesh) return;
+    //// 큐브메시 박스로 실험
+    //UStaticMesh* CubeMesh = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Cube.Cube"));
+    //if (!CubeMesh) return;
 
-    for (const FBuildingSpawnData& Info : BuildingSpawnList)
-    {
-        // 여백 설정 (건물 사이로 골목이 보이게)
-        float PaddingX = FMath::FRandRange(0.00f, 0.06f);
-        float PaddingY = FMath::FRandRange(0.00f, 0.03f);
-
-        // 높이 결정
-        float HeightZ = (Info.ZoneType == EZoneType::HighRise) ? 1800.f + (200.f * FMath::RandRange(1, 5)) :
-            (Info.ZoneType == EZoneType::LowRise) ? 500.f + (200.f * FMath::RandRange(1, 3)) : 300.f;
-
-        // 구역 크기와 실제 건물 크기
-        float BlockX = Info.Width * TileSize;
-        float BlockY = Info.Height * TileSize;
-        float InnerX = BlockX * (1.0f - PaddingX * 2.0f);
-        float InnerY = BlockY * (1.0f - PaddingY * 2.0f);
-
-        // 크기(스케일) 계산
-        FVector Scale(
-            InnerX / 100.f,
-            InnerY / 100.f,
-            HeightZ / 100.f
-        );
-
-        // Top-Left 셀 중심 얻기
-        FVector TopLeftCenter = GetWorldFromGrid(Info.Origin);
-
-        // 블록 중심 오프셋: (Width-1)/2, (Height-1)/2 만큼
-        FVector CenterOffset(
-            (Info.Width - 1) * 0.5f * TileSize,
-            (Info.Height - 1) * 0.5f * TileSize,
-            HeightZ * 0.5f
-        );
-
-        // 최종 스폰 위치 (회전 영향 x)
-        FVector SpawnLocation = TopLeftCenter + CenterOffset;
-
-        // 액터 스폰 (Rotation 은 여기서만 적용)
-        AStaticMeshActor* MeshActor = GetWorld()->SpawnActor<AStaticMeshActor>(
-            SpawnLocation,
-            Info.Rotation
-        );
-        if (MeshActor)
-        {
-            auto* MeshComp = MeshActor->GetStaticMeshComponent();
-            MeshComp->SetMobility(EComponentMobility::Movable);
-            MeshComp->SetStaticMesh(CubeMesh);
-            MeshComp->SetWorldScale3D(Scale);
-            MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-        }
-    }
-
-
-    //// 건물 스폰 (영역 단위)
     //for (const FBuildingSpawnData& Info : BuildingSpawnList)
     //{
-    //    const TArray<TSubclassOf<AActor>>* PrefabArray = CachedPrefabsByZone.Find(Info.ZoneType);
-    //    if (!PrefabArray || PrefabArray->Num() == 0) continue;
+    //    // 여백 설정 (건물 사이로 골목이 보이게)
+    //    float PaddingX = FMath::FRandRange(0.00f, 0.06f);
+    //    float PaddingY = FMath::FRandRange(0.00f, 0.03f);
 
-    //    // 크기 일치하는 프리팹만 필터링 (추가 가능)
-    //    int32 Index = RandomStream.RandRange(0, PrefabArray->Num() - 1);
-    //    TSubclassOf<AActor> Selected = (*PrefabArray)[Index];
-    //    if (!Selected) continue;
+    //    // 높이 결정
+    //    float HeightZ = (Info.ZoneType == EZoneType::HighRise) ? 1800.f + (200.f * FMath::RandRange(1, 5)) :
+    //        (Info.ZoneType == EZoneType::LowRise) ? 500.f + (200.f * FMath::RandRange(1, 3)) : 300.f;
 
-    //    FVector Location = GetActorLocation() +
-    //        FVector(Info.Origin.X * TileSize + (Info.Width - 1) * 0.5f * TileSize,
-    //            Info.Origin.Y * TileSize + (Info.Height - 1) * 0.5f * TileSize,
-    //            0.f);
+    //    // 구역 크기와 실제 건물 크기
+    //    float BlockX = Info.Width * TileSize;
+    //    float BlockY = Info.Height * TileSize;
+    //    float InnerX = BlockX * (1.0f - PaddingX * 2.0f);
+    //    float InnerY = BlockY * (1.0f - PaddingY * 2.0f);
 
-    //    AActor* Spawned = GetWorld()->SpawnActor<AActor>(Selected, Location, Info.Rotation);
+    //    // 크기(스케일) 계산
+    //    FVector Scale(
+    //        InnerX / 100.f,
+    //        InnerY / 100.f,
+    //        HeightZ / 100.f
+    //    );
 
-    //    if (ACityBlockBase* Block = Cast<ACityBlockBase>(Spawned))
+    //    // Top-Left 셀 중심 얻기
+    //    FVector TopLeftCenter = GetWorldFromGrid(Info.Origin);
+
+    //    // 블록 중심 오프셋: (Width-1)/2, (Height-1)/2 만큼
+    //    FVector CenterOffset(
+    //        (Info.Width - 1) * 0.5f * TileSize,
+    //        (Info.Height - 1) * 0.5f * TileSize,
+    //        HeightZ * 0.5f
+    //    );
+
+    //    // 최종 스폰 위치 (회전 영향 x)
+    //    FVector SpawnLocation = TopLeftCenter + CenterOffset;
+
+    //    // 액터 스폰 (Rotation 은 여기서만 적용)
+    //    AStaticMeshActor* MeshActor = GetWorld()->SpawnActor<AStaticMeshActor>(
+    //        SpawnLocation,
+    //        Info.Rotation
+    //    );
+    //    if (MeshActor)
     //    {
-    //        Block->InitializeBlock(Info.Origin, false, ERoadDirection::None);
+    //        auto* MeshComp = MeshActor->GetStaticMeshComponent();
+    //        MeshComp->SetMobility(EComponentMobility::Movable);
+    //        MeshComp->SetStaticMesh(CubeMesh);
+    //        MeshComp->SetWorldScale3D(Scale);
+    //        MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
     //    }
-
-    //    UE_LOG(LogTemp, Log, TEXT("Spawned (building): %s at (%d,%d) size (%d x %d)"),
-    //        *Selected->GetName(), Info.Origin.X, Info.Origin.Y, Info.Width, Info.Height);
     //}
+
+
+    // 건물 스폰 (영역 단위)
+    for (const FBuildingSpawnData& Info : BuildingSpawnList)
+    {
+        const TArray<TSubclassOf<AActor>>* PrefabArray = CachedPrefabsByZone.Find(Info.ZoneType);
+        if (!PrefabArray || PrefabArray->Num() == 0) continue;
+
+        // 크기 일치하는 프리팹만 필터링 (추가 가능)
+        int32 Index = RandomStream.RandRange(0, PrefabArray->Num() - 1);
+        
+        // Info에 있는 가로세로(동일) 가져와서 인덱스로 사용
+        // 빈 칸으로 두면 크래시남 앞에 빈 액터라도 채워야 함
+        Index = Info.Height;
+
+        TSubclassOf<AActor> Selected = (*PrefabArray)[Index];
+        if (!Selected) continue;
+
+        FVector Location = GetActorLocation() +
+            FVector(Info.Origin.X * TileSize + (Info.Width - 1) * 0.5f * TileSize,
+                Info.Origin.Y * TileSize + (Info.Height - 1) * 0.5f * TileSize,
+                0.f);
+
+        AActor* Spawned = GetWorld()->SpawnActor<AActor>(Selected, Location, Info.Rotation);
+
+        if (ACityBlockBase* Block = Cast<ACityBlockBase>(Spawned))
+        {
+            Block->InitializeBlock(Info.Origin, false, ERoadDirection::None);
+        }
+
+        UE_LOG(LogTemp, Log, TEXT("Spawned (building): %s at (%d,%d) size (%d x %d)"),
+            *Selected->GetName(), Info.Origin.X, Info.Origin.Y, Info.Width, Info.Height);
+    }
 
     // 도로 프랍 스폰
     SpawnSidewalkProps();
@@ -493,6 +631,7 @@ void AMapGenerator::GenerateZoneMap()
     // 1. 교차로 생성
     int32 NumCrossroads = RandomStream.RandRange(2, 2);  // 교차로 개수 설정-> 현재 2개 고정
     TArray<FIntPoint> CrossroadCenters;
+    TSet<FIntPoint> UsedRoadCells;  // 교차로 확장되면서 겹치는 곳 교차로로 만들기 위해
     CrossroadMinSpacing = 6; // 교차로 간 최소 간격
     int32 RetryCount = 0;
     int32 MaxRetry = 100; // 최대 재시도 횟수
@@ -533,16 +672,16 @@ void AMapGenerator::GenerateZoneMap()
         // 교차로 크기 확률에 따라 결정
         float Rand = RandomStream.FRand(); 
         int32 CrossroadSize = 1;  
-        if (Rand < 0.3f)
-            CrossroadSize = 1;  // 30% 1x1
-        else if (Rand < 0.8f)
-            CrossroadSize = 2;  // 50% 2x2
+        if (Rand < 0.2f)
+            CrossroadSize = 1;  // 20% 1x1
+        else if (Rand < 0.6f)
+            CrossroadSize = 2;  // 40% 2x2
         else
-            CrossroadSize = 3;  // 20% 3x3
+            CrossroadSize = 3;  // 40% 3x3
 
         int32 Half = CrossroadSize / 2;
         FIntPoint TopLeft = Center - FIntPoint(Half, Half);
-
+        UE_LOG(LogTemp, Warning, TEXT("Crossroad Size : %i"), CrossroadSize);
         if (!IsAreaAvailable(TopLeft, CrossroadSize, CrossroadSize, Blocked))
             continue;
 
@@ -555,47 +694,108 @@ void AMapGenerator::GenerateZoneMap()
                 FGridCellData& Cell = ZoneMap.FindOrAdd(Pos);
                 Cell.ZoneType = EZoneType::Road;
                 Cell.bIsCrossroad = true;
+                Cell.CrossroadSize = CrossroadSize;
+            }
+        }
+
+        UE_LOG(LogTemp, Warning, TEXT("Crossroad Size: %d TopLeft: (%d,%d) Center: (%d,%d)"),
+            CrossroadSize, TopLeft.X, TopLeft.Y, Center.X, Center.Y);
+
+        for (int32 dx = 0; dx < CrossroadSize; ++dx) {
+            for (int32 dy = 0; dy < CrossroadSize; ++dy) {
+                FIntPoint P = TopLeft + FIntPoint(dx, dy);
+                UE_LOG(LogTemp, Warning, TEXT("Crossroad Covers: (%d,%d)"), P.X, P.Y);
+            }
+        }
+
+        //  교차로 둘레 횡단보도 설정
+        if (CrossroadSize > 1)
+        {
+            for (int32 dx = -1; dx <= CrossroadSize; dx++)
+            {
+                for (int32 dy = -1; dy <= CrossroadSize; dy++)
+                {
+                    bool IsBorder =
+                        ((dx == -1 || dx == CrossroadSize) && (dy >= 0 && dy < CrossroadSize)) ||
+                        ((dy == -1 || dy == CrossroadSize) && (dx >= 0 && dx < CrossroadSize));
+                    if (!IsBorder) continue;
+                    FIntPoint Outer = TopLeft + FIntPoint(dx, dy);
+                    if (!ZoneMap.Contains(Outer))
+                    {
+                        //  이 시점에 ZoneMap에는 교차로 말고는 없으므로 없으면 새로 추가하면서 지정
+                        FGridCellData& Cell = ZoneMap.FindOrAdd(Outer);
+                        Cell.ZoneType = EZoneType::Road_Crosswalk;
+                        float CrosswalkRotatorYaw = (dx == -1 || dx == CrossroadSize) ? 0.f : 90.f;
+                        Cell.PreferredRotation = FRotator(0.f, CrosswalkRotatorYaw, 0.f);
+                    }
+                }
             }
         }
 
         CrossroadCenters.Add(Center);
 
         // 교차로를 기준으로 도로 확장
-        for (int32 dx = -Half; dx <= Half; ++dx)
+        for(int32 dx = -Half; dx < Half + (CrossroadSize % 2 == 1 ? 1 : 0); ++dx)
         {
             for (int32 x = 0; x < GridWidth; ++x)
             {
                 FIntPoint RoadPos(x, Center.Y + dx);
+                if (ZoneMap.Contains(RoadPos)) 
+                {
+                    // 이미 다른 도로가 있으면 교차로로 설정
+                    FGridCellData& Cell = ZoneMap[RoadPos];
+                    if (Cell.ZoneType == EZoneType::Road_Crosswalk) continue;
+                    Cell.bIsCrossroad = true;
+                    Cell.ZoneType = EZoneType::Road;
+                    continue;
+                }
                 FGridCellData& Cell = ZoneMap.FindOrAdd(RoadPos);
                 Cell.ZoneType = EZoneType::Road;
+                Cell.CrossroadSize = CrossroadSize;
             }
 
             for (int32 y = 0; y < GridHeight; ++y)
             {
                 FIntPoint RoadPos(Center.X + dx, y);
+                if (ZoneMap.Contains(RoadPos))
+                {
+                    // 이미 다른 도로가 있으면 교차로로 설정
+                    FGridCellData& Cell = ZoneMap[RoadPos];
+                    if (Cell.ZoneType == EZoneType::Road_Crosswalk) continue;
+                    Cell.bIsCrossroad = true;
+                    Cell.ZoneType = EZoneType::Road;
+                    continue;
+                }
                 FGridCellData& Cell = ZoneMap.FindOrAdd(RoadPos);
                 Cell.ZoneType = EZoneType::Road;
+                Cell.CrossroadSize = CrossroadSize;
             }
         }
     }
+
+    //---- 플레이어 스타트 배치 ----//
+    int32 PlayerStartIndex = RandomStream.RandRange(0, CrossroadCenters.Num() - 1);
+    FIntPoint PlayerStartPos = CrossroadCenters[PlayerStartIndex];
+
+    FVector PlayerStartLocation = GetActorLocation() + FVector(PlayerStartPos.X * TileSize, PlayerStartPos.Y * TileSize, 0.f);
+    FRotator PlayerStartRotation = FRotator(0.f, RandomStream.FRandRange(-180.f, 180.f), 0.f);
+
+    GetWorld()->SpawnActor<APlayerStart>(PlayerStartActor, PlayerStartLocation, PlayerStartRotation);
+
 
     // 2. 도로 주변 인도 추가
     TArray<FIntPoint> RoadCells;
     for (const auto& Pair : ZoneMap)
     {
-        if (Pair.Value.ZoneType == EZoneType::Road)
+        if (Pair.Value.ZoneType == EZoneType::Road || Pair.Value.ZoneType == EZoneType::Road_Crosswalk)
         {
             RoadCells.Add(Pair.Key);
         }
     }
 
-    TArray<FIntPoint> RoadOffsets = {
-        FIntPoint(1, 0), FIntPoint(-1, 0), FIntPoint(0, 1), FIntPoint(0, -1)
-    };
-
     for (const FIntPoint& Pos : RoadCells)
     {
-        for (const FIntPoint& Offset : RoadOffsets)
+        for (const FIntPoint& Offset : SearchOffsetList)
         {
             FIntPoint SidePos = Pos + Offset;
 
@@ -605,13 +805,39 @@ void AMapGenerator::GenerateZoneMap()
             {
                 continue;
             }
-
+            //  인도 지정
             if (!ZoneMap.Contains(SidePos))
             {
+                // 교차로 꼭짓점 체크
+                bool bIsTrafficCorner = false;
+                float TrafficYaw = 0.f;
+                for (const FIntPoint& CornerOffset : CornerOffsetList)
+                {
+                    FIntPoint MaybeCrossroad = SidePos + CornerOffset;
+                    if (ZoneMap.Contains(MaybeCrossroad) && ZoneMap[MaybeCrossroad].bIsCrossroad /* && ZoneMap[MaybeCrossroad].CrossroadSize > 1*/)
+                    {
+                        bIsTrafficCorner = true;
+                        if (CornerYawMap.Contains(CornerOffset))
+                        {
+                            TrafficYaw = CornerYawMap[CornerOffset];
+                        }
+                        break;
+                    }
+                }
+
                 FGridCellData& Cell = ZoneMap.Add(SidePos);
-                Cell.ZoneType = EZoneType::Road_Sidewalk;
-                float Yaw = FMath::Atan2((float)Offset.Y, (float)Offset.X) * 180.f / PI - 90.f;
-                Cell.PreferredRotation = FRotator(0.f, Yaw, 0.f);
+
+                if (bIsTrafficCorner)
+                {
+                    Cell.ZoneType = EZoneType::Road_Sidewalk_Traffic;
+                    Cell.PreferredRotation = FRotator(0.f, TrafficYaw, 0.f);
+                }
+                else
+                {
+                    Cell.ZoneType = EZoneType::Road_Sidewalk;
+                    float Yaw = FMath::Atan2((float)Offset.Y, (float)Offset.X) * 180.f / PI - 90.f;
+                    Cell.PreferredRotation = FRotator(0.f, Yaw, 0.f);
+                }
             }
         }
     }
@@ -619,7 +845,7 @@ void AMapGenerator::GenerateZoneMap()
     // 3. 도로 방향 설정
     for (auto& Pair : ZoneMap)
     {
-        if (Pair.Value.ZoneType != EZoneType::Road) continue;
+        if (Pair.Value.ZoneType != EZoneType::Road && Pair.Value.ZoneType != EZoneType::Road_Crosswalk) continue;
 
         if (Pair.Value.bIsCrossroad)
         {
@@ -629,10 +855,11 @@ void AMapGenerator::GenerateZoneMap()
 
         FIntPoint Pos = Pair.Key;
 
-        bool bLeft = ZoneMap.Contains(Pos + FIntPoint(-1, 0)) && ZoneMap[Pos + FIntPoint(-1, 0)].ZoneType == EZoneType::Road;
-        bool bRight = ZoneMap.Contains(Pos + FIntPoint(1, 0)) && ZoneMap[Pos + FIntPoint(1, 0)].ZoneType == EZoneType::Road;
-        bool bUp = ZoneMap.Contains(Pos + FIntPoint(0, 1)) && ZoneMap[Pos + FIntPoint(0, 1)].ZoneType == EZoneType::Road;
-        bool bDown = ZoneMap.Contains(Pos + FIntPoint(0, -1)) && ZoneMap[Pos + FIntPoint(0, -1)].ZoneType == EZoneType::Road;
+        // b{방향} == true -> {방향}쪽 그리드가 도로이다
+        bool bLeft = ZoneMap.Contains(Pos + FIntPoint(-1, 0)) && (ZoneMap[Pos + FIntPoint(-1, 0)].ZoneType == EZoneType::Road || ZoneMap[Pos + FIntPoint(-1, 0)].ZoneType == EZoneType::Road_Crosswalk);
+        bool bRight = ZoneMap.Contains(Pos + FIntPoint(1, 0)) && (ZoneMap[Pos + FIntPoint(1, 0)].ZoneType == EZoneType::Road || ZoneMap[Pos + FIntPoint(1, 0)].ZoneType == EZoneType::Road_Crosswalk);
+        bool bUp = ZoneMap.Contains(Pos + FIntPoint(0, 1)) && (ZoneMap[Pos + FIntPoint(0, 1)].ZoneType == EZoneType::Road || ZoneMap[Pos + FIntPoint(0, 1)].ZoneType == EZoneType::Road_Crosswalk);
+        bool bDown = ZoneMap.Contains(Pos + FIntPoint(0, -1)) &&( ZoneMap[Pos + FIntPoint(0, -1)].ZoneType == EZoneType::Road || ZoneMap[Pos + FIntPoint(0, -1)].ZoneType == EZoneType::Road_Crosswalk);
 
         if ((bLeft || bRight) && !(bUp || bDown))
         {
@@ -642,11 +869,50 @@ void AMapGenerator::GenerateZoneMap()
         {
             Pair.Value.RoadDirection = ERoadDirection::Vertical;
         }
-        else
+        /*else 
         {
             Pair.Value.RoadDirection = ERoadDirection::Crossroad;
+        }*/
+    }
+
+    /*  후 생성 횡단보도 만들기
+    *   1. 전체 ZoneMap 순회 - >EZoneType == Road인 셀만 순회 
+    *   2. 4방향 셀 조회 -> ERoadDirection == Crossroad 라면 현재 그리드 ZoneType을 Road_Crosswalk로 변경
+    *   3. 현재 그리드와 교차로의 상대 위치에 따라 PrefferdRotation 설정
+    *   3-1. CrossroadSize  > 1 무조건 횡단보도 설치
+    *   3-2. 1칸 짜리 도로면 확률에 따라 횡단보도 설치
+    */
+    for (auto& Pair : ZoneMap)
+    {
+        //  EZoneType::Road 만 순회
+        if (Pair.Value.ZoneType != EZoneType::Road) continue;
+        if (Pair.Value.bIsCrossroad == true) continue;
+        if (Pair.Value.ZoneType == EZoneType::Road_Crosswalk) continue;
+
+        FIntPoint CurrentGrid = Pair.Key;
+
+        for (auto& Offset : SearchOffsetList)
+        {
+            FIntPoint SearchOffset = CurrentGrid + Offset;
+            if (ZoneMap.Contains(SearchOffset) && ZoneMap[SearchOffset].bIsCrossroad == true && ZoneMap[CurrentGrid].ZoneType != EZoneType::Road_Crosswalk)
+            {
+                if (ZoneMap[CurrentGrid].CrossroadSize >= 2 || RandomStream.FRand() < CrosswalkChance)
+                {
+                    FGridCellData& Cell = ZoneMap[CurrentGrid];
+                    Cell.ZoneType = EZoneType::Road_Crosswalk;
+                    /*  아래 방법으로 회전시키려고 했는데 아무리 해봐도 RoadDirection이 none으로 나옴
+                    *   CurrentGrid 기준으로 bIsCrossroad == true인 SearchOffset 방향으로 회전시켜야 겠음
+                    */
+                    //float RotationYaw = (Cell.RoadDirection == ERoadDirection::Horizontal) ? 0.f : 90.f;
+                    float RotationYaw = (Offset.X != 0 && Offset.Y == 0) ? 0.f : 90.f;
+                    Cell.PreferredRotation = FRotator(0, RotationYaw, 0);
+
+                }
+
+            }
         }
     }
+
 
     // 4. 고층 건물 배치
     for (int32 X = 0; X < GridWidth; ++X)
@@ -661,13 +927,13 @@ void AMapGenerator::GenerateZoneMap()
             // 1) 인도 주변 셀인지 검사하고 유효한 회전 리스트 수집
             bool bNearSidewalk = false;
             TArray<FRotator> ValidRotations;
-            for (const FIntPoint& Off : { FIntPoint(1,0), FIntPoint(-1,0), FIntPoint(0,1), FIntPoint(0,-1) })
+            for (const FIntPoint& Offset : SearchOffsetList)
             {
-                FIntPoint N = Pos + Off;
+                FIntPoint N = Pos + Offset;
                 if (ZoneMap.Contains(N) && ZoneMap[N].ZoneType == EZoneType::Road_Sidewalk)
                 {
                     bNearSidewalk = true;
-                    float Yaw = FMath::Atan2((float)Off.Y, (float)Off.X) * 180.f / PI - 90.f;
+                    float Yaw = FMath::Atan2((float)Offset.Y, (float)Offset.X) * 180.f / PI - 90.f;
                     ValidRotations.Add(FRotator(0.f, Yaw, 0.f));
                 }
             }
@@ -701,6 +967,7 @@ void AMapGenerator::GenerateZoneMap()
     }
 
     // 5. 남은 빈 공간에 저층 배치
+
     for (int32 X = 0; X < GridWidth; ++X)
     {
         for (int32 Y = 0; Y < GridHeight; ++Y)
@@ -758,9 +1025,9 @@ void AMapGenerator::GenerateZoneMap()
 
             // 인도 인접 여부 판단
             bool bNearSidewalk = false;
-            for (const FIntPoint& Off : { FIntPoint(1,0), FIntPoint(-1,0), FIntPoint(0,1), FIntPoint(0,-1) })
+            for (const FIntPoint& Offset : SearchOffsetList)
             {
-                if (ZoneMap.Contains(Pos + Off) && ZoneMap[Pos + Off].ZoneType == EZoneType::Road_Sidewalk)
+                if (ZoneMap.Contains(Pos + Offset) && ZoneMap[Pos + Offset].ZoneType == EZoneType::Road_Sidewalk)
                 {
                     bNearSidewalk = true;
                     break;
@@ -798,5 +1065,7 @@ void AMapGenerator::AddtoBuildingSpawnList(FIntPoint Pos, int32 Width, int32 Hei
 
     BuildingSpawnList.Add(Info);
 }
+
+
 
 

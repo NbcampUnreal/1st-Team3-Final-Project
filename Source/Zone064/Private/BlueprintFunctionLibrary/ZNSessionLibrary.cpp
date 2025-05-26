@@ -276,3 +276,22 @@ void UZNSessionLibrary::TemporarilyDisableButton(UButton* TargetButton, float Di
         World->GetTimerManager().SetTimer(TimerHandle, TimerCallback, DisableDuration, false);
     }
 }
+
+void UZNSessionLibrary::OpenSteamInviteOverlay(APlayerController* PlayerController)
+{
+    if (!PlayerController) return;
+
+    IOnlineSubsystem* Subsystem = IOnlineSubsystem::Get();
+    if (!Subsystem) return;
+
+    IOnlineExternalUIPtr ExternalUI = Subsystem->GetExternalUIInterface();
+    if (!ExternalUI.IsValid()) return;
+
+    ULocalPlayer* LocalPlayer = PlayerController->GetLocalPlayer();
+    if (!LocalPlayer) return;
+
+    ExternalUI->ShowInviteUI(LocalPlayer->GetControllerId());
+
+    bool bResult = ExternalUI->ShowInviteUI(LocalPlayer->GetControllerId());
+    UE_LOG(LogTemp, Warning, TEXT("ShowInviteUI result: %s"), bResult ? TEXT("Success") : TEXT("Failed"));
+}

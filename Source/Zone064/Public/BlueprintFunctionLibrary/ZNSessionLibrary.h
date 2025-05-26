@@ -49,7 +49,10 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Session")
     static void UpdatePlayerCountInSession(UObject* WorldContextObject, int32 Delta);
 
-    // 버튼 연속 클릭 방지
+    // 버튼 연속 클릭 방지 -> 사용안하는 것 같음
     UFUNCTION(BlueprintCallable, Category = "UI|Utils")
     static void TemporarilyDisableButton(UButton* TargetButton, float DisableDuration = 1.0f);
+
+    UFUNCTION(BlueprintCallable, Category = "Steam|Invite")
+    static void OpenSteamInviteOverlay(APlayerController* PlayerController);
 };
