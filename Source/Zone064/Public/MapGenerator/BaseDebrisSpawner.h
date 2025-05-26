@@ -25,11 +25,20 @@ public:
     void GenerateInstances();
 
 protected:
+    
+    virtual void OnConstruction(const FTransform& Transform) override;
+    
     // 메시별 인스턴싱 컴포넌트 매핑
     UPROPERTY()
     TMap<UStaticMesh*, UHierarchicalInstancedStaticMeshComponent*> MeshToComponentMap;
 
     UHierarchicalInstancedStaticMeshComponent* GetOrCreateInstancedMeshComponent(UStaticMesh* Mesh);
+
+    // 랜덤 스트림과 시드 (멀티에서 동일한 환경으로 스폰하려면 같은 시드여야함)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    int32 Seed;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+    FRandomStream RandomStream;
 
     // 스폰 영역
     UPROPERTY(EditAnywhere, Category = "Instancing")
@@ -61,5 +70,5 @@ protected:
     UPROPERTY(EditAnywhere, Category = "Instancing")
     bool bUseSplitMeshArrays;
 
-    //virtual void OnConstruction(const FTransform& Transform) override;
+    
 };

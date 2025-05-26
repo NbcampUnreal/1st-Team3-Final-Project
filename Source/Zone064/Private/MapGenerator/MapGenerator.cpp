@@ -22,7 +22,7 @@ AMapGenerator::AMapGenerator()
     CrosswalkChance = 0.3f;
 
     // 도로 프랍 스폰 확률
-    TreeSpawnChance = 0.3f;
+    TreeSpawnChance = 0.4f;
     LightSpawnChance = 0.3f;
     TrashSpawnChance = 0.2f;
     TrafficSpawnChance = 0.5f;
@@ -345,7 +345,8 @@ void AMapGenerator::TrySpawnProps(AActor* Target, FIntPoint GridPos)
     TArray<USceneComponent*> Components;
     Target->GetComponents<USceneComponent>(Components);
     
-    bool bIsInfraSpawned = InfraSpawnChance <= FMath::FRand();
+    float InfraSpawnChanceRandom = RandomStream.FRand();
+    bool bIsInfraSpawned = InfraSpawnChance <= InfraSpawnChanceRandom;
 
     for (USceneComponent* Comp : Components)
     {
@@ -371,8 +372,8 @@ void AMapGenerator::TrySpawnProps(AActor* Target, FIntPoint GridPos)
 
             PropArray = &TreePrefabs;
             Chance = TreeSpawnChance;
-            float TreeScaleXY = FMath::FRandRange(0.5f, 0.8f);
-            float TreeScaleZ = FMath::FRandRange(0.7f, 0.8f);
+            float TreeScaleXY = RandomStream.FRandRange(0.5f, 0.8f);
+            float TreeScaleZ = RandomStream.FRandRange(0.7f, 0.8f);
             RandomScale = FVector(TreeScaleXY, TreeScaleXY, TreeScaleZ);
         }
 
@@ -395,24 +396,33 @@ void AMapGenerator::TrySpawnProps(AActor* Target, FIntPoint GridPos)
             Chance = TrafficSpawnChance;
         }
 
-
-        if (PropArray && PropArray->Num() > 0 && RandomStream.FRand() < Chance)
+        bool bDoSpawn = false;
+        if (PropArray && PropArray->Num() > 0)
         {
-            int32 Index = RandomStream.RandRange(0, PropArray->Num() - 1);
-            TSubclassOf<AActor> Selected = (*PropArray)[Index];
-            AActor* Spawned = nullptr;
+            float Roll = RandomStream.FRand();
+            bDoSpawn = (Roll < Chance);
 
-            if (Selected)
+            if (bDoSpawn)
             {
-                Spawned = World->SpawnActor<AActor>(
-                    Selected,
-                    Comp->GetComponentLocation(),
-                    Comp->GetComponentRotation()
-                );
-                Spawned->GetRootComponent()->SetWorldScale3D(RandomScale);
+                int32 Index = RandomStream.RandRange(0, PropArray->Num() - 1);
+                TSubclassOf<AActor> Selected = (*PropArray)[Index];
+                AActor* Spawned = nullptr;
+
+                if (Selected)
+                {
+                    Spawned = World->SpawnActor<AActor>(
+                        Selected,
+                        Comp->GetComponentLocation(),
+                        Comp->GetComponentRotation()
+                    );
+                    Spawned->GetRootComponent()->SetWorldScale3D(RandomScale);
+                }
             }
         }
     }
+
+    // 델리게이트 호출
+    OnPropSpawnComplete.Broadcast();
 }
 
 
@@ -763,6 +773,16 @@ void AMapGenerator::GenerateZoneMap()
         }
     }
 
+    //---- 플레이어 스타트 배치 ----//
+    int32 PlayerStartIndex = RandomStream.RandRange(0, CrossroadCenters.Num() - 1);
+    FIntPoint PlayerStartPos = CrossroadCenters[PlayerStartIndex];
+
+    FVector PlayerStartLocation = GetActorLocation() + FVector(PlayerStartPos.X * TileSize, PlayerStartPos.Y * TileSize, 0.f);
+    FRotator PlayerStartRotation = FRotator(0.f, RandomStream.FRandRange(-180.f, 180.f), 0.f);
+
+    GetWorld()->SpawnActor<APlayerStart>(PlayerStartActor, PlayerStartLocation, PlayerStartRotation);
+
+
     // 2. 도로 주변 인도 추가
     TArray<FIntPoint> RoadCells;
     for (const auto& Pair : ZoneMap)
@@ -1045,5 +1065,7 @@ void AMapGenerator::AddtoBuildingSpawnList(FIntPoint Pos, int32 Width, int32 Hei
 
     BuildingSpawnList.Add(Info);
 }
+
+
 
 
