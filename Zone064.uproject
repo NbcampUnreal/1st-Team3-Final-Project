@@ -11,7 +11,8 @@
 			"AdditionalDependencies": [
 				"Engine",
 				"AdvancedSessions",
-				"UMG"
+				"UMG",
+				"CoreUObject"
 			]
 		}
 	],

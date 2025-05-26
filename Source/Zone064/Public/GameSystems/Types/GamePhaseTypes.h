@@ -13,17 +13,17 @@
 UENUM(BlueprintType)
 enum class EGamePhase : uint8
 {
-	Title				UMETA(DisplayName = "Title"),				// °ÔÀÓ ½ÃÀÛ È­¸é
-	Menu				UMETA(DisplayName = "Menu"),				// ¼¼¼Ç »ı¼º/Âü°¡ È­¸é (Steam ¿¬µ¿)
-	Lobby				UMETA(DisplayName = "Lobby"),				// ¼¼¼Ç ´ë±â¹æ (ÇÃ·¹ÀÌ¾î ÁØºñ, °ÔÀÓ ÁøÀÔ)
-	Departure			UMETA(DisplayName = "Departure"),			// Ãâ¹ß ÁØºñ ¿¬Ãâ (½Ã³×¸¶Æ½ µî)
-	Driving				UMETA(DisplayName = "Driving"),				// ¸ñÀûÁö ÀÌµ¿ (ÀÌº¥Æ® ¹ß»ı!)			-> 4È¸ ¹İº¹ ½ÃÀÛÁöÁ¡
-	InGame				UMETA(DisplayName = "InGame"),				// ÀüÅõ, ÆÄ¹Ö
-	Camping				UMETA(DisplayName = "Camping"),				// Á¤ºñ ½Ã°£ (ÀÌº¥Æ® ¹ß»ı!, Å©·¡ÇÁÆÃ µî)
-	Voting				UMETA(DisplayName = "Voting"),				// ´ÙÀ½ ÀÌµ¿ Áö¿ª ¼±ÅÃ				-> 4È¸ ¹İº¹ Á¾·áÁöÁ¡
-	Defense				UMETA(DisplayName = "Defense"),				// ÃÖÁ¾ µğÆæ½º
-	Ending				UMETA(DisplayName = "Ending"),				// ¿£µù ¿¬Ãâ, °ÔÀÓ °á°ú Áı°è
-	ReturnToTitle		UMETA(DisplayName = "ReturnToTitle"),		// Title·Î µ¹¾Æ°¡±â
+	Title				UMETA(DisplayName = "Title"),				// ê²Œì„ ì‹œì‘ í™”ë©´
+	Menu				UMETA(DisplayName = "Menu"),				// ì„¸ì…˜ ìƒì„±/ì°¸ê°€ í™”ë©´ (Steam ì—°ë™)
+	Lobby				UMETA(DisplayName = "Lobby"),				// ì„¸ì…˜ ëŒ€ê¸°ë°© (í”Œë ˆì´ì–´ ì¤€ë¹„, ê²Œì„ ì§„ì…)
+	Departure			UMETA(DisplayName = "Departure"),			// ì¶œë°œ ì¤€ë¹„ ì—°ì¶œ (ì‹œë„¤ë§ˆí‹± ë“±)
+	Driving				UMETA(DisplayName = "Driving"),				// ëª©ì ì§€ ì´ë™ (ì´ë²¤íŠ¸ ë°œìƒ!)			-> 4íšŒ ë°˜ë³µ ì‹œì‘ì§€ì 
+	InGame				UMETA(DisplayName = "InGame"),				// ì „íˆ¬, íŒŒë°
+	Camping				UMETA(DisplayName = "Camping"),				// ì •ë¹„ ì‹œê°„ (ì´ë²¤íŠ¸ ë°œìƒ!, í¬ë˜í”„íŒ… ë“±)
+	Voting				UMETA(DisplayName = "Voting"),				// ë‹¤ìŒ ì´ë™ ì§€ì—­ ì„ íƒ				-> 4íšŒ ë°˜ë³µ ì¢…ë£Œì§€ì 
+	Defense				UMETA(DisplayName = "Defense"),				// ìµœì¢… ë””íœìŠ¤
+	Ending				UMETA(DisplayName = "Ending"),				// ì—”ë”© ì—°ì¶œ, ê²Œì„ ê²°ê³¼ ì§‘ê³„
+	ReturnToTitle		UMETA(DisplayName = "ReturnToTitle"),		// ì„¸ì…˜ íŒŒê´´, Titleë¡œ ëŒì•„ê°€ê¸°
 };
 
 UCLASS()

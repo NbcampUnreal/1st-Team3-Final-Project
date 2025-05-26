@@ -18,20 +18,26 @@ class ZONE064_API UGameFlowManager : public UGameInstanceSubsystem
 public:
 	void Initialize(FSubsystemCollectionBase& Collection) override;
 	
+	/* Flow Control Methods */
 	void AdvanceGamePhase();
+	void ChangePhaseAndMap(EGamePhase _NextGamePhase);
+
+	/* Getter, Setter, Init, Add, ... etc. */
+	void SetCurrentGamePhase(EGamePhase _GamePhase);
+	void SetCurrentMapName(FName _MapName);
+	void InitCurrentRepeatCount();
+	void AddCurrentRepeatCount();
 
 private:
+	/* Current Flow Datas */
 	EGamePhase CurrentGamePhase;
+	FName CurrentMapName;
+	int32 CurrentRepeatCount;
 
-	void GoToTitlePhase();
-	void GoToMenuPhase();
-	void GoToLobbyPhase();
-	void GoToDeparturePhase();
-	void GoToDrivingPhase();
-	void GoToInGamePhase();
-	void GoToCampingPhase();
-	void GoToVotingPhase();
-	void GoToDefensePhase();
-	void GoToEndingPhase();
-	void GoToReturnPhase();
+	UPROPERTY(EditDefaultsOnly)
+	int32 MaxRepeatCount = 4;
+
+	/* MapName Data Table */
+	TMap<EGamePhase, FName> MapNameCache;
+	//UDataTable* MapNameDataTable;
 };	

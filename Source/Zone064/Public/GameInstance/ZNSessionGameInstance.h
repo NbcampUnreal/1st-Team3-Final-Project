@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AdvancedFriendsGameInstance.h"
+#include "GameInstance/ZNBaseGameInstance.h"
 #include "ZNSessionGameInstance.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class ZONE064_API UZNSessionGameInstance : public UAdvancedFriendsGameInstance
+class ZONE064_API UZNSessionGameInstance : public UZNBaseGameInstance
 {
 	GENERATED_BODY()
 	
