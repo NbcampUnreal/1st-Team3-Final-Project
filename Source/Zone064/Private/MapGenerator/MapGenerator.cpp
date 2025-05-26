@@ -420,6 +420,9 @@ void AMapGenerator::TrySpawnProps(AActor* Target, FIntPoint GridPos)
             }
         }
     }
+
+    // 델리게이트 호출
+    OnPropSpawnComplete.Broadcast();
 }
 
 
@@ -770,6 +773,16 @@ void AMapGenerator::GenerateZoneMap()
         }
     }
 
+    //---- 플레이어 스타트 배치 ----//
+    int32 PlayerStartIndex = RandomStream.RandRange(0, CrossroadCenters.Num() - 1);
+    FIntPoint PlayerStartPos = CrossroadCenters[PlayerStartIndex];
+
+    FVector PlayerStartLocation = GetActorLocation() + FVector(PlayerStartPos.X * TileSize, PlayerStartPos.Y * TileSize, 0.f);
+    FRotator PlayerStartRotation = FRotator(0.f, RandomStream.FRandRange(-180.f, 180.f), 0.f);
+
+    GetWorld()->SpawnActor<APlayerStart>(PlayerStartActor, PlayerStartLocation, PlayerStartRotation);
+
+
     // 2. 도로 주변 인도 추가
     TArray<FIntPoint> RoadCells;
     for (const auto& Pair : ZoneMap)
@@ -1052,5 +1065,7 @@ void AMapGenerator::AddtoBuildingSpawnList(FIntPoint Pos, int32 Width, int32 Hei
 
     BuildingSpawnList.Add(Info);
 }
+
+
 
 

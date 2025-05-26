@@ -6,6 +6,7 @@
 #include "Engine/AssetManager.h"
 #include "MapGenerator.generated.h"
 
+DECLARE_MULTICAST_DELEGATE(FOnPropSpawnComplete);
 
 UENUM(BlueprintType)
 enum class EZoneType : uint8
@@ -92,6 +93,9 @@ protected:
     virtual void BeginPlay() override;
 
 public:
+    // 스폰 완료시 호출할 델리게이트
+    FOnPropSpawnComplete OnPropSpawnComplete;
+
     // 맵 크기
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Generation")
     int32 GridWidth;
@@ -159,6 +163,10 @@ public:
     FVector GetWorldCenterFromTopLeft(FIntPoint TopLeft, int32 Width, int32 Height, FRotator Rotation);
     FVector GetWorldFromGrid(FIntPoint GridPos);
 
+    // 커스텀 플레이어 스타트 사용
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    TSubclassOf<APlayerStart> PlayerStartActor;
+    
 
 private:
     FRandomStream RandomStream;
@@ -176,8 +184,6 @@ private:
     // 데브리 스폰용 Road Array
     TArray<FIntPoint> FinalRoadArray;
     // Road Debris InstancedStaticMeshComponent
-
-    
 
     // 건물 스폰 리스트
     TArray<FBuildingSpawnData> BuildingSpawnList;
@@ -201,4 +207,6 @@ private:
     int32 LightSpawnSpacing;
     int32 TreeSpawnSpacing;
     int32 InfraSpawnSpacing;
+
+
 };

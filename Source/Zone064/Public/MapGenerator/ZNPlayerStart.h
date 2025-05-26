@@ -13,19 +13,15 @@ class ZONE064_API AZNPlayerStart : public APlayerStart
 	GENERATED_BODY()
 	
 public:
-	AZNPlayerStart();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	AZNPlayerStart(const FObjectInitializer& ObjectInitializer);
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	class UStaticMeshComponent* CarMesh;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TArray<USceneComponent*> SpawnPoints;
 
-	
-
-private:
-
-	
-
-
+	UFUNCTION(BlueprintCallable)
+	FTransform GetSpawnTransformByIndex(int32 Index) const;
 };

@@ -2,8 +2,10 @@
 #include "Components/HierarchicalInstancedStaticMeshComponent.h"
 #include "Components/BoxComponent.h"
 #include "Engine/StaticMesh.h"
+#include "Kismet/GameplayStatics.h"
 #include "DrawDebugHelpers.h"
 #include "Engine/World.h"
+#include "MapGenerator/MapGenerator.h"
 
 ABaseDebrisSpawner::ABaseDebrisSpawner()
 {
@@ -30,7 +32,20 @@ void ABaseDebrisSpawner::BeginPlay()
 
     RandomStream.Initialize(Seed);
 
-    GenerateInstances();
+    AActor* FoundActor = UGameplayStatics::GetActorOfClass(GetWorld(), AMapGenerator::StaticClass());
+    if (FoundActor)
+    {
+        AMapGenerator* MapGenerator = Cast<AMapGenerator>(FoundActor);
+        if (MapGenerator)
+        {
+            MapGenerator->OnPropSpawnComplete.AddLambda([this]()
+                {
+                    GenerateInstances();
+                });
+        }
+    }
+    
+    //GenerateInstances();
 }
 
 void ABaseDebrisSpawner::Tick(float DeltaTime)
