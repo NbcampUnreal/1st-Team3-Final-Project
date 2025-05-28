@@ -17,6 +17,9 @@ struct ZONE064_API FWidgetDataRow : public FDataRow
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName MapName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EGamePhase GamePhase;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

@@ -31,16 +31,21 @@ void UGameFlowManager::Initialize(FSubsystemCollectionBase& Collection)
 		}
 	}
 
-	// Initialize
-	CurrentGamePhase = EGamePhase::Title;
-	CurrentMapName = *MapNameCache.Find(EGamePhase::Title);
-	InitCurrentRepeatCount();
+	// Initialize GamePhase, Map
+	CurrentGamePhase = EGamePhase::None;
+	AdvanceGamePhase();
 }
 
 void UGameFlowManager::AdvanceGamePhase()
 {
 	switch (CurrentGamePhase)
 	{
+	case EGamePhase::None:
+	{
+		InitCurrentRepeatCount();
+		ChangePhaseAndMap(EGamePhase::Title);
+		break;
+	}
 	case EGamePhase::Title:
 	{
 		ChangePhaseAndMap(EGamePhase::Menu);
@@ -85,7 +90,6 @@ void UGameFlowManager::AdvanceGamePhase()
 		}
 		else
 		{
-			InitCurrentRepeatCount();
 			ChangePhaseAndMap(EGamePhase::Defense);	// end loop
 		}
 		break;
@@ -102,6 +106,7 @@ void UGameFlowManager::AdvanceGamePhase()
 	}
 	case EGamePhase::ReturnToTitle:
 	{
+		InitCurrentRepeatCount();
 		ChangePhaseAndMap(EGamePhase::Title);
 		break;
 	}
@@ -119,11 +124,27 @@ void UGameFlowManager::ChangePhaseAndMap(EGamePhase _NextGamePhase)
 
 	if(NextMapName != CurrentMapName)
 	{
+		SetCurrentMapName(NextMapName);
 		UGameplayStatics::OpenLevel(this, NextMapName);	// todo: servertravel 해야 하는 경우 분리
 	}
 
 	// Change GamePhase
 	SetCurrentGamePhase(_NextGamePhase);
+}
+
+EGamePhase UGameFlowManager::GetCurrentGamePhase()
+{
+	return CurrentGamePhase;
+}
+
+FName UGameFlowManager::GetCurrentMapName()
+{
+	return CurrentMapName;
+}
+
+int32 UGameFlowManager::GetCurrentRepeatCount()
+{
+	return CurrentRepeatCount;
 }
 
 void UGameFlowManager::SetCurrentGamePhase(EGamePhase _GamePhase)
