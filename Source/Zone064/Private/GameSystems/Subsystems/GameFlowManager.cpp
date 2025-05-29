@@ -33,7 +33,7 @@ void UGameFlowManager::Initialize(FSubsystemCollectionBase& Collection)
 
 	// Initialize GamePhase, Map
 	CurrentGamePhase = EGamePhase::None;
-	AdvanceGamePhase();
+	//AdvanceGamePhase();
 }
 
 void UGameFlowManager::AdvanceGamePhase()
