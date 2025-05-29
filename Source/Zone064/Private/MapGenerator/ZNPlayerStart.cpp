@@ -7,7 +7,7 @@
 
 AZNPlayerStart::AZNPlayerStart(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
-
+	
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 	
 	CarMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Car Mesh"));

@@ -17,7 +17,9 @@ enum class EZoneType : uint8
     Road_Sidewalk_Traffic       UMETA(DisplayName = "Road_Sidewalk_Traffic"),  // 신호등있는 인도
     Road_Crosswalk      UMETA(DisplayName = "Road_Crosswalk"), // 횡단보도
     Road_Intersection   UMETA(DisplayName = "Road_Intersection"), //교차로
-    HighRise            UMETA(DisplayName = "High Rise"),
+    HighRise3            UMETA(DisplayName = "High Rise 3x3"),
+    HighRise4            UMETA(DisplayName = "High Rise 4x4"),
+    HighRise5            UMETA(DisplayName = "High Rise 5x5"),
     LowRise             UMETA(DisplayName = "Low Rise"),
     Alley               UMETA(DisplayName = "Alley"),
     Plant               UMETA(DisplayName = "Plant"),

@@ -208,7 +208,9 @@ void AMapGenerator::DrawDebugZoneMap()
         switch (Cell.ZoneType)
         {
         case EZoneType::Road:            Color = FColor::Silver; break;
-        case EZoneType::HighRise:        Color = FColor::Blue;   break;
+        case EZoneType::HighRise3:        Color = FColor::Blue;   break;
+        case EZoneType::HighRise4:        Color = FColor::Blue;   break;
+        case EZoneType::HighRise5:        Color = FColor::Blue;   break;
         case EZoneType::LowRise:         Color = FColor::Green;  break;
         case EZoneType::Special:         Color = FColor::Red;    break;
         case EZoneType::Road_Sidewalk:   Color = FColor::Orange; break;
@@ -421,8 +423,8 @@ void AMapGenerator::TrySpawnProps(AActor* Target, FIntPoint GridPos)
         }
     }
 
-    // 델리게이트 호출
-    OnPropSpawnComplete.Broadcast();
+    //// 델리게이트 호출
+    //OnPropSpawnComplete.Broadcast();
 }
 
 
@@ -510,7 +512,9 @@ void AMapGenerator::GenerateMap()
         if (!Selected) continue;
 
         // 건물 바닥
-        if (Cell.ZoneType == EZoneType::HighRise ||
+        if (Cell.ZoneType == EZoneType::HighRise3 ||
+            Cell.ZoneType == EZoneType::HighRise4 ||
+            Cell.ZoneType == EZoneType::HighRise5 ||
             Cell.ZoneType == EZoneType::LowRise ||
             Cell.ZoneType == EZoneType::Special)
         {
@@ -594,9 +598,11 @@ void AMapGenerator::GenerateMap()
         // 크기 일치하는 프리팹만 필터링 (추가 가능)
         int32 Index = RandomStream.RandRange(0, PrefabArray->Num() - 1);
         
-        // Info에 있는 가로세로(동일) 가져와서 인덱스로 사용
-        // 빈 칸으로 두면 크래시남 앞에 빈 액터라도 채워야 함
-        Index = Info.Height;
+        //// 대형이면 Info에 있는 가로세로(동일) 가져와서 인덱스로 사용
+        //if (Info.ZoneType == EZoneType::HighRise3 || Info.ZoneType == EZoneType::HighRise4 || Info.ZoneType == EZoneType::HighRise5)
+        //{
+        //    Index = Info.Height;
+        //}
 
         TSubclassOf<AActor> Selected = (*PrefabArray)[Index];
         if (!Selected) continue;
@@ -637,7 +643,9 @@ void AMapGenerator::GenerateZoneMap()
     int32 MaxRetry = 100; // 최대 재시도 횟수
 
     TArray<EZoneType> Blocked = {
-        EZoneType::HighRise,
+        EZoneType::HighRise3,
+        EZoneType::HighRise4,
+        EZoneType::HighRise5,
         EZoneType::LowRise,
         EZoneType::Special,
         EZoneType::Road,
@@ -773,14 +781,14 @@ void AMapGenerator::GenerateZoneMap()
         }
     }
 
-    //---- 플레이어 스타트 배치 ----//
-    int32 PlayerStartIndex = RandomStream.RandRange(0, CrossroadCenters.Num() - 1);
-    FIntPoint PlayerStartPos = CrossroadCenters[PlayerStartIndex];
+    ////---- 플레이어 스타트 배치 ----//
+    //int32 PlayerStartIndex = RandomStream.RandRange(0, CrossroadCenters.Num() - 1);
+    //FIntPoint PlayerStartPos = CrossroadCenters[PlayerStartIndex];
 
-    FVector PlayerStartLocation = GetActorLocation() + FVector(PlayerStartPos.X * TileSize, PlayerStartPos.Y * TileSize, 0.f);
-    FRotator PlayerStartRotation = FRotator(0.f, RandomStream.FRandRange(-180.f, 180.f), 0.f);
+    //FVector PlayerStartLocation = GetActorLocation() + FVector(PlayerStartPos.X * TileSize, PlayerStartPos.Y * TileSize, 0.f);
+    //FRotator PlayerStartRotation = FRotator(0.f, RandomStream.FRandRange(-180.f, 180.f), 0.f);
 
-    GetWorld()->SpawnActor<APlayerStart>(PlayerStartActor, PlayerStartLocation, PlayerStartRotation);
+    //GetWorld()->SpawnActor<APlayerStart>(PlayerStartActor, PlayerStartLocation, PlayerStartRotation);
 
 
     // 2. 도로 주변 인도 추가
@@ -961,8 +969,22 @@ void AMapGenerator::GenerateZoneMap()
                 continue;
 
             // 7) 마킹 및 스폰 리스트에 추가
-            MarkZone(TopLeft, Width, Height, EZoneType::HighRise, Rotation);
-            AddtoBuildingSpawnList(TopLeft, Width, Height, EZoneType::HighRise, Rotation);
+            if (Width == 3)
+            {
+                MarkZone(TopLeft, Width, Height, EZoneType::HighRise3, Rotation);
+                AddtoBuildingSpawnList(TopLeft, Width, Height, EZoneType::HighRise3, Rotation);
+            }
+            else if (Width == 4)
+            {
+                MarkZone(TopLeft, Width, Height, EZoneType::HighRise4, Rotation);
+                AddtoBuildingSpawnList(TopLeft, Width, Height, EZoneType::HighRise4, Rotation);
+            }
+            else if (Width == 5)
+            {
+                MarkZone(TopLeft, Width, Height, EZoneType::HighRise5, Rotation);
+                AddtoBuildingSpawnList(TopLeft, Width, Height, EZoneType::HighRise5, Rotation);
+            }
+
         }
     }
 
