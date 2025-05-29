@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/GameMode.h"
+#include "GameModes/ZNBaseGameMode.h"
 #include "ZNLobbyGameMode.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class ZONE064_API AZNLobbyGameMode : public AGameMode
+class ZONE064_API AZNLobbyGameMode : public AZNBaseGameMode
 {
 	GENERATED_BODY()
 	

@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AdvancedFriendsGameInstance.h"
+#include "GameInstance/ZNBaseGameInstance.h"
 #include "Engine/Engine.h"
 #include "Engine/NetDriver.h"
 #include "Engine/World.h"
@@ -13,7 +13,7 @@
  * 
  */
 UCLASS()
-class ZONE064_API UZNSessionGameInstance : public UAdvancedFriendsGameInstance
+class ZONE064_API UZNSessionGameInstance : public UZNBaseGameInstance
 {
 	GENERATED_BODY()
 	
