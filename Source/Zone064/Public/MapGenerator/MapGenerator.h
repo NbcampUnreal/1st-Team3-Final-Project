@@ -169,14 +169,14 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     TSubclassOf<APlayerStart> PlayerStartActor;
     
+    // 구역 맵
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+    TMap<FIntPoint, FGridCellData> ZoneMap;
 
 private:
     FRandomStream RandomStream;
     FStreamableManager AssetLoader;
     
-    // 구역 맵
-    TMap<FIntPoint, FGridCellData> ZoneMap;
-
     // 4방향 탐색용 오프셋
     TArray<FIntPoint> SearchOffsetList;
     // 대각선 방향 탐색용 오프셋
