@@ -22,7 +22,7 @@ AMapGenerator::AMapGenerator()
     CrosswalkChance = 0.3f;
 
     // 도로 프랍 스폰 확률
-    TreeSpawnChance = 0.3f;
+    TreeSpawnChance = 0.4f;
     LightSpawnChance = 0.3f;
     TrashSpawnChance = 0.2f;
     TrafficSpawnChance = 0.5f;
@@ -208,7 +208,9 @@ void AMapGenerator::DrawDebugZoneMap()
         switch (Cell.ZoneType)
         {
         case EZoneType::Road:            Color = FColor::Silver; break;
-        case EZoneType::HighRise:        Color = FColor::Blue;   break;
+        case EZoneType::HighRise3:        Color = FColor::Blue;   break;
+        case EZoneType::HighRise4:        Color = FColor::Blue;   break;
+        case EZoneType::HighRise5:        Color = FColor::Blue;   break;
         case EZoneType::LowRise:         Color = FColor::Green;  break;
         case EZoneType::Special:         Color = FColor::Red;    break;
         case EZoneType::Road_Sidewalk:   Color = FColor::Orange; break;
@@ -345,7 +347,8 @@ void AMapGenerator::TrySpawnProps(AActor* Target, FIntPoint GridPos)
     TArray<USceneComponent*> Components;
     Target->GetComponents<USceneComponent>(Components);
     
-    bool bIsInfraSpawned = InfraSpawnChance <= FMath::FRand();
+    float InfraSpawnChanceRandom = RandomStream.FRand();
+    bool bIsInfraSpawned = InfraSpawnChance <= InfraSpawnChanceRandom;
 
     for (USceneComponent* Comp : Components)
     {
@@ -371,8 +374,8 @@ void AMapGenerator::TrySpawnProps(AActor* Target, FIntPoint GridPos)
 
             PropArray = &TreePrefabs;
             Chance = TreeSpawnChance;
-            float TreeScaleXY = FMath::FRandRange(0.5f, 0.8f);
-            float TreeScaleZ = FMath::FRandRange(0.7f, 0.8f);
+            float TreeScaleXY = RandomStream.FRandRange(0.5f, 0.8f);
+            float TreeScaleZ = RandomStream.FRandRange(0.7f, 0.8f);
             RandomScale = FVector(TreeScaleXY, TreeScaleXY, TreeScaleZ);
         }
 
@@ -395,24 +398,33 @@ void AMapGenerator::TrySpawnProps(AActor* Target, FIntPoint GridPos)
             Chance = TrafficSpawnChance;
         }
 
-
-        if (PropArray && PropArray->Num() > 0 && RandomStream.FRand() < Chance)
+        bool bDoSpawn = false;
+        if (PropArray && PropArray->Num() > 0)
         {
-            int32 Index = RandomStream.RandRange(0, PropArray->Num() - 1);
-            TSubclassOf<AActor> Selected = (*PropArray)[Index];
-            AActor* Spawned = nullptr;
+            float Roll = RandomStream.FRand();
+            bDoSpawn = (Roll < Chance);
 
-            if (Selected)
+            if (bDoSpawn)
             {
-                Spawned = World->SpawnActor<AActor>(
-                    Selected,
-                    Comp->GetComponentLocation(),
-                    Comp->GetComponentRotation()
-                );
-                Spawned->GetRootComponent()->SetWorldScale3D(RandomScale);
+                int32 Index = RandomStream.RandRange(0, PropArray->Num() - 1);
+                TSubclassOf<AActor> Selected = (*PropArray)[Index];
+                AActor* Spawned = nullptr;
+
+                if (Selected)
+                {
+                    Spawned = World->SpawnActor<AActor>(
+                        Selected,
+                        Comp->GetComponentLocation(),
+                        Comp->GetComponentRotation()
+                    );
+                    Spawned->GetRootComponent()->SetWorldScale3D(RandomScale);
+                }
             }
         }
     }
+
+    //// 델리게이트 호출
+    //OnPropSpawnComplete.Broadcast();
 }
 
 
@@ -500,7 +512,9 @@ void AMapGenerator::GenerateMap()
         if (!Selected) continue;
 
         // 건물 바닥
-        if (Cell.ZoneType == EZoneType::HighRise ||
+        if (Cell.ZoneType == EZoneType::HighRise3 ||
+            Cell.ZoneType == EZoneType::HighRise4 ||
+            Cell.ZoneType == EZoneType::HighRise5 ||
             Cell.ZoneType == EZoneType::LowRise ||
             Cell.ZoneType == EZoneType::Special)
         {
@@ -519,88 +533,95 @@ void AMapGenerator::GenerateMap()
         UE_LOG(LogTemp, Log, TEXT("Spawned (infra): %s at (%d, %d)"), *Selected->GetName(), GridPos.X, GridPos.Y);
     }
 
-    // 큐브메시 박스로 실험
-    UStaticMesh* CubeMesh = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Cube.Cube"));
-    if (!CubeMesh) return;
+    //// 큐브메시 박스로 실험
+    //UStaticMesh* CubeMesh = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Cube.Cube"));
+    //if (!CubeMesh) return;
 
-    for (const FBuildingSpawnData& Info : BuildingSpawnList)
-    {
-        // 여백 설정 (건물 사이로 골목이 보이게)
-        float PaddingX = FMath::FRandRange(0.00f, 0.06f);
-        float PaddingY = FMath::FRandRange(0.00f, 0.03f);
-
-        // 높이 결정
-        float HeightZ = (Info.ZoneType == EZoneType::HighRise) ? 1800.f + (200.f * FMath::RandRange(1, 5)) :
-            (Info.ZoneType == EZoneType::LowRise) ? 500.f + (200.f * FMath::RandRange(1, 3)) : 300.f;
-
-        // 구역 크기와 실제 건물 크기
-        float BlockX = Info.Width * TileSize;
-        float BlockY = Info.Height * TileSize;
-        float InnerX = BlockX * (1.0f - PaddingX * 2.0f);
-        float InnerY = BlockY * (1.0f - PaddingY * 2.0f);
-
-        // 크기(스케일) 계산
-        FVector Scale(
-            InnerX / 100.f,
-            InnerY / 100.f,
-            HeightZ / 100.f
-        );
-
-        // Top-Left 셀 중심 얻기
-        FVector TopLeftCenter = GetWorldFromGrid(Info.Origin);
-
-        // 블록 중심 오프셋: (Width-1)/2, (Height-1)/2 만큼
-        FVector CenterOffset(
-            (Info.Width - 1) * 0.5f * TileSize,
-            (Info.Height - 1) * 0.5f * TileSize,
-            HeightZ * 0.5f
-        );
-
-        // 최종 스폰 위치 (회전 영향 x)
-        FVector SpawnLocation = TopLeftCenter + CenterOffset;
-
-        // 액터 스폰 (Rotation 은 여기서만 적용)
-        AStaticMeshActor* MeshActor = GetWorld()->SpawnActor<AStaticMeshActor>(
-            SpawnLocation,
-            Info.Rotation
-        );
-        if (MeshActor)
-        {
-            auto* MeshComp = MeshActor->GetStaticMeshComponent();
-            MeshComp->SetMobility(EComponentMobility::Movable);
-            MeshComp->SetStaticMesh(CubeMesh);
-            MeshComp->SetWorldScale3D(Scale);
-            MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-        }
-    }
-
-
-    //// 건물 스폰 (영역 단위)
     //for (const FBuildingSpawnData& Info : BuildingSpawnList)
     //{
-    //    const TArray<TSubclassOf<AActor>>* PrefabArray = CachedPrefabsByZone.Find(Info.ZoneType);
-    //    if (!PrefabArray || PrefabArray->Num() == 0) continue;
+    //    // 여백 설정 (건물 사이로 골목이 보이게)
+    //    float PaddingX = FMath::FRandRange(0.00f, 0.06f);
+    //    float PaddingY = FMath::FRandRange(0.00f, 0.03f);
 
-    //    // 크기 일치하는 프리팹만 필터링 (추가 가능)
-    //    int32 Index = RandomStream.RandRange(0, PrefabArray->Num() - 1);
-    //    TSubclassOf<AActor> Selected = (*PrefabArray)[Index];
-    //    if (!Selected) continue;
+    //    // 높이 결정
+    //    float HeightZ = (Info.ZoneType == EZoneType::HighRise) ? 1800.f + (200.f * FMath::RandRange(1, 5)) :
+    //        (Info.ZoneType == EZoneType::LowRise) ? 500.f + (200.f * FMath::RandRange(1, 3)) : 300.f;
 
-    //    FVector Location = GetActorLocation() +
-    //        FVector(Info.Origin.X * TileSize + (Info.Width - 1) * 0.5f * TileSize,
-    //            Info.Origin.Y * TileSize + (Info.Height - 1) * 0.5f * TileSize,
-    //            0.f);
+    //    // 구역 크기와 실제 건물 크기
+    //    float BlockX = Info.Width * TileSize;
+    //    float BlockY = Info.Height * TileSize;
+    //    float InnerX = BlockX * (1.0f - PaddingX * 2.0f);
+    //    float InnerY = BlockY * (1.0f - PaddingY * 2.0f);
 
-    //    AActor* Spawned = GetWorld()->SpawnActor<AActor>(Selected, Location, Info.Rotation);
+    //    // 크기(스케일) 계산
+    //    FVector Scale(
+    //        InnerX / 100.f,
+    //        InnerY / 100.f,
+    //        HeightZ / 100.f
+    //    );
 
-    //    if (ACityBlockBase* Block = Cast<ACityBlockBase>(Spawned))
+    //    // Top-Left 셀 중심 얻기
+    //    FVector TopLeftCenter = GetWorldFromGrid(Info.Origin);
+
+    //    // 블록 중심 오프셋: (Width-1)/2, (Height-1)/2 만큼
+    //    FVector CenterOffset(
+    //        (Info.Width - 1) * 0.5f * TileSize,
+    //        (Info.Height - 1) * 0.5f * TileSize,
+    //        HeightZ * 0.5f
+    //    );
+
+    //    // 최종 스폰 위치 (회전 영향 x)
+    //    FVector SpawnLocation = TopLeftCenter + CenterOffset;
+
+    //    // 액터 스폰 (Rotation 은 여기서만 적용)
+    //    AStaticMeshActor* MeshActor = GetWorld()->SpawnActor<AStaticMeshActor>(
+    //        SpawnLocation,
+    //        Info.Rotation
+    //    );
+    //    if (MeshActor)
     //    {
-    //        Block->InitializeBlock(Info.Origin, false, ERoadDirection::None);
+    //        auto* MeshComp = MeshActor->GetStaticMeshComponent();
+    //        MeshComp->SetMobility(EComponentMobility::Movable);
+    //        MeshComp->SetStaticMesh(CubeMesh);
+    //        MeshComp->SetWorldScale3D(Scale);
+    //        MeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
     //    }
-
-    //    UE_LOG(LogTemp, Log, TEXT("Spawned (building): %s at (%d,%d) size (%d x %d)"),
-    //        *Selected->GetName(), Info.Origin.X, Info.Origin.Y, Info.Width, Info.Height);
     //}
+
+
+    // 건물 스폰 (영역 단위)
+    for (const FBuildingSpawnData& Info : BuildingSpawnList)
+    {
+        const TArray<TSubclassOf<AActor>>* PrefabArray = CachedPrefabsByZone.Find(Info.ZoneType);
+        if (!PrefabArray || PrefabArray->Num() == 0) continue;
+
+        // 크기 일치하는 프리팹만 필터링 (추가 가능)
+        int32 Index = RandomStream.RandRange(0, PrefabArray->Num() - 1);
+        
+        //// 대형이면 Info에 있는 가로세로(동일) 가져와서 인덱스로 사용
+        //if (Info.ZoneType == EZoneType::HighRise3 || Info.ZoneType == EZoneType::HighRise4 || Info.ZoneType == EZoneType::HighRise5)
+        //{
+        //    Index = Info.Height;
+        //}
+
+        TSubclassOf<AActor> Selected = (*PrefabArray)[Index];
+        if (!Selected) continue;
+
+        FVector Location = GetActorLocation() +
+            FVector(Info.Origin.X * TileSize + (Info.Width - 1) * 0.5f * TileSize,
+                Info.Origin.Y * TileSize + (Info.Height - 1) * 0.5f * TileSize,
+                0.f);
+
+        AActor* Spawned = GetWorld()->SpawnActor<AActor>(Selected, Location, Info.Rotation);
+
+        if (ACityBlockBase* Block = Cast<ACityBlockBase>(Spawned))
+        {
+            Block->InitializeBlock(Info.Origin, false, ERoadDirection::None);
+        }
+
+        UE_LOG(LogTemp, Log, TEXT("Spawned (building): %s at (%d,%d) size (%d x %d)"),
+            *Selected->GetName(), Info.Origin.X, Info.Origin.Y, Info.Width, Info.Height);
+    }
 
     // 도로 프랍 스폰
     SpawnSidewalkProps();
@@ -622,7 +643,9 @@ void AMapGenerator::GenerateZoneMap()
     int32 MaxRetry = 100; // 최대 재시도 횟수
 
     TArray<EZoneType> Blocked = {
-        EZoneType::HighRise,
+        EZoneType::HighRise3,
+        EZoneType::HighRise4,
+        EZoneType::HighRise5,
         EZoneType::LowRise,
         EZoneType::Special,
         EZoneType::Road,
@@ -757,6 +780,16 @@ void AMapGenerator::GenerateZoneMap()
             }
         }
     }
+
+    ////---- 플레이어 스타트 배치 ----//
+    //int32 PlayerStartIndex = RandomStream.RandRange(0, CrossroadCenters.Num() - 1);
+    //FIntPoint PlayerStartPos = CrossroadCenters[PlayerStartIndex];
+
+    //FVector PlayerStartLocation = GetActorLocation() + FVector(PlayerStartPos.X * TileSize, PlayerStartPos.Y * TileSize, 0.f);
+    //FRotator PlayerStartRotation = FRotator(0.f, RandomStream.FRandRange(-180.f, 180.f), 0.f);
+
+    //GetWorld()->SpawnActor<APlayerStart>(PlayerStartActor, PlayerStartLocation, PlayerStartRotation);
+
 
     // 2. 도로 주변 인도 추가
     TArray<FIntPoint> RoadCells;
@@ -936,8 +969,22 @@ void AMapGenerator::GenerateZoneMap()
                 continue;
 
             // 7) 마킹 및 스폰 리스트에 추가
-            MarkZone(TopLeft, Width, Height, EZoneType::HighRise, Rotation);
-            AddtoBuildingSpawnList(TopLeft, Width, Height, EZoneType::HighRise, Rotation);
+            if (Width == 3)
+            {
+                MarkZone(TopLeft, Width, Height, EZoneType::HighRise3, Rotation);
+                AddtoBuildingSpawnList(TopLeft, Width, Height, EZoneType::HighRise3, Rotation);
+            }
+            else if (Width == 4)
+            {
+                MarkZone(TopLeft, Width, Height, EZoneType::HighRise4, Rotation);
+                AddtoBuildingSpawnList(TopLeft, Width, Height, EZoneType::HighRise4, Rotation);
+            }
+            else if (Width == 5)
+            {
+                MarkZone(TopLeft, Width, Height, EZoneType::HighRise5, Rotation);
+                AddtoBuildingSpawnList(TopLeft, Width, Height, EZoneType::HighRise5, Rotation);
+            }
+
         }
     }
 
@@ -1040,5 +1087,7 @@ void AMapGenerator::AddtoBuildingSpawnList(FIntPoint Pos, int32 Width, int32 Hei
 
     BuildingSpawnList.Add(Info);
 }
+
+
 
 

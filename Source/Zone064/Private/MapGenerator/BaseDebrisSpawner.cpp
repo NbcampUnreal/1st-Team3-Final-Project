@@ -2,8 +2,10 @@
 #include "Components/HierarchicalInstancedStaticMeshComponent.h"
 #include "Components/BoxComponent.h"
 #include "Engine/StaticMesh.h"
+#include "Kismet/GameplayStatics.h"
 #include "DrawDebugHelpers.h"
 #include "Engine/World.h"
+#include "MapGenerator/MapGenerator.h"
 
 ABaseDebrisSpawner::ABaseDebrisSpawner()
 {
@@ -27,6 +29,22 @@ ABaseDebrisSpawner::ABaseDebrisSpawner()
 void ABaseDebrisSpawner::BeginPlay()
 {
     Super::BeginPlay();
+
+    RandomStream.Initialize(Seed);
+
+    //AActor* FoundActor = UGameplayStatics::GetActorOfClass(GetWorld(), AMapGenerator::StaticClass());
+    //if (FoundActor)
+    //{
+    //    AMapGenerator* MapGenerator = Cast<AMapGenerator>(FoundActor);
+    //    if (MapGenerator)
+    //    {
+    //        MapGenerator->OnPropSpawnComplete.AddLambda([this]()
+    //            {
+    //                GenerateInstances();
+    //            });
+    //    }
+    //}
+    
     GenerateInstances();
 }
 
@@ -68,15 +86,17 @@ void ABaseDebrisSpawner::GenerateInstances()
 
         for (int32 Attempt = 0; Attempt < MaxAttempts && SpawnedCount < NumInstances; ++Attempt)
         {
-            if (FMath::FRand() > SpawnChance)
+            float Roll = RandomStream.FRand();
+            if (Roll > SpawnChance)
                 continue;
 
             FVector LocalRandom = FVector(
-                FMath::FRandRange(-Extent.X, Extent.X),
-                FMath::FRandRange(-Extent.Y, Extent.Y),
+                RandomStream.FRandRange(-Extent.X, Extent.X),
+                RandomStream.FRandRange(-Extent.Y, Extent.Y),
                 0.f
             );
 
+            // 지면 라인트레이스
             FVector Start = SpawnTransform.TransformPosition(LocalRandom + FVector(0, 0, 500.f));
             FVector End = SpawnTransform.TransformPosition(LocalRandom + FVector(0, 0, -1000.f));
 
@@ -87,12 +107,17 @@ void ABaseDebrisSpawner::GenerateInstances()
             if (!World->LineTraceSingleByChannel(HitResult, Start, End, ECC_WorldStatic, TraceParams))
                 continue;
 
-            UStaticMesh* ChosenMesh = MeshVariants[FMath::RandRange(0, MeshVariants.Num() - 1)];
-            if (!ChosenMesh) continue;
+            int32 Index = RandomStream.RandRange(0, MeshVariants.Num() - 1);
+            UStaticMesh* ChosenMesh = MeshVariants.IsValidIndex(Index) ? MeshVariants[Index] : nullptr;
+            if (!ChosenMesh)
+            {
+                RandomStream.FRand();
+                continue;
+            }
 
             float InstanceRadius = ChosenMesh->GetBounds().BoxExtent.GetMax();
             FVector SpawnLocation = HitResult.ImpactPoint;
-            FRotator RandomRot(0, FMath::FRandRange(0.f, 360.f), 0);
+            FRotator RandomRot(0, RandomStream.FRandRange(0.f, 360.f), 0);
 
             // 중복 충돌 검사
             bool bBlocked = false;
@@ -105,6 +130,7 @@ void ABaseDebrisSpawner::GenerateInstances()
                     break;
                 }
             }
+            float CollisionCheckRoll = RandomStream.FRand();
             if (bBlocked)
             {
                 UE_LOG(LogTemp, Warning, TEXT("Blocked: %s at %s"), *ChosenMesh->GetName(), *SpawnLocation.ToString());
@@ -116,6 +142,8 @@ void ABaseDebrisSpawner::GenerateInstances()
 
             FVector LocalPos = MeshComp->GetComponentTransform().InverseTransformPosition(SpawnLocation);
             FTransform InstanceTransform(RandomRot, LocalPos);
+            
+            // 추가전 SpawnLocation 로그
 
             MeshComp->AddInstance(InstanceTransform);
             //DrawDebugBox(World, SpawnLocation, ChosenMesh->GetBounds().BoxExtent, FColor::Red, false, 30.0f, 0, 2.0f);
@@ -137,18 +165,19 @@ void ABaseDebrisSpawner::GenerateInstances()
     }
 
     int32 VehicleLimit = FMath::RoundToInt(NumInstances * VehicleSpawnRatio);
-    if (FMath::FRand() > VehicleSpawnChance) VehicleLimit = 0;
+    float VehicleRoll = RandomStream.FRand();
+    if (VehicleRoll > VehicleSpawnChance) VehicleLimit = 0;
 
     int32 VehicleCount = 0;
-
     for (int32 Attempt = 0; Attempt < MaxAttempts && SpawnedCount < NumInstances; ++Attempt)
     {
-        if (FMath::FRand() > SpawnChance)
+        float SpawnChanceRoll = RandomStream.FRand();
+        if (SpawnChanceRoll > SpawnChance)
             continue;
 
         FVector LocalRandom = FVector(
-            FMath::FRandRange(-Extent.X, Extent.X),
-            FMath::FRandRange(-Extent.Y, Extent.Y),
+            RandomStream.FRandRange(-Extent.X, Extent.X),
+            RandomStream.FRandRange(-Extent.Y, Extent.Y),
             0.f
         );
 
@@ -163,19 +192,20 @@ void ABaseDebrisSpawner::GenerateInstances()
             continue;
 
         FVector SpawnLocation = HitResult.ImpactPoint;
-        FRotator RandomRot(0, FMath::FRandRange(0.f, 360.f), 0);
+        FRotator RandomRot(0, RandomStream.FRandRange(0.f, 360.f), 0);
 
         UStaticMesh* ChosenMesh = nullptr;
         bool bIsVehicle = false;
 
-        if (VehicleCount < VehicleLimit && VehicleMeshes.Num() > 0 && FMath::FRand() < VehicleSpawnRatio)
+        float VehicleSpawnRoll = RandomStream.FRand();
+        if (VehicleCount < VehicleLimit && VehicleMeshes.Num() > 0 && VehicleSpawnRoll < VehicleSpawnRatio)
         {
-            ChosenMesh = VehicleMeshes[FMath::RandRange(0, VehicleMeshes.Num() - 1)];
+            ChosenMesh = VehicleMeshes[RandomStream.RandRange(0, VehicleMeshes.Num() - 1)];
             bIsVehicle = true;
         }
         else if (OtherMeshes.Num() > 0)
         {
-            ChosenMesh = OtherMeshes[FMath::RandRange(0, OtherMeshes.Num() - 1)];
+            ChosenMesh = OtherMeshes[RandomStream.RandRange(0, OtherMeshes.Num() - 1)];
         }
 
         if (!ChosenMesh) continue;
@@ -186,13 +216,14 @@ void ABaseDebrisSpawner::GenerateInstances()
         bool bBlocked = false;
         for (int32 i = 0; i < PlacedLocations.Num(); ++i)
         {
-            float MinDist = InstanceRadius + PlacedRadii[i];
+            float MinDist = (InstanceRadius + PlacedRadii[i]) * 0.75f;
             if (FVector::DistSquared(PlacedLocations[i], SpawnLocation) < FMath::Square(MinDist))
             {
                 bBlocked = true;
                 break;
             }
         }
+        float CollisionCheckRoll = RandomStream.FRand();
         if (bBlocked)
         {
             UE_LOG(LogTemp, Warning, TEXT("Blocked: %s at %s"), *ChosenMesh->GetName(), *SpawnLocation.ToString());
@@ -229,12 +260,28 @@ UHierarchicalInstancedStaticMeshComponent* ABaseDebrisSpawner::GetOrCreateInstan
     FString Name = FString::Printf(TEXT("HISMC_%s"), *Mesh->GetName());
     UHierarchicalInstancedStaticMeshComponent* NewComp = NewObject<UHierarchicalInstancedStaticMeshComponent>(this, *Name);
     check(NewComp);
+    NewComp->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+    NewComp->SetRelativeTransform(FTransform::Identity);
     NewComp->RegisterComponent();
     NewComp->SetStaticMesh(Mesh);
     NewComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
     NewComp->SetCollisionResponseToAllChannels(ECR_Block);
-    NewComp->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 
     MeshToComponentMap.Add(Mesh, NewComp);
     return NewComp;
+}
+
+void ABaseDebrisSpawner::OnConstruction(const FTransform& Transform)
+{
+    Super::OnConstruction(Transform);
+
+    FVector Location = GetActorLocation();
+    uint32 PosHash = FCrc::MemCrc32(&Location, sizeof(FVector));
+
+    FString Name = GetClass()->GetName();
+    uint32 NameHash = FCrc::StrCrc32(*Name);
+
+    uint32 CombinedHash = HashCombineFast(PosHash, NameHash);
+
+    Seed = static_cast<int32>(CombinedHash);
 }
