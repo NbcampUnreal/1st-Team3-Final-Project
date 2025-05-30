@@ -19,9 +19,12 @@ public:
 	void Initialize(FSubsystemCollectionBase& Collection) override;
 	
 	/* Flow Control Methods */
+	//void AdvanceGamePhase();
+
 	UFUNCTION(BlueprintCallable, Category = "GameFlow")
-	void AdvanceGamePhase();
-	void ChangePhaseAndMap(EGamePhase _NextGamePhase);
+	void ChangeGamePhase(EGamePhase _NextGamePhase);
+	UFUNCTION(BlueprintCallable, Category = "GameFlow")
+	void ChangeMap(FName _NextMapName, bool _bServerTravel);
 
 	/* Getter, Setter, ... etc. */
 	UFUNCTION(BlueprintCallable, Category = "GameFlow")
@@ -30,6 +33,8 @@ public:
 	FName GetCurrentMapName();
 	UFUNCTION(BlueprintCallable, Category = "GameFlow")
 	int32 GetCurrentRepeatCount();
+	UFUNCTION(BlueprintCallable, Category = "GameFlow")
+	FName GetMapNameByGamePhase(EGamePhase _GamePhase);
 	void SetCurrentGamePhase(EGamePhase _GamePhase);
 	void SetCurrentMapName(FName _MapName);
 	void InitCurrentRepeatCount();

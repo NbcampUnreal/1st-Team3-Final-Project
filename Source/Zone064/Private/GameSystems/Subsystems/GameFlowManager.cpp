@@ -36,100 +36,111 @@ void UGameFlowManager::Initialize(FSubsystemCollectionBase& Collection)
 	//AdvanceGamePhase();
 }
 
-void UGameFlowManager::AdvanceGamePhase()
+//void UGameFlowManager::AdvanceGamePhase()
+//{
+//	switch (CurrentGamePhase)
+//	{
+//	case EGamePhase::None:
+//	{
+//		InitCurrentRepeatCount();
+//		ChangePhaseAndMap(EGamePhase::Title);
+//		break;
+//	}
+//	case EGamePhase::Title:
+//	{
+//		ChangePhaseAndMap(EGamePhase::Menu);
+//		break;
+//	}
+//	case EGamePhase::Menu:
+//	{
+//		ChangePhaseAndMap(EGamePhase::Lobby);
+//		break;
+//	}
+//	case EGamePhase::Lobby:
+//	{
+//		ChangePhaseAndMap(EGamePhase::Departure);
+//		break;
+//	}
+//	case EGamePhase::Departure:
+//	{
+//		ChangePhaseAndMap(EGamePhase::Driving);
+//		break;
+//	}
+//	case EGamePhase::Driving:
+//	{
+//		ChangePhaseAndMap(EGamePhase::InGame);
+//		break;
+//	}
+//	case EGamePhase::InGame:
+//	{
+//		ChangePhaseAndMap(EGamePhase::Camping);
+//		break;
+//	}
+//	case EGamePhase::Camping:
+//	{
+//		ChangePhaseAndMap(EGamePhase::Voting);
+//		break;
+//	}
+//	case EGamePhase::Voting:
+//	{
+//		if (CurrentRepeatCount < MaxRepeatCount)
+//		{
+//			AddCurrentRepeatCount();
+//			ChangePhaseAndMap(EGamePhase::Driving);	// next loop
+//		}
+//		else
+//		{
+//			ChangePhaseAndMap(EGamePhase::Defense);	// end loop
+//		}
+//		break;
+//	}
+//	case EGamePhase::Defense:
+//	{
+//		ChangePhaseAndMap(EGamePhase::Ending);
+//		break;
+//	}
+//	case EGamePhase::Ending:
+//	{
+//		ChangePhaseAndMap(EGamePhase::ReturnToTitle);
+//		break;
+//	}
+//	case EGamePhase::ReturnToTitle:
+//	{
+//		InitCurrentRepeatCount();
+//		ChangePhaseAndMap(EGamePhase::Title);
+//		break;
+//	}
+//	default:
+//	{
+//		break;
+//	}
+//	}
+//}
+
+void UGameFlowManager::ChangeGamePhase(EGamePhase _NextGamePhase)
 {
-	switch (CurrentGamePhase)
+	SetCurrentGamePhase(_NextGamePhase);
+}
+
+void UGameFlowManager::ChangeMap(FName _NextMapName, bool _bServerTravel)
+{
+	if (_NextMapName != CurrentMapName)
 	{
-	case EGamePhase::None:
-	{
-		InitCurrentRepeatCount();
-		ChangePhaseAndMap(EGamePhase::Title);
-		break;
-	}
-	case EGamePhase::Title:
-	{
-		ChangePhaseAndMap(EGamePhase::Menu);
-		break;
-	}
-	case EGamePhase::Menu:
-	{
-		ChangePhaseAndMap(EGamePhase::Lobby);
-		break;
-	}
-	case EGamePhase::Lobby:
-	{
-		ChangePhaseAndMap(EGamePhase::Departure);
-		break;
-	}
-	case EGamePhase::Departure:
-	{
-		ChangePhaseAndMap(EGamePhase::Driving);
-		break;
-	}
-	case EGamePhase::Driving:
-	{
-		ChangePhaseAndMap(EGamePhase::InGame);
-		break;
-	}
-	case EGamePhase::InGame:
-	{
-		ChangePhaseAndMap(EGamePhase::Camping);
-		break;
-	}
-	case EGamePhase::Camping:
-	{
-		ChangePhaseAndMap(EGamePhase::Voting);
-		break;
-	}
-	case EGamePhase::Voting:
-	{
-		if (CurrentRepeatCount < MaxRepeatCount - 1)
+		SetCurrentMapName(_NextMapName);
+
+		if (_bServerTravel)
 		{
-			AddCurrentRepeatCount();
-			ChangePhaseAndMap(EGamePhase::Driving);	// next loop
+			if (GetWorld()->GetAuthGameMode())
+			{
+				FString TravelPath = FString::Printf(TEXT("/Game/Maps/Test/%s"), *_NextMapName.ToString());
+				GetWorld()->ServerTravel(TravelPath);
+			}
 		}
 		else
 		{
-			ChangePhaseAndMap(EGamePhase::Defense);	// end loop
+			UGameplayStatics::OpenLevel(this, _NextMapName);
 		}
-		break;
 	}
-	case EGamePhase::Defense:
-	{
-		ChangePhaseAndMap(EGamePhase::Ending);
-		break;
-	}
-	case EGamePhase::Ending:
-	{
-		ChangePhaseAndMap(EGamePhase::ReturnToTitle);
-		break;
-	}
-	case EGamePhase::ReturnToTitle:
-	{
-		InitCurrentRepeatCount();
-		ChangePhaseAndMap(EGamePhase::Title);
-		break;
-	}
-	default:
-	{
-		break;
-	}
-	}
-}
-
-void UGameFlowManager::ChangePhaseAndMap(EGamePhase _NextGamePhase)
-{
-	// Change Map
-	FName NextMapName = *MapNameCache.Find(_NextGamePhase);
-
-	if(NextMapName != CurrentMapName)
-	{
-		SetCurrentMapName(NextMapName);
-		UGameplayStatics::OpenLevel(this, NextMapName);	// todo: servertravel 해야 하는 경우 분리
-	}
-
-	// Change GamePhase
-	SetCurrentGamePhase(_NextGamePhase);
 }
 
 EGamePhase UGameFlowManager::GetCurrentGamePhase()
@@ -147,6 +158,11 @@ int32 UGameFlowManager::GetCurrentRepeatCount()
 	return CurrentRepeatCount;
 }
 
+FName UGameFlowManager::GetMapNameByGamePhase(EGamePhase _GamePhase)
+{
+	return *MapNameCache.Find(_GamePhase);
+}
+
 void UGameFlowManager::SetCurrentGamePhase(EGamePhase _GamePhase)
 {
 	CurrentGamePhase = _GamePhase;
@@ -159,7 +175,7 @@ void UGameFlowManager::SetCurrentMapName(FName _MapName)
 
 void UGameFlowManager::InitCurrentRepeatCount()
 {
-	CurrentRepeatCount = 0;
+	CurrentRepeatCount = 1;
 }
 
 void UGameFlowManager::AddCurrentRepeatCount()
