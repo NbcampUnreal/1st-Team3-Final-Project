@@ -5,7 +5,8 @@
 #include "components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
 
-AZNPlayerStart::AZNPlayerStart()
+AZNPlayerStart::AZNPlayerStart(const FObjectInitializer& ObjectInitializer)
+    : Super(ObjectInitializer) // ✅ APlayerStart 생성자 명시 호출
 {
-	
+    // ...
 }

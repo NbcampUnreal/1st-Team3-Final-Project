@@ -13,7 +13,7 @@ class ZONE064_API AZNPlayerStart : public APlayerStart
 	GENERATED_BODY()
 	
 public:
-	AZNPlayerStart();
+	AZNPlayerStart(const FObjectInitializer& ObjectInitializer);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UStaticMeshComponent* CarMesh;
