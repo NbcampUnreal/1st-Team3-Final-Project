@@ -40,13 +40,14 @@ protected:
 	// ItemWidget을 붙일 PanelSlot
 	TObjectPtr<UPanelSlot> PanelSlot;
 
-	TSharedPtr<FLines> LineStructData;
+	FLines* LineStructData;
 
 	TArray<float> StartX;
 	TArray<float> StartY;
 	TArray<float> EndX;
 	TArray<float> EndY;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Reference")
 	TObjectPtr<AZNInventoryTestCharacter> CharacterReference;
 	TObjectPtr<UZNInventoryComponent> InventoryComponent;
 

@@ -28,7 +28,7 @@ void UZNInventoryGridWidget::NativeConstruct()
 	float NewWidth = Columns * TileSize;
 	float NewHeight = Rows * TileSize;
 
-	LineStructData = MakeShared<FLines>();
+	LineStructData = new FLines();
 	StartX = {};
 	StartY = {};
 	EndX = {};
@@ -63,7 +63,7 @@ int32 UZNInventoryGridWidget::NativePaint(const FPaintArgs& Args, const FGeometr
 	// - Border의 로컬 (0, 0)이 왼쪽 상단임, 이 위치를 전체 화면에서의 위치로 변경해서 반환
 	FVector2D TopLeftCorner = GridBorder->GetCachedGeometry().GetLocalPositionAtCoordinates(FVector2D(0.0f, 0.0f));
 
-	if (LineStructData.IsValid())
+	if (LineStructData)
 	{
 		for (int32 i = 0; i < LineStructData->XLines.Num(); i++)
 		{

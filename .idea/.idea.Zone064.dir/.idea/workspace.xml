@@ -8,38 +8,20 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ad18e44d-431e-4ba1-a905-566182d4eb4c" name="변경" comment="">
-      <change afterPath="$PROJECT_DIR$/Content/Zombie_Pack/ABP_Zombie.uasset" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Content/Zombie_Pack/BS_MM_WalkRun.uasset" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Content/Zombie_Pack/MM_Fall_Loop.uasset" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Content/Zombie_Pack/MM_Idle.uasset" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Content/Zombie_Pack/MM_Jump.uasset" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Content/Zombie_Pack/MM_Land.uasset" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Content/Zombie_Pack/MM_Run_Fwd.uasset" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Content/Zombie_Pack/MM_Walk_Fwd.uasset" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Content/Zombie_Pack/MM_Walk_InPlace.uasset" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Source/Zone064/Private/ActorComponent/DefenseComponent.cpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Source/Zone064/Private/ActorComponent/HungerComponent.cpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Source/Zone064/Public/ActorComponent/DefenseComponent.h" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Source/Zone064/Public/ActorComponent/HungerComponent.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Zone064.dir/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Zone064.dir/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/MPTD_Shooter/Blueprints/AI/BP_AI_DefaultCharacter.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/MPTD_Shooter/Blueprints/AI/BP_AI_DefaultCharacter.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/MPTD_Shooter/Blueprints/AI/Characters/Bomber/BT_Enemy_Bomber.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/MPTD_Shooter/Blueprints/AI/Characters/Bomber/BT_Enemy_Bomber.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/MPTD_Shooter/Blueprints/AI/Characters/Melee/BT_Enemy_Melee.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/MPTD_Shooter/Blueprints/AI/Characters/Melee/BT_Enemy_Melee.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/MPTD_Shooter/Blueprints/AI/Characters/MeleeWithWeapon/AI_Controller_Melee_WithWeapon.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/MPTD_Shooter/Blueprints/AI/Characters/MeleeWithWeapon/AI_Controller_Melee_WithWeapon.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/MPTD_Shooter/Blueprints/AI/Characters/MeleeWithWeapon/BP_AI_MeleeWithWeapon.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/MPTD_Shooter/Blueprints/AI/Characters/MeleeWithWeapon/BP_AI_MeleeWithWeapon.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/MPTD_Shooter/Blueprints/AI/Characters/MeleeWithWeapon/BP_WeaponSword.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/MPTD_Shooter/Blueprints/AI/Characters/MeleeWithWeapon/BP_WeaponSword.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/MPTD_Shooter/Blueprints/AI/Characters/MeleeWithWeapon/BT_Enemy_MeleeWithWeapon.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/MPTD_Shooter/Blueprints/AI/Characters/MeleeWithWeapon/BT_Enemy_MeleeWithWeapon.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/MPTD_Shooter/Blueprints/AI/Tasks/BTT_SetMovementSpeed.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/MPTD_Shooter/Blueprints/AI/Tasks/BTT_SetMovementSpeed.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/MPTD_Shooter/Blueprints/Characters/Animations/AnimBP_Locomotion.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/MPTD_Shooter/Blueprints/Characters/Animations/AnimBP_Locomotion.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/MPTD_Shooter/Blueprints/Characters/BP_DefaultCharacter.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/MPTD_Shooter/Blueprints/Characters/BP_DefaultCharacter.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/MPTD_Shooter/Demo/Characters/Mannequins/Rigs/CR_Mannequin_BasicFootIK.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/MPTD_Shooter/Demo/Characters/Mannequins/Rigs/CR_Mannequin_BasicFootIK.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/MPTD_Shooter/Maps/L_Game1.umap" beforeDir="false" afterPath="$PROJECT_DIR$/Content/MPTD_Shooter/Maps/L_Game1.umap" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Zombie_Pack/Animations/InPlace/Idle/IP_Idle_02.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Zombie_Pack/Animations/InPlace/Idle/IP_Idle_02.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Zombie_Pack/Animations/InPlace/Idle/IP_Idle_03.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Zombie_Pack/Animations/InPlace/Idle/IP_Idle_03.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Zombie_Pack/Animations/InPlace/Locomotion/IP_Run_Front.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Zombie_Pack/Animations/InPlace/Locomotion/IP_Run_Front.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Zombie_Pack/Animations/InPlace/Locomotion/IP_Walk_Front.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Zombie_Pack/Animations/InPlace/Locomotion/IP_Walk_Front.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Zombie_Pack/Bonus_Audio_Animations/Scream/Zombie_as_scream1_one_shot_01.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Zombie_Pack/Bonus_Audio_Animations/Scream/Zombie_as_scream1_one_shot_01.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.Zone064/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Zone064/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="DpaMonitoringSettings">
+    <option name="firstShow" value="false" />
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -60,7 +42,8 @@
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "cyh-044/적AI수정",
+    "Uproject.Zone064.executor": "Debug",
+    "git-widget-placeholder": "cyh-049/배고픔스텟,방어력스텟추가",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -156,6 +139,8 @@
       <workItem from="1747897701305" duration="595000" />
       <workItem from="1747963652232" duration="2447000" />
       <workItem from="1748316483917" duration="1839000" />
+      <workItem from="1748491211408" duration="24000" />
+      <workItem from="1748503830462" duration="506000" />
     </task>
     <servers />
   </component>

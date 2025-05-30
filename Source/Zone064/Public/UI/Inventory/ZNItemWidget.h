@@ -26,6 +26,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, meta = (BindWidget), Category = "UI")
 	TObjectPtr<UImage> ItemImage;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Reference")
 	TObjectPtr<AZNInventoryTestCharacter> CharacterReference;
 
 	FVector2D Size;
