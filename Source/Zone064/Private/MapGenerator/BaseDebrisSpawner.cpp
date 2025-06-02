@@ -32,20 +32,20 @@ void ABaseDebrisSpawner::BeginPlay()
 
     RandomStream.Initialize(Seed);
 
-    AActor* FoundActor = UGameplayStatics::GetActorOfClass(GetWorld(), AMapGenerator::StaticClass());
-    if (FoundActor)
-    {
-        AMapGenerator* MapGenerator = Cast<AMapGenerator>(FoundActor);
-        if (MapGenerator)
-        {
-            MapGenerator->OnPropSpawnComplete.AddLambda([this]()
-                {
-                    GenerateInstances();
-                });
-        }
-    }
+    //AActor* FoundActor = UGameplayStatics::GetActorOfClass(GetWorld(), AMapGenerator::StaticClass());
+    //if (FoundActor)
+    //{
+    //    AMapGenerator* MapGenerator = Cast<AMapGenerator>(FoundActor);
+    //    if (MapGenerator)
+    //    {
+    //        MapGenerator->OnPropSpawnComplete.AddLambda([this]()
+    //            {
+    //                GenerateInstances();
+    //            });
+    //    }
+    //}
     
-    //GenerateInstances();
+    GenerateInstances();
 }
 
 void ABaseDebrisSpawner::Tick(float DeltaTime)

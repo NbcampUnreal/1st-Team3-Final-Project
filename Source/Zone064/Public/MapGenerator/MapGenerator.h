@@ -4,6 +4,7 @@
 #include "GameFramework/Actor.h"
 #include "Engine/StreamableManager.h"
 #include "Engine/AssetManager.h"
+#include "GameFramework/PlayerStart.h"
 #include "MapGenerator.generated.h"
 
 DECLARE_MULTICAST_DELEGATE(FOnPropSpawnComplete);
@@ -17,7 +18,9 @@ enum class EZoneType : uint8
     Road_Sidewalk_Traffic       UMETA(DisplayName = "Road_Sidewalk_Traffic"),  // 신호등있는 인도
     Road_Crosswalk      UMETA(DisplayName = "Road_Crosswalk"), // 횡단보도
     Road_Intersection   UMETA(DisplayName = "Road_Intersection"), //교차로
-    HighRise            UMETA(DisplayName = "High Rise"),
+    HighRise3            UMETA(DisplayName = "High Rise 3x3"),
+    HighRise4            UMETA(DisplayName = "High Rise 4x4"),
+    HighRise5            UMETA(DisplayName = "High Rise 5x5"),
     LowRise             UMETA(DisplayName = "Low Rise"),
     Alley               UMETA(DisplayName = "Alley"),
     Plant               UMETA(DisplayName = "Plant"),
@@ -167,14 +170,14 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     TSubclassOf<APlayerStart> PlayerStartActor;
     
+    // 구역 맵
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+    TMap<FIntPoint, FGridCellData> ZoneMap;
 
 private:
     FRandomStream RandomStream;
     FStreamableManager AssetLoader;
     
-    // 구역 맵
-    TMap<FIntPoint, FGridCellData> ZoneMap;
-
     // 4방향 탐색용 오프셋
     TArray<FIntPoint> SearchOffsetList;
     // 대각선 방향 탐색용 오프셋
