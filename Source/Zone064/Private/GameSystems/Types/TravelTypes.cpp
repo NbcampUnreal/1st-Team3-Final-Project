@@ -1,5 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "GameModes/ZNDrivingGameMode.h"
+#include "GameSystems/Types/TravelTypes.h"
 
