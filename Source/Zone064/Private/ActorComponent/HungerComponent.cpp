@@ -19,7 +19,8 @@ UHungerComponent::UHungerComponent()
 void UHungerComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	if (bAutoDecrease)
+
+	if (GetOwner()->HasAuthority() && bAutoDecrease)
 	{
 		GetWorld()->GetTimerManager().SetTimer(
 			HungerTimerHandle,
@@ -28,9 +29,7 @@ void UHungerComponent::BeginPlay()
 			1.0f,
 			true
 		);
-	}
-	// ...
-	
+	}	
 }
 
 
@@ -42,6 +41,22 @@ void UHungerComponent::TickHunger()
 void UHungerComponent::DecreaseHunger(float Amount)
 {
 	Hunger = FMath::Clamp(Hunger - Amount, 0.f, MaxHunger);
+
+	//APawn* PawnOwner = Cast<APawn>(GetOwner());
+	//if (PawnOwner->HasAuthority())
+	//{
+	//	if (!PawnOwner->IsLocallyControlled())
+	//	{
+	//		UE_LOG(LogTemp, Warning, TEXT("Hunger : %f, Owner : %s"), Hunger, *GetOwner()->GetName());
+	//	}
+	//}
+	//else
+	//{
+	//	if (PawnOwner->IsLocallyControlled())
+	//	{
+	//		UE_LOG(LogTemp, Warning, TEXT("Hunger : %f, Owner : %s"), Hunger, *GetOwner()->GetName());
+	//	}
+	//}
 }
 
 void UHungerComponent::IncreaseHunger(float Amount)
