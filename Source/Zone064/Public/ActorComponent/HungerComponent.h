@@ -16,17 +16,19 @@ public:
 	// Sets default values for this component's properties
 	UHungerComponent();
 
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
 public:	
 	// 현재 허기 수치
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Hunger")
+	UPROPERTY(EditAnywhere, Replicated, BlueprintReadWrite, Category="Hunger")
 	float Hunger = 100.f;
 
 	// 최대 허기 수치
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Hunger")
+	UPROPERTY(EditAnywhere, Replicated, BlueprintReadWrite, Category="Hunger")
 	float MaxHunger = 100.f;
 
 	// 허기 자연 감소 속도 (초당)

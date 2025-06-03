@@ -2,6 +2,7 @@
 
 
 #include "ActorComponent/HungerComponent.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values for this component's properties
 UHungerComponent::UHungerComponent()
@@ -56,3 +57,10 @@ float UHungerComponent::GetHungerPercent() const
 	return Hunger / MaxHunger;
 }
 
+void UHungerComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(UHungerComponent, Hunger);
+	DOREPLIFETIME(UHungerComponent, MaxHunger);
+}
