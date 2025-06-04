@@ -27,89 +27,9 @@ void UGameFlowManager::Initialize(FSubsystemCollectionBase& Collection)
 
 	// Initialize GamePhase, Map
 	CurrentGamePhase = EGamePhase::None;
-	//AdvanceGamePhase();
-}
+	CurrentRepeatCount = 0;
 
-//void UGameFlowManager::AdvanceGamePhase()
-//{
-//	switch (CurrentGamePhase)
-//	{
-//	case EGamePhase::None:
-//	{
-//		InitCurrentRepeatCount();
-//		ChangePhaseAndMap(EGamePhase::Title);
-//		break;
-//	}
-//	case EGamePhase::Title:
-//	{
-//		ChangePhaseAndMap(EGamePhase::Menu);
-//		break;
-//	}
-//	case EGamePhase::Menu:
-//	{
-//		ChangePhaseAndMap(EGamePhase::Lobby);
-//		break;
-//	}
-//	case EGamePhase::Lobby:
-//	{
-//		ChangePhaseAndMap(EGamePhase::Departure);
-//		break;
-//	}
-//	case EGamePhase::Departure:
-//	{
-//		ChangePhaseAndMap(EGamePhase::Driving);
-//		break;
-//	}
-//	case EGamePhase::Driving:
-//	{
-//		ChangePhaseAndMap(EGamePhase::InGame);
-//		break;
-//	}
-//	case EGamePhase::InGame:
-//	{
-//		ChangePhaseAndMap(EGamePhase::Camping);
-//		break;
-//	}
-//	case EGamePhase::Camping:
-//	{
-//		ChangePhaseAndMap(EGamePhase::Voting);
-//		break;
-//	}
-//	case EGamePhase::Voting:
-//	{
-//		if (CurrentRepeatCount < MaxRepeatCount)
-//		{
-//			AddCurrentRepeatCount();
-//			ChangePhaseAndMap(EGamePhase::Driving);	// next loop
-//		}
-//		else
-//		{
-//			ChangePhaseAndMap(EGamePhase::Defense);	// end loop
-//		}
-//		break;
-//	}
-//	case EGamePhase::Defense:
-//	{
-//		ChangePhaseAndMap(EGamePhase::Ending);
-//		break;
-//	}
-//	case EGamePhase::Ending:
-//	{
-//		ChangePhaseAndMap(EGamePhase::ReturnToTitle);
-//		break;
-//	}
-//	case EGamePhase::ReturnToTitle:
-//	{
-//		InitCurrentRepeatCount();
-//		ChangePhaseAndMap(EGamePhase::Title);
-//		break;
-//	}
-//	default:
-//	{
-//		break;
-//	}
-//	}
-//}
+}
 
 void UGameFlowManager::ChangeGamePhase(EGamePhase _NextGamePhase)
 {
@@ -241,5 +161,15 @@ void UGameFlowManager::InitCurrentRepeatCount()
 void UGameFlowManager::AddCurrentRepeatCount()
 {
 	CurrentRepeatCount += 1;
+}
+
+bool UGameFlowManager::CheckMaxRepeatCount()
+{
+	if (CurrentRepeatCount < MaxRepeatCount)
+	{
+		return false;
+	}
+
+	return true;
 }
 

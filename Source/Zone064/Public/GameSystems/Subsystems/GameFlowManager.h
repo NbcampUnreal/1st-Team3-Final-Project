@@ -32,6 +32,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "GameFlow")
 	void RequestPhaseTransition(EGamePhase _NextGamePhase, ELevelTravelType _TravelType);
 
+	/* Repeat Count Methods */
+	UFUNCTION(BlueprintCallable, Category = "GameFlow")
+	void InitCurrentRepeatCount();
+	UFUNCTION(BlueprintCallable, Category = "GameFlow")
+	void AddCurrentRepeatCount();
+	UFUNCTION(BlueprintCallable, Category = "GameFlow")
+	bool CheckMaxRepeatCount();
+
 	/* Getter, Setter, ... etc. */
 	UFUNCTION(BlueprintCallable, Category = "GameFlow")
 	EGamePhase GetCurrentGamePhase();
@@ -43,8 +51,6 @@ public:
 	FName GetInternalMapNameByPhase(EGamePhase _GamePhase);*/
 	void SetCurrentGamePhase(EGamePhase _GamePhase);
 	void SetCurrentMapName(FName _MapName);
-	void InitCurrentRepeatCount();
-	void AddCurrentRepeatCount();
 
 private:
 	/* GameFlow Data */
@@ -52,7 +58,7 @@ private:
 	FName CurrentMapName;
 	int32 CurrentRepeatCount;
 	UPROPERTY(EditDefaultsOnly)
-	int32 MaxRepeatCount = 4;
+	int32 MaxRepeatCount = 2;
 
 	/* MapName Data */
 	TMap<EGamePhase, FMapDataRow> MapDataCache;
