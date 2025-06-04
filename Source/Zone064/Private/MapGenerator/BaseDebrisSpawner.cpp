@@ -11,6 +11,8 @@ ABaseDebrisSpawner::ABaseDebrisSpawner()
 {
     PrimaryActorTick.bCanEverTick = false;
 
+    bReplicates = true;
+
     SpawnArea = CreateDefaultSubobject<UBoxComponent>(TEXT("SpawnArea"));
     RootComponent = SpawnArea;
     SpawnArea->SetBoxExtent(FVector(250.f, 250.f, 50.f));
@@ -31,19 +33,6 @@ void ABaseDebrisSpawner::BeginPlay()
     Super::BeginPlay();
 
     RandomStream.Initialize(Seed);
-
-    //AActor* FoundActor = UGameplayStatics::GetActorOfClass(GetWorld(), AMapGenerator::StaticClass());
-    //if (FoundActor)
-    //{
-    //    AMapGenerator* MapGenerator = Cast<AMapGenerator>(FoundActor);
-    //    if (MapGenerator)
-    //    {
-    //        MapGenerator->OnPropSpawnComplete.AddLambda([this]()
-    //            {
-    //                GenerateInstances();
-    //            });
-    //    }
-    //}
     
     GenerateInstances();
 }
