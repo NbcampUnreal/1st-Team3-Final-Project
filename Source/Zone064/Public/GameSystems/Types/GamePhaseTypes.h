@@ -25,6 +25,7 @@ enum class EGamePhase : uint8
 	Defense				UMETA(DisplayName = "Defense"),				// 최종 디펜스
 	Ending				UMETA(DisplayName = "Ending"),				// 엔딩 연출, 게임 결과 집계
 	ReturnToTitle		UMETA(DisplayName = "ReturnToTitle"),		// 세션 파괴, Title로 돌아가기
+	Test				UMETA(DisplayName = "Test"),				// 테스트용 (템플릿 전용 레벨 등)
 };
 
 UCLASS()
