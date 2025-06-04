@@ -87,14 +87,16 @@ public:
 
     float GetRandomChance();
 
+    UPROPERTY(BlueprintReadOnly, Category = "City Block")
+    bool bIsCrossroad;
+
 protected:
     // 오버랩 시 실제 탐색 이벤트 (확장용)
     virtual void OnPlayerEnterBlock();
 
     void SpawnRoadsideProps();
 
-    UPROPERTY(BlueprintReadOnly, Category = "City Block")
-    bool bIsCrossroad = false;
+
 
     ERoadDirection RoadDirection;
 
