@@ -7,7 +7,7 @@
 #include "GameFramework/PlayerStart.h"
 #include "MapGenerator.generated.h"
 
-DECLARE_MULTICAST_DELEGATE(FOnPropSpawnComplete);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPropSpawnComplete);
 
 UENUM(BlueprintType)
 enum class EZoneType : uint8
@@ -97,6 +97,7 @@ protected:
 
 public:
     // 스폰 완료시 호출할 델리게이트
+    UPROPERTY(BlueprintAssignable)
     FOnPropSpawnComplete OnPropSpawnComplete;
 
     // 맵 크기
@@ -168,7 +169,7 @@ public:
 
     // 커스텀 플레이어 스타트 사용
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    TSubclassOf<APlayerStart> PlayerStartActor;
+    TSubclassOf<AActor> PlayerStartActor;
     
     // 구역 맵
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
