@@ -4,6 +4,7 @@
 #include "GameSystems/Subsystems/GameFlowManager.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameInstance/ZNBaseGameInstance.h"
+#include "GameStates/ZNBaseGameState.h"
 #include "GameSystems/Datas/MapDataRow.h"
 
 
@@ -25,51 +26,54 @@ void UGameFlowManager::Initialize(FSubsystemCollectionBase& Collection)
 		}
 	}
 
-	// Initialize GamePhase, Map
-	CurrentGamePhase = EGamePhase::None;
-	CurrentRepeatCount = 0;
-
-}
-
-void UGameFlowManager::ChangeGamePhase(EGamePhase _NextGamePhase)
-{
-	SetCurrentGamePhase(_NextGamePhase);
-}
-
-void UGameFlowManager::ChangeMapByName(FName _NextMapName, bool _bServerTravel)
-{
-	if (_NextMapName != CurrentMapName)
+	// Initialize GamePhase, RepeatCount
+	AZNBaseGameState* GS = GetWorld()->GetGameState<AZNBaseGameState>();
+	if (GS)
 	{
-		SetCurrentMapName(_NextMapName);
-
-		if (_bServerTravel)
-		{
-			if (GetWorld()->GetAuthGameMode())
-			{
-				FString TravelPath = FString::Printf(TEXT("/Game/Maps/Test/%s"), *_NextMapName.ToString());
-				GetWorld()->ServerTravel(TravelPath);
-			}
-		}
-		else
-		{
-			UGameplayStatics::OpenLevel(this, _NextMapName);
-		}
+		GS->SetCurrentGamePhase(EGamePhase::None);
 	}
+	InitCurrentRepeatCount();
 }
 
-void UGameFlowManager::ChangeMapByPhase(EGamePhase _NextGamePhase, bool _bServerTravel)
-{
-	/*FName NextMapName = GetInternalMapNameByPhase(_NextGamePhase);
-	ChangeMapByName(NextMapName, _bServerTravel);*/
-}
-
-void UGameFlowManager::ChangePhaseAndMap(EGamePhase _NextGamePhase, bool _bServerTravel)
-{
-	/*ChangeGamePhase(_NextGamePhase);
-
-	FName NextMapName = GetInternalMapNameByPhase(_NextGamePhase);
-	ChangeMapByName(NextMapName, _bServerTravel);*/
-}
+//void UGameFlowManager::ChangeGamePhase(EGamePhase _NextGamePhase)
+//{
+//	SetCurrentGamePhase(_NextGamePhase);
+//}
+//
+//void UGameFlowManager::ChangeMapByName(FName _NextMapName, bool _bServerTravel)
+//{
+//	if (_NextMapName != CurrentMapName)
+//	{
+//		SetCurrentMapName(_NextMapName);
+//
+//		if (_bServerTravel)
+//		{
+//			if (GetWorld()->GetAuthGameMode())
+//			{
+//				FString TravelPath = FString::Printf(TEXT("/Game/Maps/Test/%s"), *_NextMapName.ToString());
+//				GetWorld()->ServerTravel(TravelPath);
+//			}
+//		}
+//		else
+//		{
+//			UGameplayStatics::OpenLevel(this, _NextMapName);
+//		}
+//	}
+//}
+//
+//void UGameFlowManager::ChangeMapByPhase(EGamePhase _NextGamePhase, bool _bServerTravel)
+//{
+//	/*FName NextMapName = GetInternalMapNameByPhase(_NextGamePhase);
+//	ChangeMapByName(NextMapName, _bServerTravel);*/
+//}
+//
+//void UGameFlowManager::ChangePhaseAndMap(EGamePhase _NextGamePhase, bool _bServerTravel)
+//{
+//	/*ChangeGamePhase(_NextGamePhase);
+//
+//	FName NextMapName = GetInternalMapNameByPhase(_NextGamePhase);
+//	ChangeMapByName(NextMapName, _bServerTravel);*/
+//}
 
 void UGameFlowManager::RequestPhaseTransition(EGamePhase _NextGamePhase, ELevelTravelType _TravelType)
 {
@@ -79,9 +83,11 @@ void UGameFlowManager::RequestPhaseTransition(EGamePhase _NextGamePhase, ELevelT
 		return;
 	}
 
-	SetCurrentGamePhase(_NextGamePhase);
-	SetCurrentMapName(Row->InternalMapName);
-	
+	// Cache GameFlow Data
+	CurGamePhaseCache = _NextGamePhase;
+	CurMapNameCache = Row->InternalMapName;
+
+	// Level Travel
 	switch (_TravelType)
 	{
 	case ELevelTravelType::NoTravel:
@@ -90,13 +96,13 @@ void UGameFlowManager::RequestPhaseTransition(EGamePhase _NextGamePhase, ELevelT
 	}
 	case ELevelTravelType::OpenLevel_Solo:
 	{
-		UGameplayStatics::OpenLevel(this, Row->InternalMapName);
+		UGameplayStatics::OpenLevel(this, CurMapNameCache);
 		break;
 	}
 
 	case ELevelTravelType::OpenLevel_Listen:
 	{
-		UGameplayStatics::OpenLevel(this, Row->InternalMapName, true, TEXT("listen"));
+		UGameplayStatics::OpenLevel(this, CurMapNameCache, true, TEXT("listen"));
 		break;
 	}
 	case ELevelTravelType::ServerTravel:
@@ -111,23 +117,20 @@ void UGameFlowManager::RequestPhaseTransition(EGamePhase _NextGamePhase, ELevelT
 		break;
 	}
 
+	UpdateGameFlowData();
 
 	//OnPhaseChanged.Broadcast(NextPhase);
 }
 
-EGamePhase UGameFlowManager::GetCurrentGamePhase()
+void UGameFlowManager::UpdateGameFlowData()
 {
-	return CurrentGamePhase;
-}
-
-FName UGameFlowManager::GetCurrentMapName()
-{
-	return CurrentMapName;
-}
-
-int32 UGameFlowManager::GetCurrentRepeatCount()
-{
-	return CurrentRepeatCount;
+	AZNBaseGameState* GS = GetWorld()->GetGameState<AZNBaseGameState>();
+	if (GS)
+	{
+		GS->SetCurrentGamePhase(CurGamePhaseCache);
+		GS->SetCurrentMapName(CurMapNameCache);
+		GS->SetCurrentRepeatCount(CurRepeatCountCache);
+	}
 }
 
 //FName UGameFlowManager::GetInternalMapNameByPhase(EGamePhase _GamePhase)
@@ -143,29 +146,19 @@ int32 UGameFlowManager::GetCurrentRepeatCount()
 //	return InternalMapName;
 //}
 
-void UGameFlowManager::SetCurrentGamePhase(EGamePhase _GamePhase)
-{
-	CurrentGamePhase = _GamePhase;
-}
-
-void UGameFlowManager::SetCurrentMapName(FName _MapName)
-{
-	CurrentMapName = _MapName;
-}
-
 void UGameFlowManager::InitCurrentRepeatCount()
 {
-	CurrentRepeatCount = 1;
+	CurRepeatCountCache = 0;
 }
 
 void UGameFlowManager::AddCurrentRepeatCount()
 {
-	CurrentRepeatCount += 1;
+	CurRepeatCountCache += 1;
 }
 
 bool UGameFlowManager::CheckMaxRepeatCount()
 {
-	if (CurrentRepeatCount < MaxRepeatCount)
+	if (CurRepeatCountCache < MaxRepeatCount)
 	{
 		return false;
 	}

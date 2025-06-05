@@ -22,15 +22,10 @@ public:
 	
 	/* Flow Control Methods */
 	UFUNCTION(BlueprintCallable, Category = "GameFlow")
-	void ChangeGamePhase(EGamePhase _NextGamePhase);
-	UFUNCTION(BlueprintCallable, Category = "GameFlow")
-	void ChangeMapByName(FName _NextMapName, bool _bServerTravel);
-	UFUNCTION(BlueprintCallable, Category = "GameFlow")
-	void ChangeMapByPhase(EGamePhase _NextGamePhase, bool _bServerTravel);
-	UFUNCTION(BlueprintCallable, Category = "GameFlow")
-	void ChangePhaseAndMap(EGamePhase _NextGamePhase, bool _bServerTravel);
-	UFUNCTION(BlueprintCallable, Category = "GameFlow")
 	void RequestPhaseTransition(EGamePhase _NextGamePhase, ELevelTravelType _TravelType);
+
+	/*UFUNCTION(BlueprintCallable, Category = "GameFlow")
+	FName GetInternalMapNameByPhase(EGamePhase _GamePhase);*/
 
 	/* Repeat Count Methods */
 	UFUNCTION(BlueprintCallable, Category = "GameFlow")
@@ -40,23 +35,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "GameFlow")
 	bool CheckMaxRepeatCount();
 
-	/* Getter, Setter, ... etc. */
+	/* Update GameState */
 	UFUNCTION(BlueprintCallable, Category = "GameFlow")
-	EGamePhase GetCurrentGamePhase();
-	UFUNCTION(BlueprintCallable, Category = "GameFlow")
-	FName GetCurrentMapName();
-	UFUNCTION(BlueprintCallable, Category = "GameFlow")
-	int32 GetCurrentRepeatCount();
-	/*UFUNCTION(BlueprintCallable, Category = "GameFlow")
-	FName GetInternalMapNameByPhase(EGamePhase _GamePhase);*/
-	void SetCurrentGamePhase(EGamePhase _GamePhase);
-	void SetCurrentMapName(FName _MapName);
+	void UpdateGameFlowData();
 
 private:
 	/* GameFlow Data */
-	EGamePhase CurrentGamePhase;
-	FName CurrentMapName;
-	int32 CurrentRepeatCount;
+	EGamePhase CurGamePhaseCache;
+	FName CurMapNameCache;
+	int32 CurRepeatCountCache;
 	UPROPERTY(EditDefaultsOnly)
 	int32 MaxRepeatCount = 2;
 
