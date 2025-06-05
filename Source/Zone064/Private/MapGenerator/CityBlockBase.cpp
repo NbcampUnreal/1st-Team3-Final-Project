@@ -23,6 +23,9 @@ ACityBlockBase::ACityBlockBase()
     LightSpawnChance = 0.3f;
     TrashSpawnChance = 0.3f;
 
+    bIsCrossroad = false;
+    bReplicates = true;
+
 }
 
 void ACityBlockBase::BeginPlay()
@@ -149,7 +152,6 @@ void ACityBlockBase::InitializeBlock(FIntPoint InGridPos, bool bCrossroad, ERoad
     GridPosition = InGridPos;
     bIsCrossroad = bCrossroad;
     RoadDirection = InDirection;
-    //SpawnRoadsideProps();
 }
 
 float ACityBlockBase::GetRandomChance()
