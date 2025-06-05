@@ -91,6 +91,8 @@ void AMapGenerator::OnPrefabsLoaded()
     {
         GenerateMap();
     }
+
+    OnPropSpawnComplete.Broadcast();
 }
 
 
@@ -425,9 +427,6 @@ void AMapGenerator::TrySpawnProps(AActor* Target, FIntPoint GridPos)
             }
         }
     }
-
-    //// 델리게이트 호출
-    //OnPropSpawnComplete.Broadcast();
 }
 
 
