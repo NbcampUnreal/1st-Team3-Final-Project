@@ -27,11 +27,7 @@ void UGameFlowManager::Initialize(FSubsystemCollectionBase& Collection)
 	}
 
 	// Initialize GamePhase, RepeatCount
-	AZNBaseGameState* GS = GetWorld()->GetGameState<AZNBaseGameState>();
-	if (GS)
-	{
-		GS->SetCurrentGamePhase(EGamePhase::None);
-	}
+	CurGamePhaseCache = EGamePhase::None;
 	InitCurrentRepeatCount();
 }
 
