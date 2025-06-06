@@ -9,14 +9,6 @@ class UBoxComponent;
 class UStaticMesh;
 class AMapGenerator;
 
-UENUM()
-enum class EDebrisMeshType : uint8
-{
-    Variant,
-    Vehicle,
-    Other
-};
-
 USTRUCT()
 struct FDebrisInstanceData 
 {
@@ -26,7 +18,6 @@ struct FDebrisInstanceData
     UPROPERTY() FVector Location;
     UPROPERTY() FRotator Rotation;
     UPROPERTY() int32 MeshIndex;
-    UPROPERTY() EDebrisMeshType MeshType;
 };
 
 UCLASS()
