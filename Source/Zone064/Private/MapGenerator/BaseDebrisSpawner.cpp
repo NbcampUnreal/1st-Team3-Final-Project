@@ -45,7 +45,10 @@ void ABaseDebrisSpawner::BeginPlay()
 
     RandomStream.Initialize(Seed);
     
-    GenerateInstances();
+    if (HasAuthority())
+    {
+        GenerateInstances();
+    }
 }
 
 void ABaseDebrisSpawner::Tick(float DeltaTime)
@@ -152,6 +155,7 @@ void ABaseDebrisSpawner::GenerateInstances()
             InstanceData.Location = SpawnLocation;
             InstanceData.Rotation = RandomRot;
             InstanceData.MeshIndex = Index;
+            InstanceData.MeshType = EDebrisMeshType::Variant;
             ReplicatedInstances.Add(InstanceData);
 
             MeshComp->AddInstance(InstanceTransform);
@@ -184,6 +188,7 @@ void ABaseDebrisSpawner::GenerateInstances()
         if (SpawnChanceRoll > SpawnChance)
             continue;
 
+        FDebrisInstanceData InstanceData;
         FVector LocalRandom = FVector(
             RandomStream.FRandRange(-Extent.X, Extent.X),
             RandomStream.FRandRange(-Extent.Y, Extent.Y),
@@ -212,12 +217,14 @@ void ABaseDebrisSpawner::GenerateInstances()
         {
             Index = RandomStream.RandRange(0, VehicleMeshes.Num() - 1);
             ChosenMesh = VehicleMeshes[Index];
+            InstanceData.MeshType = EDebrisMeshType::Vehicle;
             bIsVehicle = true;
         }
         else if (OtherMeshes.Num() > 0)
         {
             Index = RandomStream.RandRange(0, OtherMeshes.Num() - 1);
             ChosenMesh = OtherMeshes[Index];
+            InstanceData.MeshType = EDebrisMeshType::Other;
         }
 
         if (!ChosenMesh) continue;
@@ -248,8 +255,7 @@ void ABaseDebrisSpawner::GenerateInstances()
         FVector LocalPos = MeshComp->GetComponentTransform().InverseTransformPosition(SpawnLocation);
         FTransform InstanceTransform(RandomRot, LocalPos);
 
-        // 클라이언트에 전달할 구조체 저장
-        FDebrisInstanceData InstanceData;
+        // 클라이언트에 전달할 구조체 저장 객체는 위에 있음
         InstanceData.Location = SpawnLocation;
         InstanceData.Rotation = RandomRot;
         InstanceData.MeshIndex = Index;
@@ -321,19 +327,35 @@ void ABaseDebrisSpawner::OnConstruction(const FTransform& Transform)
 
 void ABaseDebrisSpawner::OnRep_DebrisSpawnData()
 {
+    UE_LOG(LogTemp, Warning, TEXT("OnRep_DebrisSpawnData called, %d items"), ReplicatedInstances.Num());
+    
     // 추가될 때마다 새로 생성하므로 초기화로 중복 생성 방지
     for (auto& Pair : MeshToComponentMap)
     {
         if (Pair.Value) Pair.Value->ClearInstances();
     }
+    
 
     for (const FDebrisInstanceData& Info : ReplicatedInstances)
     {
-        if (!MeshVariants.IsValidIndex(Info.MeshIndex)) continue;
-        UStaticMesh* Mesh = MeshVariants[Info.MeshIndex];
+        UStaticMesh* Mesh = nullptr;
+        if (Info.MeshType == EDebrisMeshType::Variant && MeshVariants.IsValidIndex(Info.MeshIndex))
+        {
+            Mesh = MeshVariants[Info.MeshIndex];
+        }
+        else if (Info.MeshType == EDebrisMeshType::Vehicle && VehicleMeshes.IsValidIndex(Info.MeshIndex))
+        {
+            Mesh = VehicleMeshes[Info.MeshIndex];
+        }
+        else if (Info.MeshType == EDebrisMeshType::Other && OtherMeshes.IsValidIndex(Info.MeshIndex))
+        {
+            Mesh = OtherMeshes[Info.MeshIndex];
+        }
+        
         UHierarchicalInstancedStaticMeshComponent* MeshComp = GetOrCreateInstancedMeshComponent(Mesh);
         if (!MeshComp) continue;
         FTransform InstanceTransform(Info.Rotation, MeshComp->GetComponentTransform().InverseTransformPosition(Info.Location));
         MeshComp->AddInstance(InstanceTransform);
+        
     }
 }
