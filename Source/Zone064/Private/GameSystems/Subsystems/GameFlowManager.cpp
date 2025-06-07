@@ -79,7 +79,7 @@ void UGameFlowManager::RequestPhaseTransition(EGamePhase _NextGamePhase, ELevelT
 		return;
 	}
 
-	// Cache GameFlow Data
+	// Cache GameFlow Data (on GameFlowManager)
 	CurGamePhaseCache = _NextGamePhase;
 	CurMapNameCache = Row->InternalMapName;
 
@@ -113,7 +113,12 @@ void UGameFlowManager::RequestPhaseTransition(EGamePhase _NextGamePhase, ELevelT
 		break;
 	}
 
-	UpdateGameFlowData();
+	// Update GameFlow Data (from GameFlowManager to GameState)
+	if (GetWorld()->GetAuthGameMode())
+	{
+		UpdateGameFlowData();
+	}
+
 
 	//OnPhaseChanged.Broadcast(NextPhase);
 }

@@ -9,9 +9,13 @@ void AZNBaseGameState::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (UGameFlowManager* GameFlowManager = GetGameInstance()->GetSubsystem<UGameFlowManager>())
+	// Update GameFlow Data (from GameFlowManager to GameState)
+	if (GetWorld()->GetAuthGameMode())
 	{
-		GameFlowManager->UpdateGameFlowData();
+		if (UGameFlowManager* GameFlowManager = GetGameInstance()->GetSubsystem<UGameFlowManager>())
+		{
+			GameFlowManager->UpdateGameFlowData();
+		}
 	}
 }
 
