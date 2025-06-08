@@ -20,5 +20,14 @@ public:
 	EGamePhase GamePhase;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName MapName;
+	FName InternalMapName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FString DisplayMapName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FString Path;
+
+	/*UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UTexture2D* Thumbnail;*/
 };

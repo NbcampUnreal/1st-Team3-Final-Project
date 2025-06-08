@@ -17,7 +17,7 @@ class ZONE064_API UZNBaseGameInstance : public UAdvancedFriendsGameInstance
 public:
 	/* Data Tables */
 	UPROPERTY(EditDefaultsOnly)
-	UDataTable* MapNameDataTable;
+	UDataTable* MapDataTable;
 
 	UPROPERTY(EditDefaultsOnly)
 	UDataTable* WidgetDataTable;
