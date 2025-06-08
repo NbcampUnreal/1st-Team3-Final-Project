@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "GameSystems/Types/GamePhaseTypes.h"
+#include "GameSystems/Types/TravelTypes.h"
+#include "GameSystems/Datas/MapDataRow.h"
 #include "GameFlowManager.generated.h"
 
 /**
@@ -20,30 +22,31 @@ public:
 	
 	/* Flow Control Methods */
 	UFUNCTION(BlueprintCallable, Category = "GameFlow")
-	void AdvanceGamePhase();
-	void ChangePhaseAndMap(EGamePhase _NextGamePhase);
+	void RequestPhaseTransition(EGamePhase _NextGamePhase, ELevelTravelType _TravelType);
 
-	/* Getter, Setter, ... etc. */
+	/*UFUNCTION(BlueprintCallable, Category = "GameFlow")
+	FName GetInternalMapNameByPhase(EGamePhase _GamePhase);*/
+
+	/* Repeat Count Methods */
 	UFUNCTION(BlueprintCallable, Category = "GameFlow")
-	EGamePhase GetCurrentGamePhase();
-	UFUNCTION(BlueprintCallable, Category = "GameFlow")
-	FName GetCurrentMapName();
-	UFUNCTION(BlueprintCallable, Category = "GameFlow")
-	int32 GetCurrentRepeatCount();
-	void SetCurrentGamePhase(EGamePhase _GamePhase);
-	void SetCurrentMapName(FName _MapName);
 	void InitCurrentRepeatCount();
+	UFUNCTION(BlueprintCallable, Category = "GameFlow")
 	void AddCurrentRepeatCount();
+	UFUNCTION(BlueprintCallable, Category = "GameFlow")
+	bool CheckMaxRepeatCount();
+
+	/* Update GameState */
+	UFUNCTION(BlueprintCallable, Category = "GameFlow")
+	void UpdateGameFlowData();
 
 private:
 	/* GameFlow Data */
-	EGamePhase CurrentGamePhase;
-	FName CurrentMapName;
-	int32 CurrentRepeatCount;
-
+	EGamePhase CurGamePhaseCache;
+	FName CurMapNameCache;
+	int32 CurRepeatCountCache;
 	UPROPERTY(EditDefaultsOnly)
-	int32 MaxRepeatCount = 4;
+	int32 MaxRepeatCount = 2;
 
 	/* MapName Data */
-	TMap<EGamePhase, FName> MapNameCache;
+	TMap<EGamePhase, FMapDataRow> MapDataCache;
 };	
