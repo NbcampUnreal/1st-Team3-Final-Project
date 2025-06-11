@@ -25,13 +25,19 @@
 			]
 		},
 		{
-
 			"Name": "AnimationWarping",
 			"Enabled": true
 		},
 		{
-
 			"Name": "PCG",
+			"Enabled": true
+		},
+		{
+			"Name": "OnlineSubsystemSteam",
+			"Enabled": true
+		},
+		{
+			"Name": "SoundUtilities",
 			"Enabled": true
 		}
 	]

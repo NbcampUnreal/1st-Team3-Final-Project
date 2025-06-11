@@ -10,13 +10,6 @@ ACityBlockBase::ACityBlockBase()
 
     RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 
-    ExplorationTrigger = CreateDefaultSubobject<UBoxComponent>(TEXT("ExplorationTrigger"));
-    ExplorationTrigger->SetupAttachment(RootComponent);
-    ExplorationTrigger->SetCollisionProfileName(TEXT("NoCollision"));
-    ExplorationTrigger->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel1, ECollisionResponse::ECR_Ignore);
-    ExplorationTrigger->SetBoxExtent(FVector(300.f, 300.f, 200.f));
-    ExplorationTrigger->OnComponentBeginOverlap.AddDynamic(this, &ACityBlockBase::OnOverlapBegin);
-
     ItemSpawnPoint = CreateDefaultSubobject<UArrowComponent>(TEXT("ItemSpawnPoint"));
     ItemSpawnPoint->SetupAttachment(RootComponent);
 
@@ -29,6 +22,9 @@ ACityBlockBase::ACityBlockBase()
     TreeSpawnChance = 0.8f;
     LightSpawnChance = 0.3f;
     TrashSpawnChance = 0.3f;
+
+    bIsCrossroad = false;
+    bReplicates = true;
 
 }
 
@@ -50,15 +46,15 @@ void ACityBlockBase::BeginPlay()
     }
 }
 
-void ACityBlockBase::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
-    UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
-    bool bFromSweep, const FHitResult& SweepResult)
-{
-    if (OtherActor && OtherActor != this)
-    {
-        OnPlayerEnterBlock();
-    }
-}
+//void ACityBlockBase::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+//    UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
+//    bool bFromSweep, const FHitResult& SweepResult)
+//{
+//    if (OtherActor && OtherActor != this)
+//    {
+//        OnPlayerEnterBlock();
+//    }
+//}
 
 void ACityBlockBase::SetGridPosition(FIntPoint InGridPos)
 {
@@ -156,7 +152,6 @@ void ACityBlockBase::InitializeBlock(FIntPoint InGridPos, bool bCrossroad, ERoad
     GridPosition = InGridPos;
     bIsCrossroad = bCrossroad;
     RoadDirection = InDirection;
-    //SpawnRoadsideProps();
 }
 
 float ACityBlockBase::GetRandomChance()

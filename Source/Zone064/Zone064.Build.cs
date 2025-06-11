@@ -9,7 +9,7 @@ public class Zone064 : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "UMG", "OnlineSubsystem", "OnlineSubsystemUtils", "NetCore", "Slate", "SlateCore"});
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "UMG", "OnlineSubsystem", "OnlineSubsystemSteam", "OnlineSubsystemUtils", "NetCore", "Slate", "SlateCore", "Voice"});
 
 		PrivateDependencyModuleNames.AddRange(new string[] { "OnlineSubsystemSteam" });
 

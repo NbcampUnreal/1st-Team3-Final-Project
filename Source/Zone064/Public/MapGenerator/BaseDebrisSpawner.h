@@ -7,6 +7,27 @@
 class UHierarchicalInstancedStaticMeshComponent;
 class UBoxComponent;
 class UStaticMesh;
+class AMapGenerator;
+
+UENUM()
+enum class EDebrisMeshType : uint8
+{
+    Variant,
+    Vehicle,
+    Other
+};
+
+USTRUCT()
+struct FDebrisInstanceData 
+{
+
+    GENERATED_BODY()
+
+    UPROPERTY() FVector Location;
+    UPROPERTY() FRotator Rotation;
+    UPROPERTY() int32 MeshIndex;
+    UPROPERTY() EDebrisMeshType MeshType;
+};
 
 UCLASS()
 class ZONE064_API ABaseDebrisSpawner : public AActor
@@ -24,10 +45,24 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Instancing")
     void GenerateInstances();
 
+    virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 protected:
     
+    AMapGenerator* MapGenerator;
+
+    UFUNCTION()
+    bool CheckCrossRoad();
+
     virtual void OnConstruction(const FTransform& Transform) override;
     
+    UPROPERTY(ReplicatedUsing = OnRep_DebrisSpawnData)
+    TArray<FDebrisInstanceData> ReplicatedInstances;
+
+    // 클라이언트 OnRep
+    UFUNCTION()
+    void OnRep_DebrisSpawnData();
+
     // 메시별 인스턴싱 컴포넌트 매핑
     UPROPERTY()
     TMap<UStaticMesh*, UHierarchicalInstancedStaticMeshComponent*> MeshToComponentMap;
