@@ -4,10 +4,9 @@
 #include "GameFramework/Actor.h"
 #include "Engine/StreamableManager.h"
 #include "Engine/AssetManager.h"
-#include "GameFramework/PlayerStart.h"
 #include "MapGenerator.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPropSpawnComplete);
+DECLARE_MULTICAST_DELEGATE(FOnPropSpawnComplete);
 
 UENUM(BlueprintType)
 enum class EZoneType : uint8
@@ -97,7 +96,6 @@ protected:
 
 public:
     // 스폰 완료시 호출할 델리게이트
-    UPROPERTY(BlueprintAssignable)
     FOnPropSpawnComplete OnPropSpawnComplete;
 
     // 맵 크기
@@ -169,16 +167,16 @@ public:
 
     // 커스텀 플레이어 스타트 사용
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    TSubclassOf<AActor> PlayerStartActor;
+    TSubclassOf<APlayerStart> PlayerStartActor;
     
-    // 구역 맵
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-    TMap<FIntPoint, FGridCellData> ZoneMap;
 
 private:
     FRandomStream RandomStream;
     FStreamableManager AssetLoader;
     
+    // 구역 맵
+    TMap<FIntPoint, FGridCellData> ZoneMap;
+
     // 4방향 탐색용 오프셋
     TArray<FIntPoint> SearchOffsetList;
     // 대각선 방향 탐색용 오프셋

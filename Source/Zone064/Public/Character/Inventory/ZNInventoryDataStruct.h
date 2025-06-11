@@ -13,9 +13,7 @@ struct FLines {
 		YLines = {};
 	};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<FVector2D> XLines;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<FVector2D> YLines;
 };
 
@@ -28,9 +26,7 @@ struct FMousePositionInTile {
 
 	};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool Right;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool Down;
 };
 
