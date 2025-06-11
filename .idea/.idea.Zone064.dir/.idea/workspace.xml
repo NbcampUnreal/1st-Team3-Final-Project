@@ -7,14 +7,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ad18e44d-431e-4ba1-a905-566182d4eb4c" name="변경" comment="">
-      <change afterPath="$PROJECT_DIR$/Source/Zone064/Private/ActorComponent/DefenseComponent.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Source/Zone064/Private/ActorComponent/HungerComponent.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Source/Zone064/Public/ActorComponent/DefenseComponent.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Source/Zone064/Public/ActorComponent/HungerComponent.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.Zone064.dir/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Zone064.dir/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.Zone064/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Zone064/.idea/workspace.xml" afterDir="false" />
-    </list>
+    <list default="true" id="ad18e44d-431e-4ba1-a905-566182d4eb4c" name="변경" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -43,7 +36,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
     "Uproject.Zone064.executor": "Debug",
-    "git-widget-placeholder": "cyh-049/배고픔스텟,방어력스텟추가",
+    "git-widget-placeholder": "cyh-105/좀비가-자유롭게-이동",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -141,6 +134,7 @@
       <workItem from="1748316483917" duration="1839000" />
       <workItem from="1748491211408" duration="24000" />
       <workItem from="1748503830462" duration="506000" />
+      <workItem from="1749537688080" duration="3000" />
     </task>
     <servers />
   </component>
