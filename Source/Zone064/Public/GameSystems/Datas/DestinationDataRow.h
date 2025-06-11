@@ -16,8 +16,11 @@ struct ZONE064_API FDestinationDataRow : public FDataRow
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName DestinationName;
+	FString DestinationName;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UTexture2D* Thumbnail;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 RepeatCount;
 };
