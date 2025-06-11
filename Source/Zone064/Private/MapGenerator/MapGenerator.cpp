@@ -87,12 +87,7 @@ void AMapGenerator::OnPrefabsLoaded()
         }
     }
 
-    if (HasAuthority())
-    {
-        GenerateMap();
-    }
-
-    OnPropSpawnComplete.Broadcast();
+    GenerateMap();
 }
 
 
@@ -427,6 +422,9 @@ void AMapGenerator::TrySpawnProps(AActor* Target, FIntPoint GridPos)
             }
         }
     }
+
+    //// 델리게이트 호출
+    //OnPropSpawnComplete.Broadcast();
 }
 
 
@@ -529,7 +527,7 @@ void AMapGenerator::GenerateMap()
         AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(Selected, Location, Rotation);
         if (ACityBlockBase* Block = Cast<ACityBlockBase>(SpawnedActor))
         {
-            Block->InitializeBlock(GridPos, Cell.bIsCrossroad, Cell.RoadDirection);
+            //Block->InitializeBlock(GridPos, Cell.bIsCrossroad, Cell.RoadDirection);
         }
 
         UE_LOG(LogTemp, Log, TEXT("Spawned (infra): %s at (%d, %d)"), *Selected->GetName(), GridPos.X, GridPos.Y);
@@ -783,14 +781,14 @@ void AMapGenerator::GenerateZoneMap()
         }
     }
 
-    //---- 플레이어 스타트 배치 ----//
-    int32 PlayerStartIndex = RandomStream.RandRange(0, CrossroadCenters.Num() - 1);
-    FIntPoint PlayerStartPos = CrossroadCenters[PlayerStartIndex];
+    ////---- 플레이어 스타트 배치 ----//
+    //int32 PlayerStartIndex = RandomStream.RandRange(0, CrossroadCenters.Num() - 1);
+    //FIntPoint PlayerStartPos = CrossroadCenters[PlayerStartIndex];
 
-    FVector PlayerStartLocation = GetActorLocation() + FVector(PlayerStartPos.X * TileSize, PlayerStartPos.Y * TileSize, 50.f);
-    FRotator PlayerStartRotation = FRotator(0.f, RandomStream.FRandRange(-180.f, 180.f), 0.f);
+    //FVector PlayerStartLocation = GetActorLocation() + FVector(PlayerStartPos.X * TileSize, PlayerStartPos.Y * TileSize, 0.f);
+    //FRotator PlayerStartRotation = FRotator(0.f, RandomStream.FRandRange(-180.f, 180.f), 0.f);
 
-    GetWorld()->SpawnActor<AActor>(PlayerStartActor, PlayerStartLocation, PlayerStartRotation);
+    //GetWorld()->SpawnActor<APlayerStart>(PlayerStartActor, PlayerStartLocation, PlayerStartRotation);
 
 
     // 2. 도로 주변 인도 추가

@@ -4,7 +4,6 @@
 #include "GameSystems/Subsystems/GameFlowManager.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameInstance/ZNBaseGameInstance.h"
-#include "GameStates/ZNBaseGameState.h"
 #include "GameSystems/Datas/MapDataRow.h"
 
 
@@ -14,156 +13,224 @@ void UGameFlowManager::Initialize(FSubsystemCollectionBase& Collection)
 
 	// Cache Data Table
 	UZNBaseGameInstance* GI = Cast<UZNBaseGameInstance>(GetGameInstance());
-	if (GI && GI->MapDataTable)
+	if (GI && GI->MapNameDataTable)
 	{
-		for (const auto& RowName : GI->MapDataTable->GetRowNames())
+		static const FString Context = TEXT("MapNameDT");
+		for (const auto& RowName : GI->MapNameDataTable->GetRowNames())
 		{
-			const FMapDataRow* Row = GI->MapDataTable->FindRow<FMapDataRow>(RowName, TEXT("MapDT"));
-			if (Row)
+			const FMapDataRow* Row = GI->MapNameDataTable->FindRow<FMapDataRow>(RowName, Context);
+			if (!Row)
 			{
-				MapDataCache.Add(Row->GamePhase, *Row);
+				continue;
+			}
+
+			if (!Row->MapName.IsNone())
+			{
+				MapNameCache.Add(Row->GamePhase, Row->MapName);
 			}
 		}
 	}
 
-	// Initialize GamePhase, RepeatCount
-	CurGamePhaseCache = EGamePhase::None;
-	InitCurrentRepeatCount();
+	// Initialize GamePhase, Map
+	CurrentGamePhase = EGamePhase::None;
+	//AdvanceGamePhase();
 }
 
-//void UGameFlowManager::ChangeGamePhase(EGamePhase _NextGamePhase)
-//{
-//	SetCurrentGamePhase(_NextGamePhase);
-//}
-//
-//void UGameFlowManager::ChangeMapByName(FName _NextMapName, bool _bServerTravel)
-//{
-//	if (_NextMapName != CurrentMapName)
-//	{
-//		SetCurrentMapName(_NextMapName);
-//
-//		if (_bServerTravel)
-//		{
-//			if (GetWorld()->GetAuthGameMode())
-//			{
-//				FString TravelPath = FString::Printf(TEXT("/Game/Maps/Test/%s"), *_NextMapName.ToString());
-//				GetWorld()->ServerTravel(TravelPath);
-//			}
-//		}
-//		else
-//		{
-//			UGameplayStatics::OpenLevel(this, _NextMapName);
-//		}
-//	}
-//}
-//
-//void UGameFlowManager::ChangeMapByPhase(EGamePhase _NextGamePhase, bool _bServerTravel)
-//{
-//	/*FName NextMapName = GetInternalMapNameByPhase(_NextGamePhase);
-//	ChangeMapByName(NextMapName, _bServerTravel);*/
-//}
-//
-//void UGameFlowManager::ChangePhaseAndMap(EGamePhase _NextGamePhase, bool _bServerTravel)
-//{
-//	/*ChangeGamePhase(_NextGamePhase);
-//
-//	FName NextMapName = GetInternalMapNameByPhase(_NextGamePhase);
-//	ChangeMapByName(NextMapName, _bServerTravel);*/
-//}
-
-void UGameFlowManager::RequestPhaseTransition(EGamePhase _NextGamePhase, ELevelTravelType _TravelType)
+void UGameFlowManager::AdvanceGamePhase()
 {
-	const FMapDataRow* Row = MapDataCache.Find(_NextGamePhase);
-	if (!Row)
+	switch (CurrentGamePhase)
 	{
-		return;
-	}
-
-	// Cache GameFlow Data (on GameFlowManager)
-	CurGamePhaseCache = _NextGamePhase;
-	CurMapNameCache = Row->InternalMapName;
-
-	// Level Travel
-	switch (_TravelType)
+	case EGamePhase::None:
 	{
-	case ELevelTravelType::NoTravel:
-	{
+		InitCurrentRepeatCount();
+		ChangePhaseAndMap(EGamePhase::Title);
 		break;
 	}
-	case ELevelTravelType::OpenLevel_Solo:
+	case EGamePhase::Title:
 	{
-		UGameplayStatics::OpenLevel(this, CurMapNameCache);
+		ChangePhaseAndMap(EGamePhase::Menu);
 		break;
 	}
-
-	case ELevelTravelType::OpenLevel_Listen:
+	case EGamePhase::Menu:
 	{
-		UGameplayStatics::OpenLevel(this, CurMapNameCache, true, TEXT("listen"));
+		ChangePhaseAndMap(EGamePhase::Lobby);
 		break;
 	}
-	case ELevelTravelType::ServerTravel:
+	case EGamePhase::Lobby:
 	{
-		if (GetWorld()->GetAuthGameMode())
+		ChangePhaseAndMap(EGamePhase::Departure);
+		break;
+	}
+	case EGamePhase::Departure:
+	{
+		ChangePhaseAndMap(EGamePhase::Driving);
+		break;
+	}
+	case EGamePhase::Driving:
+	{
+		ChangePhaseAndMap(EGamePhase::InGame);
+		break;
+	}
+	case EGamePhase::InGame:
+	{
+		ChangePhaseAndMap(EGamePhase::Camping);
+		break;
+	}
+	case EGamePhase::Camping:
+	{
+		ChangePhaseAndMap(EGamePhase::Voting);
+		break;
+	}
+	case EGamePhase::Voting:
+	{
+		if (CurrentRepeatCount < MaxRepeatCount - 1)
 		{
-			GetWorld()->ServerTravel(Row->Path);
+			AddCurrentRepeatCount();
+			ChangePhaseAndMap(EGamePhase::Driving);	// next loop
+		}
+		else
+		{
+			ChangePhaseAndMap(EGamePhase::Defense);	// end loop
 		}
 		break;
 	}
-	default:
+	case EGamePhase::Defense:
+	{
+		ChangePhaseAndMap(EGamePhase::Ending);
 		break;
 	}
-
-	// Update GameFlow Data (from GameFlowManager to GameState)
-	if (GetWorld()->GetAuthGameMode())
+	case EGamePhase::Ending:
 	{
-		UpdateGameFlowData();
+		ChangePhaseAndMap(EGamePhase::ReturnToTitle);
+		break;
 	}
-
-
-	//OnPhaseChanged.Broadcast(NextPhase);
+	case EGamePhase::ReturnToTitle:
+	{
+		InitCurrentRepeatCount();
+		ChangePhaseAndMap(EGamePhase::Title);
+		break;
+	}
+	default:
+	{
+		break;
+	}
+	}
 }
 
-void UGameFlowManager::UpdateGameFlowData()
+void UGameFlowManager::ChangePhaseAndMap(EGamePhase _NextGamePhase)
 {
-	AZNBaseGameState* GS = GetWorld()->GetGameState<AZNBaseGameState>();
-	if (GS)
+	// Change Map
+	FName NextMapName = *MapNameCache.Find(_NextGamePhase);
+
+	if(NextMapName != CurrentMapName)
 	{
-		GS->SetCurrentGamePhase(CurGamePhaseCache);
-		GS->SetCurrentMapName(CurMapNameCache);
-		GS->SetCurrentRepeatCount(CurRepeatCountCache);
+		SetCurrentMapName(NextMapName);
+		UGameplayStatics::OpenLevel(this, NextMapName);	// todo: servertravel 해야 하는 경우 분리
 	}
+
+	// Change GamePhase
+	SetCurrentGamePhase(_NextGamePhase);
 }
 
-//FName UGameFlowManager::GetInternalMapNameByPhase(EGamePhase _GamePhase)
-//{
-//	const FMapDataRow* Row = MapDataCache.Find(_GamePhase);
-//	if (!Row)
-//	{
-//		return;
-//	}
-//
-//	FName InternalMapName = Row->InternalMapName;
-//
-//	return InternalMapName;
-//}
+EGamePhase UGameFlowManager::GetCurrentGamePhase()
+{
+	return CurrentGamePhase;
+}
+
+FName UGameFlowManager::GetCurrentMapName()
+{
+	return CurrentMapName;
+}
+
+int32 UGameFlowManager::GetCurrentRepeatCount()
+{
+	return CurrentRepeatCount;
+}
+
+void UGameFlowManager::SetCurrentGamePhase(EGamePhase _GamePhase)
+{
+	CurrentGamePhase = _GamePhase;
+}
+
+void UGameFlowManager::SetCurrentMapName(FName _MapName)
+{
+	CurrentMapName = _MapName;
+}
 
 void UGameFlowManager::InitCurrentRepeatCount()
 {
-	CurRepeatCountCache = 0;
+	CurrentRepeatCount = 0;
 }
 
 void UGameFlowManager::AddCurrentRepeatCount()
 {
-	CurRepeatCountCache += 1;
+	CurrentRepeatCount += 1;
 }
 
-bool UGameFlowManager::CheckMaxRepeatCount()
-{
-	if (CurRepeatCountCache < MaxRepeatCount)
-	{
-		return false;
-	}
 
-	return true;
-}
-
+//void UGameFlowManager::GoToTitlePhase()
+//{
+//	CurrentGamePhase = EGamePhase::Title;
+//	UGameplayStatics::OpenLevel(this, FName("TitleLevel"));		// todo: Server, Client differentiate?
+//}
+//
+//void UGameFlowManager::GoToMenuPhase()
+//{
+//	CurrentGamePhase = EGamePhase::Menu;
+//	UGameplayStatics::OpenLevel(this, FName("MenuLevel"));
+//}
+//
+//void UGameFlowManager::GoToLobbyPhase()
+//{
+//	CurrentGamePhase = EGamePhase::Lobby;
+//	UGameplayStatics::OpenLevel(this, FName("LobbyLevel"));
+//}
+//
+//void UGameFlowManager::GoToDeparturePhase()
+//{
+//	CurrentGamePhase = EGamePhase::Departure;
+//	UGameplayStatics::OpenLevel(this, FName("DepartureLevel"));	// todo: Change to ServerTravel
+//}
+//
+//void UGameFlowManager::GoToDrivingPhase()
+//{
+//	CurrentGamePhase = EGamePhase::Driving;
+//	UGameplayStatics::OpenLevel(this, FName("DrivingLevel"));	// todo: Change to ServerTravel
+//}
+//
+//void UGameFlowManager::GoToInGamePhase()
+//{
+//	CurrentGamePhase = EGamePhase::InGame;
+//	UGameplayStatics::OpenLevel(this, FName("InGameLevel"));	// todo: Change to ServerTravel
+//}
+//
+//void UGameFlowManager::GoToCampingPhase()
+//{
+//	CurrentGamePhase = EGamePhase::Camping;
+//	UGameplayStatics::OpenLevel(this, FName("CampingLevel"));	// todo: Same as InGameLevel?
+//}
+//
+//void UGameFlowManager::GoToVotingPhase()
+//{
+//	CurrentGamePhase = EGamePhase::Voting;
+//	// No Level Change
+//}
+//
+//void UGameFlowManager::GoToDefensePhase()
+//{
+//	CurrentGamePhase = EGamePhase::Defense;
+//	UGameplayStatics::OpenLevel(this, FName("DefenseLevel"));	// todo: Change to ServerTravel
+//}
+//
+//void UGameFlowManager::GoToEndingPhase()
+//{
+//	CurrentGamePhase = EGamePhase::Ending;
+//	UGameplayStatics::OpenLevel(this, FName("EndingLevel"));	// todo: Change to ServerTravel
+//}
+//
+//void UGameFlowManager::GoToReturnPhase()
+//{
+//	CurrentGamePhase = EGamePhase::ReturnToTitle;
+//	// No Level Change
+//}
+//

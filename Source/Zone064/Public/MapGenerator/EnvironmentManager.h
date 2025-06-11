@@ -16,14 +16,6 @@ protected:
     virtual void BeginPlay() override;
 
 public:
-
-    /*
-    *   리플리케이트 시 추가해야 할 것
-    *   1. RPC로 전달할 변경된 변수
-    *   2. 전달받은 변수로 서버에서 세팅할 함수
-    *   3. RepNotify
-    */
-
     // --- Replicated 변수 --- //
     // 시간
     UPROPERTY(ReplicatedUsing = OnRep_LightRotation)
@@ -44,12 +36,6 @@ public:
     // 비
     UPROPERTY(ReplicatedUsing = OnRep_bShouldRain, BlueprintReadWrite)
     bool bShouldRain;
-
-    // ExponentialFogHeight = 안개 관련
-    UPROPERTY(ReplicatedUsing = OnRep_FogMaxOpacity)
-    float FogMaxOpacity;
-    UPROPERTY(EditAnywhere, BlueprintReadWrite)
-    class AExponentialHeightFog* FogActor;
 
     // 라이트 액터 포인터
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -78,8 +64,6 @@ public:
     void SetMaterialInddex(int32 Index);
     UFUNCTION(BlueprintCallable)
     void SetShouldRain(bool NewShouldRain);
-    UFUNCTION(BlueprintCallable)
-    void SetFogMaxOpacity(float NewOpacity);
 
     // RepNotify
     UFUNCTION()
@@ -92,8 +76,6 @@ public:
     void OnRep_MaterialIndex();
     UFUNCTION(BlueprintImplementableEvent)
     void OnRep_bShouldRain();
-    UFUNCTION()
-    void OnRep_FogMaxOpacity();
 
 
     // Replication 셋업

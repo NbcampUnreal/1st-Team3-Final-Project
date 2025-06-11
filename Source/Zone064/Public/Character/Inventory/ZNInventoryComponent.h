@@ -22,14 +22,14 @@ public:
 
 	// 실제 인벤토리
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory|Items")
-	TArray<AZNInventoryTestBaseItem*> Items;	// 애매
+	TArray<AZNInventoryTestBaseItem*> Items;
 
 	bool bAddedItem = false;
-	TObjectPtr<UZNInventoryGridWidget> InventoryGridWidgetReference;	// BP
+	TObjectPtr<UZNInventoryGridWidget> InventoryGridWidgetReference;
 
 protected:
 	// 아이템과 저장 위치 저장
-	TMap<AZNInventoryTestBaseItem*, FIntPoint> AllItems;	// 애매
+	TMap<AZNInventoryTestBaseItem*, FIntPoint> AllItems;
 
 public:	
 	UZNInventoryComponent();
