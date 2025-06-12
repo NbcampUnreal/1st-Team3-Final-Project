@@ -33,7 +33,7 @@ public:
 
 	// 허기 자연 감소 속도 (초당)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Hunger")
-	float HungerDecayRate = 2.f;
+	float HungerDecayRate = 0.5f;
 
 	// 감소를 위한 Tick 사용 여부
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Hunger")
