@@ -236,10 +236,13 @@ void AMapGenerator::DrawDebugZoneMap()
 void AMapGenerator::SpawnSidewalkProps()
 {
     // 관심있는 타입 한 번에 묶어놓기
-    TSet<EZoneType> SidewalkTypes = {
+    TSet<EZoneType> SidewalkTypes = 
+    {
         EZoneType::Road_Sidewalk,
         EZoneType::Road_Sidewalk_Traffic,
+        EZoneType::House4,
         EZoneType::Alley,
+        EZoneType::FarmSlope,
         EZoneType::Plant
     };
 
@@ -513,11 +516,17 @@ void AMapGenerator::GenerateMap()
         TSubclassOf<AActor> Selected = (*PrefabArray)[Index];
         if (!Selected) continue;
 
-        // 건물 바닥
+        // 프리팹 대신 건물 바닥 스폰
         if (Cell.ZoneType == EZoneType::HighRise3 ||
             Cell.ZoneType == EZoneType::HighRise4 ||
             Cell.ZoneType == EZoneType::HighRise5 ||
             Cell.ZoneType == EZoneType::LowRise ||
+            Cell.ZoneType == EZoneType::Shop3 ||
+            Cell.ZoneType == EZoneType::Shop4 ||
+            Cell.ZoneType == EZoneType::Shop5 ||
+            Cell.ZoneType == EZoneType::House3 ||
+            Cell.ZoneType == EZoneType::House4 ||
+            Cell.ZoneType == EZoneType::House5 ||
             Cell.ZoneType == EZoneType::Special)
         {
             Selected = BuildingGroundPrefab;
