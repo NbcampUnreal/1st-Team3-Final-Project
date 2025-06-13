@@ -21,9 +21,19 @@ enum class EZoneType : uint8
     HighRise3            UMETA(DisplayName = "High Rise 3x3"),
     HighRise4            UMETA(DisplayName = "High Rise 4x4"),
     HighRise5            UMETA(DisplayName = "High Rise 5x5"),
+    Shop3            UMETA(DisplayName = "Shop 3x3"),
+    Shop4            UMETA(DisplayName = "Shop 4x4"),
+    Shop5            UMETA(DisplayName = "Shop 5x5"),
+    House3            UMETA(DisplayName = "House 3x3"),
+    House4            UMETA(DisplayName = "House 4x4"),
+    House5            UMETA(DisplayName = "House 5x5"),
     LowRise             UMETA(DisplayName = "Low Rise"),
     Alley               UMETA(DisplayName = "Alley"),
+    Garbage               UMETA(DisplayName = "Garbage"),
     Plant               UMETA(DisplayName = "Plant"),
+    Farmland               UMETA(DisplayName = "Farmland"),
+    FarmSlope               UMETA(DisplayName = "FarmSlope"),
+    FarmSlopeCorner               UMETA(DisplayName = "FarmSlopeCorner"),
     Special             UMETA(DisplayName = "Special")
 };
 
@@ -160,7 +170,7 @@ public:
     void SpawnSidewalkProps();
 
     void TrySpawnProps(AActor* Target, FIntPoint GridPos);
-    void TrySpawnBorder(const FVector& Location, const FIntPoint& GridPos);
+    virtual void TrySpawnBorder(const FVector& Location, const FIntPoint& GridPos);
     
     // 회전값 고려한 좌상단 구하기
     FIntPoint GetTopLeftFromOrigin(FIntPoint center, int32 width, int32 height, const FRotator& Rotation);
@@ -175,7 +185,6 @@ public:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
     TMap<FIntPoint, FGridCellData> ZoneMap;
 
-private:
     FRandomStream RandomStream;
     FStreamableManager AssetLoader;
     
@@ -193,7 +202,7 @@ private:
     TArray<FBuildingSpawnData> BuildingSpawnList;
 
     void GenerateMap();
-    void GenerateZoneMap();
+    virtual void GenerateZoneMap();
     void AddtoBuildingSpawnList(FIntPoint Pos, int32 Width, int32 Height, EZoneType ZoneType, FRotator Rotation);
 
     // 교차로 최소 간격
