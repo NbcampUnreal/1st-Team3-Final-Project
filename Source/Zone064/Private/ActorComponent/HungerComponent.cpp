@@ -79,3 +79,9 @@ void UHungerComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(UHungerComponent, Hunger);
 	DOREPLIFETIME(UHungerComponent, MaxHunger);
 }
+
+void UHungerComponent::OnRep_Hunger()
+{
+	UE_LOG(LogTemp, Log, TEXT("OnRep_Hunger called. Hunger = %f"), Hunger);
+
+}

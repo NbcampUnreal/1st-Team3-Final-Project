@@ -24,7 +24,7 @@ protected:
 
 public:	
 	// 현재 허기 수치
-	UPROPERTY(EditAnywhere, Replicated, BlueprintReadWrite, Category="Hunger")
+	UPROPERTY(EditAnywhere, ReplicatedUsing = OnRep_Hunger, BlueprintReadWrite, Category="Hunger")
 	float Hunger = 100.f;
 
 	// 최대 허기 수치
@@ -50,6 +50,10 @@ public:
 	// 현재 비율 (UI용)
 	UFUNCTION(BlueprintCallable, Category="Hunger")
 	float GetHungerPercent() const;
+
+	// 현재 허기 수치 반환
+	UFUNCTION()
+	void OnRep_Hunger();
 
 private:
 	FTimerHandle HungerTimerHandle;
