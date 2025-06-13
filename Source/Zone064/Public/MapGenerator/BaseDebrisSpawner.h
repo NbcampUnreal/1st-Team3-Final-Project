@@ -25,6 +25,7 @@ struct FDebrisInstanceData
 
     UPROPERTY() FVector Location;
     UPROPERTY() FRotator Rotation;
+    UPROPERTY() FVector Scale = FVector(1.f, 1.f, 1.f);
     UPROPERTY() int32 MeshIndex;
     UPROPERTY() EDebrisMeshType MeshType;
 };
@@ -105,5 +106,9 @@ protected:
     UPROPERTY(EditAnywhere, Category = "Instancing")
     bool bUseSplitMeshArrays;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Instancing")
+    bool bShouldCheckCollision;
     
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Instancing")
+    FVector Scale;
 };
