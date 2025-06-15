@@ -531,6 +531,7 @@ void AMapGenerator::GenerateMap()
         {
             Selected = BuildingGroundPrefab;
         }
+        else if (Cell.ZoneType == EZoneType::Greenhouse) continue;
 
         FVector Location = GetActorLocation() + FVector(GridPos.X * TileSize, GridPos.Y * TileSize, 0.f);
         FRotator Rotation = Cell.PreferredRotation;
