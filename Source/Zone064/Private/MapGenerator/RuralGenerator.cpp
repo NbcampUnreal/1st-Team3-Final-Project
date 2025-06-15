@@ -37,6 +37,8 @@ void ARuralGenerator::BeginPlay()
 	
 }
 
+
+
 void ARuralGenerator::GenerateZoneMap()
 {
     ZoneMap.Empty();
@@ -223,6 +225,8 @@ void ARuralGenerator::GenerateZoneMap()
     auto& Selected1 = Offsets[SmallestIdx];
     auto& Selected2 = Offsets[SecondLargestIdx];
 
+    TArray<FIntPoint> GreenHouseOffset = { {0, 0}, {0, 1}, {1, 0}, {1, 1} };
+
     for (int32 x = Selected1.Key.X; x <= Selected1.Value.X; x++) {
         for (int32 y = Selected1.Key.Y; y <= Selected1.Value.Y; y++) {
             FIntPoint Pos(x, y);
@@ -241,7 +245,12 @@ void ARuralGenerator::GenerateZoneMap()
             Cell.ZoneType = EZoneType::Farmland;
         }
     }
-
+    // 비닐하우스 지정
+    PlaceGreenhouse(Selected2);                 
+    if (FMath::FRand() < 0.5f)            
+    {
+        PlaceGreenhouse(Selected1);
+    }
     
 
     // 2. 도로 주변 인도 추가, 경작지면 경사로 추가
@@ -992,3 +1001,49 @@ void ARuralGenerator::TrySpawnBorder(const FVector& Location, const FIntPoint& G
     }
 }
 
+void ARuralGenerator::PlaceGreenhouse(const TPair<FIntPoint, FIntPoint>& Range)
+{
+    TArray<FIntPoint> Candidates;
+
+    for (int32 x = Range.Key.X +1; x <= Range.Value.X - 1; ++x)
+    {
+        for (int32 y = Range.Key.Y + 1; y <= Range.Value.Y - 1; ++y)
+        {
+            // 4×4 블록의 TopLeft
+            FIntPoint TL(x, y);            
+
+            bool bIsAllFarmland = true;
+            for (int dx = 0; dx < 4 && bIsAllFarmland; ++dx)
+            {
+                for (int dy = 0; dy < 4; ++dy)
+                {
+                    FIntPoint P = TL + FIntPoint(dx, dy);
+
+                    // 만약 Farmland가 아니면 후보 탈락
+                    if (!ZoneMap.Contains(P) ||
+                        ZoneMap[P].ZoneType != EZoneType::Farmland)
+                    {
+                        bIsAllFarmland = false;
+                        break;
+                    }
+                }
+            }
+
+            if (bIsAllFarmland)
+            {
+                Candidates.Add(TL);
+            }
+        }
+    }
+
+    if (Candidates.Num() == 0) return;          // 자리 없음
+
+    // 랜덤으로 하나 뽑기
+    int32 Pick = FMath::RandRange(0, Candidates.Num() - 1);
+    FIntPoint TL = Candidates[Pick];
+    FRotator   Rot = FRotator::ZeroRotator;
+
+    // Greenhouse 로 덮어쓰기
+    MarkZone(TL, 4, 4, EZoneType::Greenhouse, Rot);
+    AddtoBuildingSpawnList(TL, 4, 4, EZoneType::Greenhouse, Rot);
+}

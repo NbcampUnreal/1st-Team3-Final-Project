@@ -37,6 +37,8 @@ protected:
 	TArray<FIntPoint> FurtherLeftRightOffsetList;
 	// 상하 방향 탐색용 방향 오프셋
 	TArray<FIntPoint> UpDownOffsetList;
+	// 비닐하우스 설치
+	void PlaceGreenhouse(const TPair<FIntPoint, FIntPoint>& Range);
 
 public:	
 	

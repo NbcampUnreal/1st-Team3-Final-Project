@@ -32,6 +32,7 @@ enum class EZoneType : uint8
     Garbage               UMETA(DisplayName = "Garbage"),
     Plant               UMETA(DisplayName = "Plant"),
     Farmland               UMETA(DisplayName = "Farmland"),
+    Greenhouse               UMETA(DisplayName = "Greenhouse"),
     FarmSlope               UMETA(DisplayName = "FarmSlope"),
     FarmSlopeCorner               UMETA(DisplayName = "FarmSlopeCorner"),
     Special             UMETA(DisplayName = "Special")

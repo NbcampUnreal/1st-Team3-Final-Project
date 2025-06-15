@@ -309,6 +309,8 @@ UHierarchicalInstancedStaticMeshComponent* ABaseDebrisSpawner::GetOrCreateInstan
     NewComp->SetRelativeTransform(FTransform::Identity);
     NewComp->RegisterComponent();
     NewComp->SetStaticMesh(Mesh);
+    NewComp->InstanceStartCullDistance = 5000.f;
+    NewComp->InstanceEndCullDistance = 7000.f;
     if (bShouldCheckCollision)
     {
         NewComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
