@@ -53,7 +53,15 @@ Plugins/**/Binaries/*
 Build/*
 
 # Assests
-Content/Assets/PostCity/*
+Content/Assets/PostCity/Blueprints/*
+Content/Assets/PostCity/Demo/*
+Content/Assets/PostCity/Effects/*
+Content/Assets/PostCity/ExamplePlayer/*
+Content/Assets/PostCity/Geometry/*
+Content/Assets/PostCity/Maps/*
+Content/Assets/PostCity/Models/*
+Content/Assets/PostCity/Textures/*
+Content/Assets/PostCity/Vehicles/*
 Content/Assets/Zombie_02/*
 Content/Assets/Adventures_Pack/*
 
