@@ -1005,9 +1005,9 @@ void ARuralGenerator::PlaceGreenhouse(const TPair<FIntPoint, FIntPoint>& Range)
 {
     TArray<FIntPoint> Candidates;
 
-    for (int32 x = Range.Key.X +1; x <= Range.Value.X - 1; ++x)
+    for (int32 x = Range.Key.X +6; x <= Range.Value.X - 6; ++x)
     {
-        for (int32 y = Range.Key.Y + 1; y <= Range.Value.Y - 1; ++y)
+        for (int32 y = Range.Key.Y + 6; y <= Range.Value.Y - 6; ++y)
         {
             // 4×4 블록의 TopLeft
             FIntPoint TL(x, y);            
