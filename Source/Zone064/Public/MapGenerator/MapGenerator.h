@@ -107,6 +107,10 @@ protected:
     virtual void BeginPlay() override;
 
 public:
+
+    UFUNCTION(BlueprintCallable)
+    void StartGenerateMap(int32 GenerateSeed);
+
     // 스폰 완료시 호출할 델리게이트
     UPROPERTY(BlueprintAssignable)
     FOnPropSpawnComplete OnPropSpawnComplete;
@@ -151,9 +155,12 @@ public:
     // 비동기 로딩 후 콜백
     void OnPrefabsLoaded();
 
-    // 랜덤 시드
+    // 랜덤 시드와 setter
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Generation")
     int32 Seed;
+
+    UFUNCTION(BlueprintCallable, Category = "Generation")
+    void SetRandomSeed(int32 NewSeed);
 
     void AssignSpecialClusters();
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Generation|Special")
