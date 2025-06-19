@@ -35,6 +35,12 @@ public:
 	void InitCurrentRepeatCount();
 	void AddCurrentRepeatCount();
 
+	/* Getter */
+	UFUNCTION(BlueprintCallable, Category = "GameFlow")
+	EGamePhase GetCurGamePhaseCache();
+	UFUNCTION(BlueprintCallable, Category = "GameFlow")
+	int32 GetCurRepeatCountCache();
+
 private:
 	/* GameFlow Data */
 	EGamePhase CurrentGamePhase;
