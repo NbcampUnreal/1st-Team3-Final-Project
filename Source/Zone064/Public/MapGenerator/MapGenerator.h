@@ -52,13 +52,11 @@ struct FGridCellData
 {
     GENERATED_BODY()
 
-
-    EZoneType ZoneType = EZoneType::None;
-    FRotator PreferredRotation = FRotator::ZeroRotator;
-    bool bIsCrossroad = false;
-    int32 CrossroadSize = 0;
-    UPROPERTY(BlueprintReadOnly)
-    ERoadDirection RoadDirection = ERoadDirection::None; 
+    UPROPERTY(BlueprintReadOnly)    EZoneType ZoneType = EZoneType::None;
+    UPROPERTY(BlueprintReadOnly)    FRotator PreferredRotation = FRotator::ZeroRotator;
+    UPROPERTY(BlueprintReadOnly)    bool bIsCrossroad = false;
+    UPROPERTY(BlueprintReadOnly)    int32 CrossroadSize = 0;
+    UPROPERTY(BlueprintReadOnly)    ERoadDirection RoadDirection = ERoadDirection::None; 
 };
 
 USTRUCT(BlueprintType)
@@ -107,6 +105,10 @@ protected:
     virtual void BeginPlay() override;
 
 public:
+
+    UFUNCTION(BlueprintCallable)
+    void StartGenerateMap(int32 GenerateSeed);
+
     // 스폰 완료시 호출할 델리게이트
     UPROPERTY(BlueprintAssignable)
     FOnPropSpawnComplete OnPropSpawnComplete;
@@ -151,9 +153,12 @@ public:
     // 비동기 로딩 후 콜백
     void OnPrefabsLoaded();
 
-    // 랜덤 시드
+    // 랜덤 시드와 setter
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Generation")
     int32 Seed;
+
+    UFUNCTION(BlueprintCallable, Category = "Generation")
+    void SetRandomSeed(int32 NewSeed);
 
     void AssignSpecialClusters();
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Generation|Special")
@@ -221,6 +226,5 @@ public:
     int32 LightSpawnSpacing;
     int32 TreeSpawnSpacing;
     int32 InfraSpawnSpacing;
-
 
 };

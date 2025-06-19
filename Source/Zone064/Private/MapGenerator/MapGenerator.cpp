@@ -13,7 +13,7 @@ AMapGenerator::AMapGenerator()
     GridHeight = 10;
     TileSize = 500;
 
-    // 시드
+    // 시드 
     Seed = 42;
     // 특수부지 최소 크기와 확률
     RequiredClusterSize = 6;
@@ -47,15 +47,17 @@ void AMapGenerator::BeginPlay()
     {
         Seed = FDateTime::Now().ToUnixTimestamp();
     }
-    RandomStream.Initialize(Seed);
+}
 
+void AMapGenerator::StartGenerateMap(int32 GenerateSeed)
+{
+    SetRandomSeed(GenerateSeed);
 
     // BlockPrefabSets -> BlockPrefabAssetsByZone 변환
     for (const FZonePrefabSet& Set : BlockPrefabSets)
     {
         BlockPrefabAssetsByZone.FindOrAdd(Set.ZoneType) = Set.Prefabs;
     }
-
 
     // 소프트 레퍼런스 로딩
     TArray<FSoftObjectPath> AssetPaths;
@@ -68,9 +70,8 @@ void AMapGenerator::BeginPlay()
     }
 
     AssetLoader.RequestAsyncLoad(AssetPaths, FStreamableDelegate::CreateUObject(this, &AMapGenerator::OnPrefabsLoaded));
+
 }
-
-
 
 void AMapGenerator::OnPrefabsLoaded()
 {
@@ -95,6 +96,11 @@ void AMapGenerator::OnPrefabsLoaded()
     OnPropSpawnComplete.Broadcast();
 }
 
+void AMapGenerator::SetRandomSeed(int32 NewSeed)
+{
+    Seed = NewSeed;
+    RandomStream.Initialize(Seed);
+}
 
 void AMapGenerator::AssignSpecialClusters()
 {
