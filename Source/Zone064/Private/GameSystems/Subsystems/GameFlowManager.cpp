@@ -134,6 +134,16 @@ void UGameFlowManager::UpdateGameFlowData()
 	}
 }
 
+EGamePhase UGameFlowManager::GetCurGamePhaseCache()
+{
+	return CurGamePhaseCache;
+}
+
+int32 UGameFlowManager::GetCurRepeatCountCache()
+{
+	return CurRepeatCountCache;
+}
+
 //FName UGameFlowManager::GetInternalMapNameByPhase(EGamePhase _GamePhase)
 //{
 //	const FMapDataRow* Row = MapDataCache.Find(_GamePhase);
