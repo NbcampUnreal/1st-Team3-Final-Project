@@ -52,13 +52,11 @@ struct FGridCellData
 {
     GENERATED_BODY()
 
-
-    EZoneType ZoneType = EZoneType::None;
-    FRotator PreferredRotation = FRotator::ZeroRotator;
-    bool bIsCrossroad = false;
-    int32 CrossroadSize = 0;
-    UPROPERTY(BlueprintReadOnly)
-    ERoadDirection RoadDirection = ERoadDirection::None; 
+    UPROPERTY(BlueprintReadOnly)    EZoneType ZoneType = EZoneType::None;
+    UPROPERTY(BlueprintReadOnly)    FRotator PreferredRotation = FRotator::ZeroRotator;
+    UPROPERTY(BlueprintReadOnly)    bool bIsCrossroad = false;
+    UPROPERTY(BlueprintReadOnly)    int32 CrossroadSize = 0;
+    UPROPERTY(BlueprintReadOnly)    ERoadDirection RoadDirection = ERoadDirection::None; 
 };
 
 USTRUCT(BlueprintType)
@@ -228,6 +226,5 @@ public:
     int32 LightSpawnSpacing;
     int32 TreeSpawnSpacing;
     int32 InfraSpawnSpacing;
-
 
 };
