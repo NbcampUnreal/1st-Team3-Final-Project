@@ -24,6 +24,9 @@ ABaseDebrisSpawner::ABaseDebrisSpawner()
     VehicleSpawnChance = 0.2f;
     bUseSplitMeshArrays = false;
 
+    bShouldCheckCollision = true;
+    Scale = FVector(1.f, 1.f, 1.f);
+
 }
 
 void ABaseDebrisSpawner::BeginPlay()
@@ -45,7 +48,11 @@ void ABaseDebrisSpawner::BeginPlay()
     //    }
     //}
     
-    GenerateInstances();
+    if (HasAuthority())
+    {
+        GenerateInstances();
+    }
+    UE_LOG(LogTemp, Warning, TEXT("### NumInstances = %d (HasAuthority=%d)"), NumInstances, HasAuthority());
 }
 
 void ABaseDebrisSpawner::Tick(float DeltaTime)
@@ -55,6 +62,12 @@ void ABaseDebrisSpawner::Tick(float DeltaTime)
 
 void ABaseDebrisSpawner::GenerateInstances()
 {
+    int32 TraceMiss = 0, NoMesh = 0;
+    
+    if (!HasAuthority()) return;
+    // 교차로에선 스폰 안함
+    if (CheckCrossRoad()) return;
+
     for (auto& Pair : MeshToComponentMap)
     {
         if (Pair.Value)
@@ -73,7 +86,8 @@ void ABaseDebrisSpawner::GenerateInstances()
     TArray<float> PlacedRadii;
 
     int32 SpawnedCount = 0;
-    int32 MaxAttempts = NumInstances * 2;
+    int32 MaxAttempts = NumInstances * 5;
+    int32 Attempt = 0;
 
     // 통합 랜덤 방식
     if (!bUseSplitMeshArrays)
@@ -84,12 +98,9 @@ void ABaseDebrisSpawner::GenerateInstances()
             return;
         }
 
-        for (int32 Attempt = 0; Attempt < MaxAttempts && SpawnedCount < NumInstances; ++Attempt)
+        for (; Attempt < MaxAttempts && SpawnedCount < NumInstances; ++Attempt)
         {
-            float Roll = RandomStream.FRand();
-            if (Roll > SpawnChance)
-                continue;
-
+            
             FVector LocalRandom = FVector(
                 RandomStream.FRandRange(-Extent.X, Extent.X),
                 RandomStream.FRandRange(-Extent.Y, Extent.Y),
@@ -105,31 +116,39 @@ void ABaseDebrisSpawner::GenerateInstances()
             TraceParams.AddIgnoredActor(this);
 
             if (!World->LineTraceSingleByChannel(HitResult, Start, End, ECC_WorldStatic, TraceParams))
+            {
+                TraceMiss++;
                 continue;
+            }
+                
 
-            int32 Index = RandomStream.RandRange(0, MeshVariants.Num() - 1);
+            int32 Index = FMath::RandRange(0, MeshVariants.Num() - 1);
             UStaticMesh* ChosenMesh = MeshVariants.IsValidIndex(Index) ? MeshVariants[Index] : nullptr;
             if (!ChosenMesh)
             {
-                RandomStream.FRand();
+                NoMesh++;
                 continue;
             }
 
             float InstanceRadius = ChosenMesh->GetBounds().BoxExtent.GetMax();
             FVector SpawnLocation = HitResult.ImpactPoint;
-            FRotator RandomRot(0, RandomStream.FRandRange(0.f, 360.f), 0);
+            FRotator RandomRot(0, FMath::FRandRange(0.f, 360.f), 0);
 
             // 중복 충돌 검사
             bool bBlocked = false;
-            for (int32 i = 0; i < PlacedLocations.Num(); ++i)
+            if (bShouldCheckCollision)
             {
-                float MinDist = InstanceRadius + PlacedRadii[i];
-                if (FVector::DistSquared(PlacedLocations[i], SpawnLocation) < FMath::Square(MinDist))
+                for (int32 i = 0; i < PlacedLocations.Num(); ++i)
                 {
-                    bBlocked = true;
-                    break;
+                    float MinDist = InstanceRadius + PlacedRadii[i];
+                    if (FVector::DistSquared(PlacedLocations[i], SpawnLocation) < FMath::Square(MinDist))
+                    {
+                        bBlocked = true;
+                        break;
+                    }
                 }
             }
+
             float CollisionCheckRoll = RandomStream.FRand();
             if (bBlocked)
             {
@@ -141,9 +160,16 @@ void ABaseDebrisSpawner::GenerateInstances()
             if (!MeshComp) continue;
 
             FVector LocalPos = MeshComp->GetComponentTransform().InverseTransformPosition(SpawnLocation);
-            FTransform InstanceTransform(RandomRot, LocalPos);
+            FTransform InstanceTransform(RandomRot, LocalPos, Scale);
             
-            // 추가전 SpawnLocation 로그
+            // 클라이언트에 전달할 구조체 저장
+            FDebrisInstanceData InstanceData;
+            InstanceData.Location = SpawnLocation;
+            InstanceData.Rotation = RandomRot;
+            InstanceData.MeshIndex = Index;
+            InstanceData.Scale = Scale;
+            InstanceData.MeshType = EDebrisMeshType::Variant;
+            ReplicatedInstances.Add(InstanceData);
 
             MeshComp->AddInstance(InstanceTransform);
             //DrawDebugBox(World, SpawnLocation, ChosenMesh->GetBounds().BoxExtent, FColor::Red, false, 30.0f, 0, 2.0f);
@@ -154,6 +180,7 @@ void ABaseDebrisSpawner::GenerateInstances()
         }
 
         UE_LOG(LogTemp, Log, TEXT("[Simple] %d개의 인스턴스를 생성했습니다."), SpawnedCount);
+        UE_LOG(LogTemp, Warning, TEXT("Spawned %d / Attempts %d (TraceMiss %d, NoMesh %d)"), SpawnedCount, Attempt, TraceMiss, NoMesh);
         return;
     }
 
@@ -165,13 +192,13 @@ void ABaseDebrisSpawner::GenerateInstances()
     }
 
     int32 VehicleLimit = FMath::RoundToInt(NumInstances * VehicleSpawnRatio);
-    float VehicleRoll = RandomStream.FRand();
+    float VehicleRoll = FMath::FRand();
     if (VehicleRoll > VehicleSpawnChance) VehicleLimit = 0;
 
     int32 VehicleCount = 0;
-    for (int32 Attempt = 0; Attempt < MaxAttempts && SpawnedCount < NumInstances; ++Attempt)
+    for (; Attempt < MaxAttempts && SpawnedCount < NumInstances; ++Attempt)
     {
-        float SpawnChanceRoll = RandomStream.FRand();
+        float SpawnChanceRoll = FMath::FRand();
         if (SpawnChanceRoll > SpawnChance)
             continue;
 
@@ -192,12 +219,13 @@ void ABaseDebrisSpawner::GenerateInstances()
             continue;
 
         FVector SpawnLocation = HitResult.ImpactPoint;
-        FRotator RandomRot(0, RandomStream.FRandRange(0.f, 360.f), 0);
+        FRotator RandomRot(0, FMath::FRandRange(0.f, 360.f), 0);
 
         UStaticMesh* ChosenMesh = nullptr;
         bool bIsVehicle = false;
 
-        float VehicleSpawnRoll = RandomStream.FRand();
+        float VehicleSpawnRoll = FMath::FRand();
+        int32 Index = 0;
         if (VehicleCount < VehicleLimit && VehicleMeshes.Num() > 0 && VehicleSpawnRoll < VehicleSpawnRatio)
         {
             ChosenMesh = VehicleMeshes[RandomStream.RandRange(0, VehicleMeshes.Num() - 1)];
@@ -214,16 +242,19 @@ void ABaseDebrisSpawner::GenerateInstances()
 
         // 중복 충돌 검사
         bool bBlocked = false;
-        for (int32 i = 0; i < PlacedLocations.Num(); ++i)
+        if (bShouldCheckCollision)
         {
-            float MinDist = (InstanceRadius + PlacedRadii[i]) * 0.75f;
-            if (FVector::DistSquared(PlacedLocations[i], SpawnLocation) < FMath::Square(MinDist))
+            for (int32 i = 0; i < PlacedLocations.Num(); ++i)
             {
-                bBlocked = true;
-                break;
+                float MinDist = InstanceRadius + PlacedRadii[i];
+                if (FVector::DistSquared(PlacedLocations[i], SpawnLocation) < FMath::Square(MinDist))
+                {
+                    bBlocked = true;
+                    break;
+                }
             }
         }
-        float CollisionCheckRoll = RandomStream.FRand();
+        float CollisionCheckRoll = FMath::FRand();
         if (bBlocked)
         {
             UE_LOG(LogTemp, Warning, TEXT("Blocked: %s at %s"), *ChosenMesh->GetName(), *SpawnLocation.ToString());
@@ -234,7 +265,14 @@ void ABaseDebrisSpawner::GenerateInstances()
         if (!MeshComp) continue;
 
         FVector LocalPos = MeshComp->GetComponentTransform().InverseTransformPosition(SpawnLocation);
-        FTransform InstanceTransform(RandomRot, LocalPos);
+        FTransform InstanceTransform(RandomRot, LocalPos, Scale);
+
+        // 클라이언트에 전달할 구조체 저장 객체는 위에 있음
+        InstanceData.Location = SpawnLocation;
+        InstanceData.Rotation = RandomRot;
+        InstanceData.MeshIndex = Index;
+        InstanceData.Scale = Scale;
+        ReplicatedInstances.Add(InstanceData);
 
         MeshComp->AddInstance(InstanceTransform);
         //DrawDebugBox(World, SpawnLocation, ChosenMesh->GetBounds().BoxExtent, FColor::Blue, false, 30.0f, 0, 2.0f);
@@ -244,7 +282,7 @@ void ABaseDebrisSpawner::GenerateInstances()
         if (bIsVehicle) VehicleCount++;
         SpawnedCount++;
     }
-
+    UE_LOG(LogTemp, Warning, TEXT("Spawned %d / Attempts %d (TraceMiss %d, NoMesh %d)"), SpawnedCount, Attempt, TraceMiss, NoMesh);
     UE_LOG(LogTemp, Log, TEXT("[Split] %d개의 인스턴스를 생성했습니다. (차량 %d개 / 제한 %d개)"), SpawnedCount, VehicleCount, VehicleLimit);
 }
 
@@ -264,8 +302,17 @@ UHierarchicalInstancedStaticMeshComponent* ABaseDebrisSpawner::GetOrCreateInstan
     NewComp->SetRelativeTransform(FTransform::Identity);
     NewComp->RegisterComponent();
     NewComp->SetStaticMesh(Mesh);
-    NewComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-    NewComp->SetCollisionResponseToAllChannels(ECR_Block);
+    NewComp->InstanceStartCullDistance = 7000.f;
+    NewComp->InstanceEndCullDistance = 9000.f;
+    if (bShouldCheckCollision)
+    {
+        NewComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+        NewComp->SetCollisionResponseToAllChannels(ECR_Block);
+    }
+    else if (!bShouldCheckCollision)
+    {
+        NewComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    }
 
     MeshToComponentMap.Add(Mesh, NewComp);
     return NewComp;
@@ -284,4 +331,39 @@ void ABaseDebrisSpawner::OnConstruction(const FTransform& Transform)
     uint32 CombinedHash = HashCombineFast(PosHash, NameHash);
 
     Seed = static_cast<int32>(CombinedHash);
+}
+
+void ABaseDebrisSpawner::OnRep_DebrisSpawnData()
+{
+    UE_LOG(LogTemp, Warning, TEXT("OnRep_DebrisSpawnData called, %d items"), ReplicatedInstances.Num());
+    
+    // 추가될 때마다 새로 생성하므로 초기화로 중복 생성 방지
+    for (auto& Pair : MeshToComponentMap)
+    {
+        if (Pair.Value) Pair.Value->ClearInstances();
+    }
+    
+
+    for (const FDebrisInstanceData& Info : ReplicatedInstances)
+    {
+        UStaticMesh* Mesh = nullptr;
+        if (Info.MeshType == EDebrisMeshType::Variant && MeshVariants.IsValidIndex(Info.MeshIndex))
+        {
+            Mesh = MeshVariants[Info.MeshIndex];
+        }
+        else if (Info.MeshType == EDebrisMeshType::Vehicle && VehicleMeshes.IsValidIndex(Info.MeshIndex))
+        {
+            Mesh = VehicleMeshes[Info.MeshIndex];
+        }
+        else if (Info.MeshType == EDebrisMeshType::Other && OtherMeshes.IsValidIndex(Info.MeshIndex))
+        {
+            Mesh = OtherMeshes[Info.MeshIndex];
+        }
+        
+        UHierarchicalInstancedStaticMeshComponent* MeshComp = GetOrCreateInstancedMeshComponent(Mesh);
+        if (!MeshComp) continue;
+        FTransform InstanceTransform(Info.Rotation, MeshComp->GetComponentTransform().InverseTransformPosition(Info.Location), Info.Scale);
+        MeshComp->AddInstance(InstanceTransform);
+        
+    }
 }

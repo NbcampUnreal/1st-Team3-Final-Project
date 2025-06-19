@@ -7,6 +7,28 @@
 class UHierarchicalInstancedStaticMeshComponent;
 class UBoxComponent;
 class UStaticMesh;
+class AMapGenerator;
+
+UENUM()
+enum class EDebrisMeshType : uint8
+{
+    Variant,
+    Vehicle,
+    Other
+};
+
+USTRUCT()
+struct FDebrisInstanceData 
+{
+
+    GENERATED_BODY()
+
+    UPROPERTY() FVector Location;
+    UPROPERTY() FRotator Rotation;
+    UPROPERTY() FVector Scale = FVector(1.f, 1.f, 1.f);
+    UPROPERTY() int32 MeshIndex;
+    UPROPERTY() EDebrisMeshType MeshType;
+};
 
 UCLASS()
 class ZONE064_API ABaseDebrisSpawner : public AActor
@@ -70,5 +92,9 @@ protected:
     UPROPERTY(EditAnywhere, Category = "Instancing")
     bool bUseSplitMeshArrays;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Instancing")
+    bool bShouldCheckCollision;
     
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Instancing")
+    FVector Scale;
 };

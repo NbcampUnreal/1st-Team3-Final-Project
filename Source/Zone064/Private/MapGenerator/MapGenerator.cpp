@@ -13,7 +13,7 @@ AMapGenerator::AMapGenerator()
     GridHeight = 10;
     TileSize = 500;
 
-    // 시드
+    // 시드 
     Seed = 42;
     // 특수부지 최소 크기와 확률
     RequiredClusterSize = 6;
@@ -47,15 +47,17 @@ void AMapGenerator::BeginPlay()
     {
         Seed = FDateTime::Now().ToUnixTimestamp();
     }
-    RandomStream.Initialize(Seed);
+}
 
+void AMapGenerator::StartGenerateMap(int32 GenerateSeed)
+{
+    SetRandomSeed(GenerateSeed);
 
     // BlockPrefabSets -> BlockPrefabAssetsByZone 변환
     for (const FZonePrefabSet& Set : BlockPrefabSets)
     {
         BlockPrefabAssetsByZone.FindOrAdd(Set.ZoneType) = Set.Prefabs;
     }
-
 
     // 소프트 레퍼런스 로딩
     TArray<FSoftObjectPath> AssetPaths;
@@ -68,9 +70,8 @@ void AMapGenerator::BeginPlay()
     }
 
     AssetLoader.RequestAsyncLoad(AssetPaths, FStreamableDelegate::CreateUObject(this, &AMapGenerator::OnPrefabsLoaded));
+
 }
-
-
 
 void AMapGenerator::OnPrefabsLoaded()
 {
@@ -90,6 +91,11 @@ void AMapGenerator::OnPrefabsLoaded()
     GenerateMap();
 }
 
+void AMapGenerator::SetRandomSeed(int32 NewSeed)
+{
+    Seed = NewSeed;
+    RandomStream.Initialize(Seed);
+}
 
 void AMapGenerator::AssignSpecialClusters()
 {
@@ -231,10 +237,13 @@ void AMapGenerator::DrawDebugZoneMap()
 void AMapGenerator::SpawnSidewalkProps()
 {
     // 관심있는 타입 한 번에 묶어놓기
-    TSet<EZoneType> SidewalkTypes = {
+    TSet<EZoneType> SidewalkTypes = 
+    {
         EZoneType::Road_Sidewalk,
         EZoneType::Road_Sidewalk_Traffic,
+        EZoneType::House4,
         EZoneType::Alley,
+        EZoneType::FarmSlope,
         EZoneType::Plant
     };
 
@@ -511,15 +520,22 @@ void AMapGenerator::GenerateMap()
         TSubclassOf<AActor> Selected = (*PrefabArray)[Index];
         if (!Selected) continue;
 
-        // 건물 바닥
+        // 프리팹 대신 건물 바닥 스폰
         if (Cell.ZoneType == EZoneType::HighRise3 ||
             Cell.ZoneType == EZoneType::HighRise4 ||
             Cell.ZoneType == EZoneType::HighRise5 ||
             Cell.ZoneType == EZoneType::LowRise ||
+            Cell.ZoneType == EZoneType::Shop3 ||
+            Cell.ZoneType == EZoneType::Shop4 ||
+            Cell.ZoneType == EZoneType::Shop5 ||
+            Cell.ZoneType == EZoneType::House3 ||
+            Cell.ZoneType == EZoneType::House4 ||
+            Cell.ZoneType == EZoneType::House5 ||
             Cell.ZoneType == EZoneType::Special)
         {
             Selected = BuildingGroundPrefab;
         }
+        else if (Cell.ZoneType == EZoneType::Greenhouse) continue;
 
         FVector Location = GetActorLocation() + FVector(GridPos.X * TileSize, GridPos.Y * TileSize, 0.f);
         FRotator Rotation = Cell.PreferredRotation;

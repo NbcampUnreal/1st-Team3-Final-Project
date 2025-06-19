@@ -54,7 +54,10 @@ Build/*
 
 # Assests
 Content/Assets/PostCity/*
+!Content/Assets/PostCity/Materials/
+!Content/Assets/PostCity/Materials/**
 Content/Assets/Zombie_02/*
+Content/Assets/Adventures_Pack/*
 
 # Whitelist PakBlacklist-<BuildConfiguration>.txt files
 !Build/*/

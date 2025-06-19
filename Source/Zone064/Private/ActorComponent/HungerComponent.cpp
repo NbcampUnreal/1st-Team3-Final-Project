@@ -1,0 +1,87 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "ActorComponent/HungerComponent.h"
+#include "Net/UnrealNetwork.h"
+
+// Sets default values for this component's properties
+UHungerComponent::UHungerComponent()
+{
+	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
+	// off to improve performance if you don't need them.
+	PrimaryComponentTick.bCanEverTick = false;
+
+	// ...
+}
+
+
+// Called when the game starts
+void UHungerComponent::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (GetOwner()->HasAuthority() && bAutoDecrease)
+	{
+		GetWorld()->GetTimerManager().SetTimer(
+			HungerTimerHandle,
+			this,
+			&UHungerComponent::TickHunger,
+			1.0f,
+			true
+		);
+	}	
+}
+
+
+void UHungerComponent::TickHunger()
+{
+	DecreaseHunger(HungerDecayRate);
+}
+
+void UHungerComponent::DecreaseHunger(float Amount)
+{
+	Hunger = FMath::Clamp(Hunger - Amount, 0.f, MaxHunger);
+
+	//APawn* PawnOwner = Cast<APawn>(GetOwner());
+	//if (PawnOwner->HasAuthority())
+	//{
+	//	if (!PawnOwner->IsLocallyControlled())
+	//	{
+	//		UE_LOG(LogTemp, Warning, TEXT("Hunger : %f, Owner : %s"), Hunger, *GetOwner()->GetName());
+	//	}
+	//}
+	//else
+	//{
+	//	if (PawnOwner->IsLocallyControlled())
+	//	{
+	//		UE_LOG(LogTemp, Warning, TEXT("Hunger : %f, Owner : %s"), Hunger, *GetOwner()->GetName());
+	//	}
+	//}
+}
+
+void UHungerComponent::IncreaseHunger(float Amount)
+{
+	Hunger = FMath::Clamp(Hunger + Amount, 0.f, MaxHunger);
+}
+
+float UHungerComponent::GetHungerPercent() const
+{
+	if (MaxHunger <= 0.f)
+		return 0.f;
+
+	return Hunger / MaxHunger;
+}
+
+void UHungerComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(UHungerComponent, Hunger);
+	DOREPLIFETIME(UHungerComponent, MaxHunger);
+}
+
+void UHungerComponent::OnRep_Hunger()
+{
+	UE_LOG(LogTemp, Log, TEXT("OnRep_Hunger called. Hunger = %f"), Hunger);
+
+}
