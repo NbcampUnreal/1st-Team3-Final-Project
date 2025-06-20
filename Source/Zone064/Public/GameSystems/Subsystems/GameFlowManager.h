@@ -51,7 +51,7 @@ private:
 	FName CurMapNameCache;
 	int32 CurRepeatCountCache;
 	UPROPERTY(EditDefaultsOnly)
-	int32 MaxRepeatCount = 2;
+	int32 MaxRepeatCount = 4;
 
 	/* MapName Data */
 	TMap<EGamePhase, FMapDataRow> MapDataCache;
