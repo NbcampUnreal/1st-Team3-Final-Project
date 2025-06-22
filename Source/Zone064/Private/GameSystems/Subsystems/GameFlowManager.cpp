@@ -21,7 +21,7 @@ void UGameFlowManager::Initialize(FSubsystemCollectionBase& Collection)
 			const FMapDataRow* Row = GI->MapDataTable->FindRow<FMapDataRow>(RowName, TEXT("MapDT"));
 			if (Row)
 			{
-				MapDataCache.Add(Row->GamePhase, *Row);
+				MapDataCache.FindOrAdd(Row->GamePhase).Add(*Row);
 			}
 		}
 	}
@@ -73,15 +73,18 @@ void UGameFlowManager::Initialize(FSubsystemCollectionBase& Collection)
 
 void UGameFlowManager::RequestPhaseTransition(EGamePhase _NextGamePhase, ELevelTravelType _TravelType)
 {
-	const FMapDataRow* Row = MapDataCache.Find(_NextGamePhase);
-	if (!Row)
+	const TArray<FMapDataRow>* RowArray = MapDataCache.Find(_NextGamePhase);
+	if (!RowArray || RowArray->Num() == 0)
 	{
 		return;
 	}
 
+	int32 RandomIndex = FMath::RandRange(0, RowArray->Num() - 1);
+	const FMapDataRow& SelectedRow = (*RowArray)[RandomIndex];
+
 	// Cache GameFlow Data (on GameFlowManager)
 	CurGamePhaseCache = _NextGamePhase;
-	CurMapNameCache = Row->InternalMapName;
+	CurMapNameCache = SelectedRow.InternalMapName;
 
 	// Level Travel
 	switch (_TravelType)
@@ -105,7 +108,7 @@ void UGameFlowManager::RequestPhaseTransition(EGamePhase _NextGamePhase, ELevelT
 	{
 		if (GetWorld()->GetAuthGameMode())
 		{
-			GetWorld()->ServerTravel(Row->Path);
+			GetWorld()->ServerTravel(SelectedRow.Path);
 		}
 		break;
 	}

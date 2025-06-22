@@ -54,5 +54,5 @@ private:
 	int32 MaxRepeatCount = 4;
 
 	/* MapName Data */
-	TMap<EGamePhase, FMapDataRow> MapDataCache;
+	TMap<EGamePhase, TArray<FMapDataRow>> MapDataCache;
 };	
