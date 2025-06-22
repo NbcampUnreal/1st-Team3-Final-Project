@@ -22,6 +22,13 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
+	// 현재 맵 이름 저장
+	FString CachedMapName;
+
+	// 예외 맵 목록
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Hunger")
+	TArray<FString> IgnoreMaps;
+
 public:	
 	// 현재 허기 수치
 	UPROPERTY(EditAnywhere, ReplicatedUsing = OnRep_Hunger, BlueprintReadWrite, Category="Hunger")
@@ -33,7 +40,7 @@ public:
 
 	// 허기 자연 감소 속도 (초당)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Hunger")
-	float HungerDecayRate = 0.5f;
+	float HungerDecayRate = .25f;
 
 	// 감소를 위한 Tick 사용 여부
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Hunger")
