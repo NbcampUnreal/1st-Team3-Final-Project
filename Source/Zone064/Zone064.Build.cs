@@ -23,7 +23,8 @@ public class Zone064 : ModuleRules
             "Slate",
             "SlateCore",
             "Voice",
-            "MotionWarping"
+            "MotionWarping",
+            "GameplayTags"
         });
 
 		PrivateDependencyModuleNames.AddRange(new string[] { "OnlineSubsystemSteam" });
