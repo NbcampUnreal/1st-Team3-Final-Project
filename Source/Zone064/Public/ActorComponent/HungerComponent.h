@@ -58,6 +58,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Hunger")
 	float GetHungerPercent() const;
 
+	UFUNCTION(BlueprintCallable, Category="Hunger")
+	void TriggerTickHungerTimer(bool IsDead);
+
 	// 현재 허기 수치 반환
 	UFUNCTION()
 	void OnRep_Hunger();

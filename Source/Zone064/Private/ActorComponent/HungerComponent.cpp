@@ -86,6 +86,30 @@ float UHungerComponent::GetHungerPercent() const
 	return Hunger / MaxHunger;
 }
 
+void UHungerComponent::TriggerTickHungerTimer(bool IsDead)
+{
+	if (GetOwner()->HasAuthority()) 
+	{
+		if (IsDead)
+		{
+			if (GetWorld()->GetTimerManager().IsTimerActive(HungerTimerHandle))
+			{
+				GetWorld()->GetTimerManager().ClearTimer(HungerTimerHandle);
+			}
+		}
+		else
+		{
+			GetWorld()->GetTimerManager().SetTimer(
+				HungerTimerHandle,
+				this,
+				&UHungerComponent::TickHunger,
+				1.0f,
+				true
+			);
+		}
+	}
+}
+
 void UHungerComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
