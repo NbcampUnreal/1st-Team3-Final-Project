@@ -4,11 +4,14 @@
 #include "DrawDebugHelpers.h"
 #include "Kismet/GameplayStatics.h"
 #include "Engine/StaticMeshActor.h"
+#include "RenderCommandFence.h"
+#include "RenderingThread.h"
 
 AMapGenerator::AMapGenerator()
 {
     PrimaryActorTick.bCanEverTick = false;
 
+    bReplicates = true;
     GridWidth = 10;
     GridHeight = 10;
     TileSize = 500;
@@ -49,10 +52,13 @@ void AMapGenerator::BeginPlay()
     }
 }
 
-void AMapGenerator::StartGenerateMap(int32 GenerateSeed)
+void AMapGenerator::StartGenerateMap_Implementation(int32 GenerateSeed)
 {
-    SetRandomSeed(GenerateSeed);
-
+    if (HasAuthority())
+    {
+        SetRandomSeed(GenerateSeed);
+    }
+    
     // BlockPrefabSets -> BlockPrefabAssetsByZone 변환
     for (const FZonePrefabSet& Set : BlockPrefabSets)
     {
@@ -91,9 +97,27 @@ void AMapGenerator::OnPrefabsLoaded()
     if (HasAuthority())
     {
         GenerateMap();
+        OnPropSpawnComplete.Broadcast();
+    }
+    
+    ENetMode NetMode = GetWorld()->GetNetMode();
+    if (NetMode == NM_Client)
+    {
+        // GPU 명령어가 완전히 끝날 때까지 대기
+        ENQUEUE_RENDER_COMMAND(AMapGenerator_WaitForGPU)(
+            [this](FRHICommandListImmediate& RHICmdList)
+            {
+                // RHI 스레드까지 완전히 밀어넣고
+                RHICmdList.ImmediateFlush(EImmediateFlushType::FlushRHIThread);
+
+                // GameThread로 돌아와서 한 번만 브로드캐스트
+                AsyncTask(ENamedThreads::GameThread, [this]()
+                    {
+                        OnPropSpawnComplete.Broadcast();
+                    });
+            });
     }
 
-    OnPropSpawnComplete.Broadcast();
 }
 
 void AMapGenerator::SetRandomSeed(int32 NewSeed)

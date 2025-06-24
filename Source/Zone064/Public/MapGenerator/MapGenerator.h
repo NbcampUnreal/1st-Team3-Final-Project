@@ -106,8 +106,9 @@ protected:
 
 public:
 
-    UFUNCTION(BlueprintCallable)
+    UFUNCTION(BlueprintCallable, NetMulticast, Reliable)
     void StartGenerateMap(int32 GenerateSeed);
+    void StartGenerateMap_Implementation(int32 GenerateSeed);
 
     // 스폰 완료시 호출할 델리게이트
     UPROPERTY(BlueprintAssignable)

@@ -25,7 +25,7 @@ ACityBlockBase::ACityBlockBase()
 
     bIsCrossroad = false;
     bReplicates = true;
-
+    SetNetDormancy(ENetDormancy::DORM_Initial);
 }
 
 void ACityBlockBase::BeginPlay()
