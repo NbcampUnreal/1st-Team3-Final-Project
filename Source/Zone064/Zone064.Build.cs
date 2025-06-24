@@ -24,6 +24,8 @@ public class Zone064 : ModuleRules
             "SlateCore",
             "Voice",
             "MotionWarping",
+            "RHI",
+            "RenderCore",
             "GameplayTags"
         });
 

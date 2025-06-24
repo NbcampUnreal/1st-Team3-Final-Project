@@ -85,9 +85,11 @@ void AGlobalDebrisGenerator::SpawnLocalInstance(const FGlobalDebrisSpawnData& D)
     {
         auto* H = HISMComponents[D.MeshIndex];
 
-        FTransform WolrdTransform(FRotator(0.f, D.RotationYaw, 0.f), D.Location, D.Scale);
+        FVector LocalPos = H->GetComponentTransform().InverseTransformPosition(D.Location);
 
-        H->AddInstanceWorldSpace(WolrdTransform);
+        FTransform InstTM(FRotator(0.f, D.RotationYaw, 0.f), LocalPos, D.Scale);
+
+        H->AddInstance(InstTM);
         H->MarkRenderStateDirty();
         UE_LOG(LogTemp, Warning, TEXT("[%s] SpawnLocalInstance on mesh %d → total %d | NetMode=%d, Role=%d"), *GetName(), D.MeshIndex,H->GetInstanceCount(),(int)GetNetMode(), (int)GetLocalRole());
     }
