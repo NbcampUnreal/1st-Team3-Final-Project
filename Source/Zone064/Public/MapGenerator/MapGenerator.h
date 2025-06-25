@@ -187,7 +187,8 @@ public:
     // 커스텀 플레이어 스타트 사용
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     TSubclassOf<AActor> PlayerStartActor;
-    
+   
+
     // 구역 맵
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
     TMap<FIntPoint, FGridCellData> ZoneMap;
@@ -228,4 +229,5 @@ public:
     int32 TreeSpawnSpacing;
     int32 InfraSpawnSpacing;
 
+    
 };

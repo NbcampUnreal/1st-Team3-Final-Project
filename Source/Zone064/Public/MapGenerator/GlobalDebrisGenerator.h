@@ -8,6 +8,8 @@
 #include "MapGenerator/MapGenerator.h"
 #include "GlobalDebrisGenerator.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDebrisSpawnComplete);
+
 class UHierarchicalInstancedStaticMeshComponent;
 class AMapGenerator;
 
@@ -40,6 +42,9 @@ public:
     void SpawnAllDebris();
 
     virtual void BeginPlay() override;
+
+    UPROPERTY(BlueprintAssignable)
+    FOnDebrisSpawnComplete OnDebrisSpawnComplete;
 
     UPROPERTY()
     AMapGenerator* MapGenerator = nullptr;
