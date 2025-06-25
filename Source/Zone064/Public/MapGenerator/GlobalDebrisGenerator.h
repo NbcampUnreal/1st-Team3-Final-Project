@@ -85,16 +85,23 @@ public:
 
 
     UFUNCTION(NetMulticast, Reliable)
-    void Multicast_SpawnDebrisBatch(const TArray<FGlobalDebrisSpawnData>& Batch);
-    void Multicast_SpawnDebrisBatch_Implementation(const TArray<FGlobalDebrisSpawnData>& Batch);
+    void Multicast_SpawnDebrisBatch(const TArray<FGlobalDebrisSpawnData>& InBatch);
+    void Multicast_SpawnDebrisBatch_Implementation(const TArray<FGlobalDebrisSpawnData>& InBatch);
 
     void SpawnLocalInstance(const FGlobalDebrisSpawnData& D);
 
     UPROPERTY(EditAnywhere, Category = "Debris")
-    int32 RPCChunkSize = 100;
+    int32 RPCChunkSize = 25;
 
     UFUNCTION(NetMulticast, Reliable)
     void Multicast_FinalizeSpawn();
     void Multicast_FinalizeSpawn_Implementation();
+
+    // 대용량 데이터 나눠서 뿌리기
+    TArray<FGlobalDebrisSpawnData> Batch;
+    FTimerHandle BatchTimerHandle;
+    int32 PendingBatchStart;
+
+    void SendNextChunk();
 
 };

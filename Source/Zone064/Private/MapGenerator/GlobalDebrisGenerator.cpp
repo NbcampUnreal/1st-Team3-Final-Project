@@ -68,14 +68,14 @@ void AGlobalDebrisGenerator::BeginPlay()
     }
 }
 
-void AGlobalDebrisGenerator::Multicast_SpawnDebrisBatch_Implementation(const TArray<FGlobalDebrisSpawnData>& Batch)
+void AGlobalDebrisGenerator::Multicast_SpawnDebrisBatch_Implementation(const TArray<FGlobalDebrisSpawnData>& InBatch)
 {
     UE_LOG(LogTemp, Warning, TEXT("[%s] Multicast received %d items (NetMode=%d)"),
         *GetName(),
-        Batch.Num(),
+        InBatch.Num(),
         (int)GetNetMode());
     
-    for (auto& D : Batch) SpawnLocalInstance(D);
+    for (auto& D : InBatch) SpawnLocalInstance(D);
 
 }
 
@@ -100,6 +100,7 @@ void AGlobalDebrisGenerator::Multicast_FinalizeSpawn_Implementation()
     SetNetDormancy(DORM_DormantAll);
     UE_LOG(LogTemp, Log, TEXT("[%s] Finalized spawning and set to dormant."), *GetName());
 }
+
 
 // 타일 정보 수집: ZoneMap을 순회해 TargetZoneType인 타일만
 void AGlobalDebrisGenerator::GatherTiles()
@@ -164,7 +165,7 @@ void AGlobalDebrisGenerator::CreateHISMComponents()
 
 void AGlobalDebrisGenerator::SpawnAllDebris()
 {
-    TArray<FGlobalDebrisSpawnData> Batch;
+
 
     UWorld* World = GetWorld();
     if (!World) return;
@@ -249,20 +250,38 @@ void AGlobalDebrisGenerator::SpawnAllDebris()
         }
     }
 
+    // 서버가 멀티 캐스트로 뿌림
     if (HasAuthority())
     {
-        // Batch를 ChunkSize씩 잘라서 순차적 Multicast 호출
-        int32 Total = Batch.Num();
-        for (int32 Start = 0; Start < Total; Start += RPCChunkSize)
-        {
-            int32 Count = FMath::Min(RPCChunkSize, Total - Start);
-            TArray<FGlobalDebrisSpawnData> SubBatch;
-            SubBatch.Append(&Batch[Start], Count);
+        PendingBatchStart = 0;
 
-            Multicast_SpawnDebrisBatch(SubBatch);
-        }
+        GetWorld()->GetTimerManager().SetTimer(
+            BatchTimerHandle,
+            this,
+            &AGlobalDebrisGenerator::SendNextChunk,
+            0.05f,
+            true /* 함수에서 타이머 정지 */
+        );
+    }
+}
 
+void AGlobalDebrisGenerator::SendNextChunk()
+{
+    // Batch를 ChunkSize씩 잘라서 순차적 Multicast 호출
+    const int32 Total = Batch.Num();
+    if (PendingBatchStart >= Total)
+    {
+        GetWorld()->GetTimerManager().ClearTimer(BatchTimerHandle);
         Multicast_FinalizeSpawn();
+        return;
     }
 
+    
+    int32 Count = FMath::Min(RPCChunkSize, Total - PendingBatchStart);
+    TArray<FGlobalDebrisSpawnData> SubBatch;
+    SubBatch.Append(&Batch[PendingBatchStart], Count);
+
+    Multicast_SpawnDebrisBatch(SubBatch);
+
+    PendingBatchStart += Count;
 }
