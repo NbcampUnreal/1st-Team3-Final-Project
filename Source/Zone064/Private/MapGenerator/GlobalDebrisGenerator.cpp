@@ -99,6 +99,8 @@ void AGlobalDebrisGenerator::Multicast_FinalizeSpawn_Implementation()
 {
     SetNetDormancy(DORM_DormantAll);
     UE_LOG(LogTemp, Log, TEXT("[%s] Finalized spawning and set to dormant."), *GetName());
+
+    OnDebrisSpawnComplete.Broadcast();
 }
 
 
