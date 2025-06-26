@@ -79,8 +79,16 @@ void UGameFlowManager::RequestPhaseTransition(EGamePhase _NextGamePhase, ELevelT
 		return;
 	}
 
-	int32 RandomIndex = FMath::RandRange(0, RowArray->Num() - 1);
-	const FMapDataRow& SelectedRow = (*RowArray)[RandomIndex];
+	// Select which map to travel
+	int32 SelectedIndex = 0;
+	if (_NextGamePhase == EGamePhase::InGame)
+	{
+		if (CurDestinationTypeCache == EMapType::Rural)
+		{
+			SelectedIndex = 1;
+		}
+	}
+	const FMapDataRow& SelectedRow = (*RowArray)[SelectedIndex];
 
 	// Cache GameFlow Data (on GameFlowManager)
 	CurGamePhaseCache = _NextGamePhase;
@@ -147,18 +155,25 @@ int32 UGameFlowManager::GetCurRepeatCountCache()
 	return CurRepeatCountCache;
 }
 
-//FName UGameFlowManager::GetInternalMapNameByPhase(EGamePhase _GamePhase)
-//{
-//	const FMapDataRow* Row = MapDataCache.Find(_GamePhase);
-//	if (!Row)
-//	{
-//		return;
-//	}
-//
-//	FName InternalMapName = Row->InternalMapName;
-//
-//	return InternalMapName;
-//}
+FName UGameFlowManager::GetCurDestinationNumCache()
+{
+	return CurDestinationNumCache;
+}
+
+EMapType UGameFlowManager::GetCurDestinationTypeCache()
+{
+	return CurDestinationTypeCache;
+}
+
+void UGameFlowManager::SetCurDestinationNumCache(FName _DestinationNum)
+{
+	CurDestinationNumCache = _DestinationNum;
+}
+
+void UGameFlowManager::SetCurDestinationTypeCache(EMapType _MapType)
+{
+	CurDestinationTypeCache = _MapType;
+}
 
 void UGameFlowManager::InitCurrentRepeatCount()
 {

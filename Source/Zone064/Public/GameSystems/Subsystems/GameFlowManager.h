@@ -6,6 +6,7 @@
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "GameSystems/Types/GamePhaseTypes.h"
 #include "GameSystems/Types/TravelTypes.h"
+#include "GameSystems/Types/MapTypes.h"
 #include "GameSystems/Datas/MapDataRow.h"
 #include "GameFlowManager.generated.h"
 
@@ -39,17 +40,29 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "GameFlow")
 	void UpdateGameFlowData();
 
-	/* Getter */
+	/* Getter, Setter */
 	UFUNCTION(BlueprintCallable, Category = "GameFlow")
 	EGamePhase GetCurGamePhaseCache();
 	UFUNCTION(BlueprintCallable, Category = "GameFlow")
 	int32 GetCurRepeatCountCache();
+	UFUNCTION(BlueprintCallable, Category = "GameFlow")
+	FName GetCurDestinationNumCache();
+	UFUNCTION(BlueprintCallable, Category = "GameFlow")
+	EMapType GetCurDestinationTypeCache();
+
+	UFUNCTION(BlueprintCallable, Category = "GameFlow")
+	void SetCurDestinationNumCache(FName _DestinationNum);
+	UFUNCTION(BlueprintCallable, Category = "GameFlow")
+	void SetCurDestinationTypeCache(EMapType _DestinationType);
 
 private:
 	/* GameFlow Data */
 	EGamePhase CurGamePhaseCache;
 	FName CurMapNameCache;
+	FName CurDestinationNumCache;
+	EMapType CurDestinationTypeCache;
 	int32 CurRepeatCountCache;
+
 	UPROPERTY(EditDefaultsOnly)
 	int32 MaxRepeatCount = 4;
 
