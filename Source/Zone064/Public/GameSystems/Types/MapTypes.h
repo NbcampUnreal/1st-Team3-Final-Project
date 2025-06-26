@@ -9,6 +9,15 @@
 /**
  * 
  */
+
+UENUM(BlueprintType)
+enum class EMapType : uint8
+{
+	None				UMETA(DisplayName = "None"),
+	City				UMETA(DisplayName = "City"),
+	Rural				UMETA(DisplayName = "Rural"),
+};
+
 UCLASS()
 class ZONE064_API UMapTypes : public UObject
 {
