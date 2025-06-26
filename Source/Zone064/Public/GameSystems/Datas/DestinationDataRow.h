@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameSystems/Datas/DataRow.h"
+#include "GameSystems/Types/MapTypes.h"
 #include "DestinationDataRow.generated.h"
 
 /**
@@ -16,10 +17,16 @@ struct ZONE064_API FDestinationDataRow : public FDataRow
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FName DestinationNum;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 RepeatCount;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString DestinationName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	EMapType MapType;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<FString> NextDestinations;
