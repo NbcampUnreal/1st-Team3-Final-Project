@@ -85,11 +85,11 @@ void AGlobalDebrisGenerator::SpawnLocalInstance(const FGlobalDebrisSpawnData& D)
     {
         auto* H = HISMComponents[D.MeshIndex];
 
-        FVector LocalPos = H->GetComponentTransform().InverseTransformPosition(D.Location);
+        //FVector LocalPos = H->GetComponentTransform().InverseTransformPosition(D.Location);
 
-        FTransform InstTM(FRotator(0.f, D.RotationYaw, 0.f), LocalPos, D.Scale);
+        FTransform InstTM(FRotator(0.f, D.RotationYaw, 0.f), D.Location, D.Scale);
 
-        H->AddInstance(InstTM);
+        H->AddInstance(InstTM, true);
         H->MarkRenderStateDirty();
         UE_LOG(LogTemp, Warning, TEXT("[%s] SpawnLocalInstance on mesh %d → total %d | NetMode=%d, Role=%d"), *GetName(), D.MeshIndex,H->GetInstanceCount(),(int)GetNetMode(), (int)GetLocalRole());
     }
@@ -221,7 +221,7 @@ void AGlobalDebrisGenerator::SpawnAllDebris()
                 FRotator Rot = FRotator(0.f, RandomStream.FRandRange(0.f, 360.f), 0.f);
                 if (bUseInnerTile)
                 {
-                    float RandomYaw = FMath::RandRange(0, 4) * 90.0f;
+                    float RandomYaw = FMath::RandRange(0, 3) * 90.0f;
                     Rot = FRotator(0.f, RandomYaw, 0.f);
                 }
                 uint16 Yaw = Rot.Yaw;
