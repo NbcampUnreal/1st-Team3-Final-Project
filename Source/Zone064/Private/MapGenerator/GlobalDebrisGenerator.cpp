@@ -117,6 +117,11 @@ void AGlobalDebrisGenerator::GatherTiles()
             // 그리드 좌표 월드 위치 변환 
             FVector Center(Pair.Key.X * 500.f, Pair.Key.Y * 500.f, 0.f);
             FVector Extent(250.f, 250.f, 50.f);
+            if (bUseInnerTile)
+            {
+                Extent = FVector(5.f, 5.f, 50.f);
+            }
+
             TileInfos.Add({ Center, Extent });
         }
     }
@@ -214,8 +219,13 @@ void AGlobalDebrisGenerator::SpawnAllDebris()
 
                 FVector Loc = Hit.ImpactPoint;
                 FRotator Rot = FRotator(0.f, RandomStream.FRandRange(0.f, 360.f), 0.f);
+                if (bUseInnerTile)
+                {
+                    float RandomYaw = FMath::RandRange(0, 4) * 90.0f;
+                    Rot = FRotator(0.f, RandomYaw, 0.f);
+                }
                 uint16 Yaw = Rot.Yaw;
-                FVector  Scl = Scale;
+                FVector Scl = Scale;
 
                 // 중복 충돌 검사
                 bool bBlocked = false;

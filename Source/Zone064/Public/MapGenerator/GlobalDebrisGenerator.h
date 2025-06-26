@@ -77,6 +77,10 @@ public:
     UPROPERTY(EditAnywhere, Category = "Debris")
     bool bShouldCheckCollision = true;
 
+    // 뭉쳐진 큰 메시를 스폰할 거라면 타일 경계 넘어가지 않도록 체크
+    UPROPERTY(EditAnywhere, Category = "Debris")
+    bool bUseInnerTile = false;
+
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debris")
     FVector Scale;
 
