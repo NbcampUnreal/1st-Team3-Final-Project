@@ -106,8 +106,9 @@ protected:
 
 public:
 
-    UFUNCTION(BlueprintCallable)
+    UFUNCTION(BlueprintCallable, NetMulticast, Reliable)
     void StartGenerateMap(int32 GenerateSeed);
+    void StartGenerateMap_Implementation(int32 GenerateSeed);
 
     // 스폰 완료시 호출할 델리게이트
     UPROPERTY(BlueprintAssignable)
@@ -186,7 +187,8 @@ public:
     // 커스텀 플레이어 스타트 사용
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     TSubclassOf<AActor> PlayerStartActor;
-    
+   
+
     // 구역 맵
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
     TMap<FIntPoint, FGridCellData> ZoneMap;
@@ -227,4 +229,5 @@ public:
     int32 TreeSpawnSpacing;
     int32 InfraSpawnSpacing;
 
+    
 };

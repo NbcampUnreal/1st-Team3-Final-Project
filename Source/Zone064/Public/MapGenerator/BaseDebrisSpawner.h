@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Net/Serialization/FastArraySerializer.h"
 #include "BaseDebrisSpawner.generated.h"
 
 class UHierarchicalInstancedStaticMeshComponent;
@@ -18,16 +19,49 @@ enum class EDebrisMeshType : uint8
 };
 
 USTRUCT()
-struct FDebrisInstanceData 
+struct FDebrisInstanceDataItem : public FFastArraySerializerItem
 {
 
     GENERATED_BODY()
+
+    UPROPERTY() int32 ItemID;
 
     UPROPERTY() FVector Location;
     UPROPERTY() FRotator Rotation;
     UPROPERTY() FVector Scale = FVector(1.f, 1.f, 1.f);
     UPROPERTY() int32 MeshIndex;
     UPROPERTY() EDebrisMeshType MeshType;
+};
+
+USTRUCT()
+struct FDebrisInstanceDataArray : public FFastArraySerializer
+{
+    GENERATED_BODY()
+
+    UPROPERTY()
+    TArray<FDebrisInstanceDataItem> Instances;
+
+    // 스포너 오너
+    ABaseDebrisSpawner* Spawner = nullptr;
+
+
+    bool NetDeltaSerialize(FNetDeltaSerializeInfo& DeltaParms)
+    {
+        return FastArrayDeltaSerialize<FDebrisInstanceDataItem, FDebrisInstanceDataArray>(
+            Instances, DeltaParms, *this
+        );
+    }
+
+private:
+    // ItemID 부여 카운터
+    int32 NextID = 1;
+};
+
+template<>
+struct TStructOpsTypeTraits<FDebrisInstanceDataArray>
+    : public TStructOpsTypeTraitsBase2<FDebrisInstanceDataArray>
+{
+    enum { WithNetDeltaSerializer = true };
 };
 
 UCLASS()
@@ -48,7 +82,7 @@ public:
 
     virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-protected:
+public:
     
     AMapGenerator* MapGenerator;
 
@@ -57,12 +91,21 @@ protected:
 
     virtual void OnConstruction(const FTransform& Transform) override;
     
-    UPROPERTY(ReplicatedUsing = OnRep_DebrisSpawnData)
-    TArray<FDebrisInstanceData> ReplicatedInstances;
+    // Depricated 패스트 어레이 시리얼라이저 사용
+    //UPROPERTY(ReplicatedUsing = OnRep_DebrisSpawnData)
+    //TArray<FDebrisInstanceData> ReplicatedInstances;
 
-    // 클라이언트 OnRep
+    UPROPERTY(ReplicatedUsing = OnRep_DebrisArray)
+    FDebrisInstanceDataArray DebrisArray;
+
     UFUNCTION()
-    void OnRep_DebrisSpawnData();
+    void OnRep_DebrisArray();
+
+    // 하나의 아이템을 HISM에 적용하는 헬퍼
+    void ApplyDebrisInstance(const FDebrisInstanceDataItem& Item);
+
+    // 마지막으로 처리한 DebrisArray.Instances 의 개수
+    int32 LastReplicatedItemCount = 0;
 
     // 메시별 인스턴싱 컴포넌트 매핑
     UPROPERTY()
