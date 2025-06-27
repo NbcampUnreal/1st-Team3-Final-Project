@@ -52,6 +52,18 @@ void AMapGenerator::BeginPlay()
     }
 }
 
+void AMapGenerator::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+    Super::EndPlay(EndPlayReason);
+
+    if (PrefabLoadHandle.IsValid())
+    {
+        PrefabLoadHandle->ReleaseHandle();
+        PrefabLoadHandle.Reset();
+        CollectGarbage(GARBAGE_COLLECTION_KEEPFLAGS);
+    }
+}
+
 void AMapGenerator::StartGenerateMap_Implementation(int32 GenerateSeed)
 {
     if (HasAuthority())
@@ -75,7 +87,8 @@ void AMapGenerator::StartGenerateMap_Implementation(int32 GenerateSeed)
         }
     }
 
-    AssetLoader.RequestAsyncLoad(AssetPaths, FStreamableDelegate::CreateUObject(this, &AMapGenerator::OnPrefabsLoaded));
+    auto& AssetLoader = UAssetManager::GetStreamableManager();
+    PrefabLoadHandle = AssetLoader.RequestAsyncLoad(AssetPaths, FStreamableDelegate::CreateUObject(this, &AMapGenerator::OnPrefabsLoaded));
 
 }
 
