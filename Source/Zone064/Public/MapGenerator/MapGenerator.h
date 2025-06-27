@@ -103,6 +103,7 @@ public:
 
 protected:
     virtual void BeginPlay() override;
+    virtual void EndPlay(const EEndPlayReason::Type EndPlayReason);
 
 public:
 
@@ -194,7 +195,7 @@ public:
     TMap<FIntPoint, FGridCellData> ZoneMap;
 
     FRandomStream RandomStream;
-    FStreamableManager AssetLoader;
+    TSharedPtr<FStreamableHandle> PrefabLoadHandle;
     
     // 4방향 탐색용 오프셋
     TArray<FIntPoint> SearchOffsetList;
