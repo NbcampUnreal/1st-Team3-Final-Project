@@ -26,7 +26,9 @@ public class Zone064 : ModuleRules
             "MotionWarping",
             "RHI",
             "RenderCore",
-            "GameplayTags"
+            "GameplayTags",
+            "HeadMountedDisplay",
+            "AudioMixer"
         });
 
 		PrivateDependencyModuleNames.AddRange(new string[] { "OnlineSubsystemSteam" });
