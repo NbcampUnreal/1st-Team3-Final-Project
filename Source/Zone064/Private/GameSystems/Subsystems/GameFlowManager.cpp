@@ -14,6 +14,7 @@ void UGameFlowManager::Initialize(FSubsystemCollectionBase& Collection)
 
 	// Cache Data Table
 	UZNBaseGameInstance* GI = Cast<UZNBaseGameInstance>(GetGameInstance());
+
 	if (GI && GI->MapDataTable)
 	{
 		for (const auto& RowName : GI->MapDataTable->GetRowNames())
@@ -26,50 +27,23 @@ void UGameFlowManager::Initialize(FSubsystemCollectionBase& Collection)
 		}
 	}
 
+	if (GI && GI->DestDataTable)
+	{
+		for (const auto& RowName : GI->DestDataTable->GetRowNames())
+		{
+			const FDestinationDataRow* Row = GI->DestDataTable->FindRow<FDestinationDataRow>(RowName, TEXT("DestDT"));
+			if (Row)
+			{
+				DestDataCache.Add(RowName, *Row);
+			}
+		}
+	}
+
 	// Initialize GamePhase, RepeatCount
 	CurGamePhaseCache = EGamePhase::None;
+	CurDestinationNumCache = FName("000");
 	InitCurrentRepeatCount();
 }
-
-//void UGameFlowManager::ChangeGamePhase(EGamePhase _NextGamePhase)
-//{
-//	SetCurrentGamePhase(_NextGamePhase);
-//}
-//
-//void UGameFlowManager::ChangeMapByName(FName _NextMapName, bool _bServerTravel)
-//{
-//	if (_NextMapName != CurrentMapName)
-//	{
-//		SetCurrentMapName(_NextMapName);
-//
-//		if (_bServerTravel)
-//		{
-//			if (GetWorld()->GetAuthGameMode())
-//			{
-//				FString TravelPath = FString::Printf(TEXT("/Game/Maps/Test/%s"), *_NextMapName.ToString());
-//				GetWorld()->ServerTravel(TravelPath);
-//			}
-//		}
-//		else
-//		{
-//			UGameplayStatics::OpenLevel(this, _NextMapName);
-//		}
-//	}
-//}
-//
-//void UGameFlowManager::ChangeMapByPhase(EGamePhase _NextGamePhase, bool _bServerTravel)
-//{
-//	/*FName NextMapName = GetInternalMapNameByPhase(_NextGamePhase);
-//	ChangeMapByName(NextMapName, _bServerTravel);*/
-//}
-//
-//void UGameFlowManager::ChangePhaseAndMap(EGamePhase _NextGamePhase, bool _bServerTravel)
-//{
-//	/*ChangeGamePhase(_NextGamePhase);
-//
-//	FName NextMapName = GetInternalMapNameByPhase(_NextGamePhase);
-//	ChangeMapByName(NextMapName, _bServerTravel);*/
-//}
 
 void UGameFlowManager::RequestPhaseTransition(EGamePhase _NextGamePhase, ELevelTravelType _TravelType)
 {
@@ -163,6 +137,16 @@ FName UGameFlowManager::GetCurDestinationNumCache()
 EMapType UGameFlowManager::GetCurDestinationTypeCache()
 {
 	return CurDestinationTypeCache;
+}
+
+FDestinationDataRow UGameFlowManager::GetDestDataCacheRow(FName _RowName) const
+{
+	const FDestinationDataRow* FoundRow = DestDataCache.Find(_RowName);
+	if (FoundRow)
+	{
+		return *FoundRow;
+	}
+	return FDestinationDataRow();
 }
 
 void UGameFlowManager::SetCurDestinationNumCache(FName _DestinationNum)

@@ -8,6 +8,7 @@
 #include "GameSystems/Types/TravelTypes.h"
 #include "GameSystems/Types/MapTypes.h"
 #include "GameSystems/Datas/MapDataRow.h"
+#include "GameSystems/Datas/DestinationDataRow.h"
 #include "GameFlowManager.generated.h"
 
 /**
@@ -49,6 +50,8 @@ public:
 	FName GetCurDestinationNumCache();
 	UFUNCTION(BlueprintCallable, Category = "GameFlow")
 	EMapType GetCurDestinationTypeCache();
+	UFUNCTION(BlueprintCallable, Category = "GameFlow")
+	FDestinationDataRow GetDestDataCacheRow(FName _RowName) const;
 
 	UFUNCTION(BlueprintCallable, Category = "GameFlow")
 	void SetCurDestinationNumCache(FName _DestinationNum);
@@ -56,7 +59,7 @@ public:
 	void SetCurDestinationTypeCache(EMapType _DestinationType);
 
 private:
-	/* GameFlow Data */
+	/* GameFlow Data Cache*/
 	EGamePhase CurGamePhaseCache;
 	FName CurMapNameCache;
 	FName CurDestinationNumCache;
@@ -66,6 +69,7 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	int32 MaxRepeatCount = 4;
 
-	/* MapName Data */
+	/* DataTable Cache */
 	TMap<EGamePhase, TArray<FMapDataRow>> MapDataCache;
+	TMap<FName, FDestinationDataRow> DestDataCache;
 };	
