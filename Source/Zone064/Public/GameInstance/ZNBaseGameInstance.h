@@ -20,5 +20,8 @@ public:
 	UDataTable* MapDataTable;
 
 	UPROPERTY(EditDefaultsOnly)
-	UDataTable* WidgetDataTable;
+	UDataTable* DestDataTable;
+
+	//UPROPERTY(EditDefaultsOnly)
+	//UDataTable* WidgetDataTable;
 };
