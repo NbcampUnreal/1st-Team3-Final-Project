@@ -4,6 +4,15 @@
 #include "GameFramework/Actor.h"
 #include "EnvironmentManager.generated.h"
 
+UENUM(BlueprintType)
+enum class EWeatherState : uint8
+{
+    Clear   UMETA(DisplayName = "Clear"),
+    Rain    UMETA(DisplayName = "Rainy"),
+    Fog     UMETA(DisplayName = "Foggy"),
+    Eclipse   UMETA(DisplayName = "Eclipse")
+};
+
 UCLASS()
 class ZONE064_API AEnvironmentManager : public AActor
 {
