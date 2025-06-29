@@ -116,7 +116,7 @@ void AGlobalDebrisGenerator::GatherTiles()
         {
             // 그리드 좌표 월드 위치 변환 
             FVector Center(Pair.Key.X * 500.f, Pair.Key.Y * 500.f, 0.f);
-            FVector Extent(250.f, 250.f, 50.f);
+            FVector Extent(225.f, 225.f, 50.f);
             if (bUseInnerTile)
             {
                 Extent = FVector(5.f, 5.f, 50.f);
