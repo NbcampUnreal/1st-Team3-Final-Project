@@ -26,6 +26,7 @@ public class Zone064 : ModuleRules
             "MotionWarping",
             "RHI",
             "RenderCore",
+            "AIModule",
             "GameplayTags",
             "HeadMountedDisplay",
             "AudioMixer"
