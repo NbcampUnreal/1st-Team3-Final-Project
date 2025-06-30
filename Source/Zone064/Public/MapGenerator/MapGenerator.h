@@ -9,6 +9,16 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnPropSpawnComplete);
 
+USTRUCT(BlueprintType)
+struct FSpawnQueueData
+{
+    GENERATED_BODY()
+
+    UPROPERTY()    TSoftClassPtr<AActor> ActorClass;
+    UPROPERTY()    FVector Location;
+    UPROPERTY()    FRotator Rotation;
+};
+
 UENUM(BlueprintType)
 enum class EZoneType : uint8
 {
@@ -107,9 +117,55 @@ protected:
 
 public:
 
+    /*
+    *  순차 스폰용 
+    */
+    UPROPERTY(EditAnywhere, Category = "Generation")
+    bool bIsUsingSpawnQueue = false;
+    TQueue<FSpawnQueueData> SpawnQueue;
+    FTimerHandle SpawnQueueHandle;
+    UPROPERTY(EditAnywhere, Category = "Generation")
+    float SpawnInterval = 0.1f;
+    void EnqueueSpawnData(const FSpawnQueueData& Data);
+    void ProcessNextSpawn();
+    void StartSpawnSequence();
+
+
     UFUNCTION(BlueprintCallable, NetMulticast, Reliable)
     void StartGenerateMap(int32 GenerateSeed);
     void StartGenerateMap_Implementation(int32 GenerateSeed);
+
+
+
+    /*
+    *   1. 게임모드 StartGenerateMap() 호출
+    *   2. 서버->클라이언트에게 멀티캐스트로 비동기 로드 명령 : Multicast_RequestPrefabLoad()
+    *   3. 서버 자신도 비동기 로드 수행
+    *   4. 로딩이 끝나면 OnPrefabsLoaded() 호출
+    *   4-1. 서버는 ReadyClient에 자기 자신 추가
+    *   4-2. 클라이언트는 Server_ReportPrefabLoaded()를 통해 ReadyClient에 추가
+    *   5. ReadyClient와 GS의 PlayerArray가 같아지면 맵 스폰 개시
+    */
+    UPROPERTY()
+    TSet<APlayerState*> ReadyClients;
+
+    UFUNCTION(NetMulticast, Reliable)
+    void Multicast_RequestPrefabLoad();
+    void Multicast_RequestPrefabLoad_Implementation();
+
+    void RequestAsyncLoadAllPrefabs();
+
+    UFUNCTION(Server, Reliable, WithValidation)
+    void Server_ReportPrefabLoaded();
+    bool Server_ReportPrefabLoaded_Validate() { return true; }
+    void Server_ReportPrefabLoaded_Implementation();
+
+    void TryStartWhenAllReady();
+
+    UFUNCTION(NetMulticast, Reliable)
+    void Multicast_PropSpawnComplete();
+    void Multicast_PropSpawnComplete_Implementation();
+    
 
     // 스폰 완료시 호출할 델리게이트
     UPROPERTY(BlueprintAssignable)

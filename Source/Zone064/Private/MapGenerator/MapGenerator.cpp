@@ -4,8 +4,7 @@
 #include "DrawDebugHelpers.h"
 #include "Kismet/GameplayStatics.h"
 #include "Engine/StaticMeshActor.h"
-#include "RenderCommandFence.h"
-#include "RenderingThread.h"
+#include "GameFramework/GameStateBase.h"
 
 AMapGenerator::AMapGenerator()
 {
@@ -60,7 +59,40 @@ void AMapGenerator::EndPlay(const EEndPlayReason::Type EndPlayReason)
     {
         PrefabLoadHandle->ReleaseHandle();
         PrefabLoadHandle.Reset();
-        CollectGarbage(GARBAGE_COLLECTION_KEEPFLAGS);
+        //CollectGarbage(GARBAGE_COLLECTION_KEEPFLAGS);
+    }
+}
+
+void AMapGenerator::EnqueueSpawnData(const FSpawnQueueData& Data)
+{
+    SpawnQueue.Enqueue(Data);
+}
+
+void AMapGenerator::ProcessNextSpawn()
+{
+    FSpawnQueueData Data;
+    if (SpawnQueue.Dequeue(Data))
+    {
+        // SoftClassPtr에서 실제 UClass* 로 로드
+        UClass* SpawnCls = Data.ActorClass.LoadSynchronous();
+        if (SpawnCls)
+        {
+            GetWorld()->SpawnActor<AActor>(SpawnCls, Data.Location, Data.Rotation);
+        }
+    }
+    else
+    {
+        GetWorldTimerManager().ClearTimer(SpawnQueueHandle);
+        UE_LOG(LogTemp, Log, TEXT("모든 스폰 완료"));
+    }
+}
+
+void AMapGenerator::StartSpawnSequence()
+{
+    if (!SpawnQueueHandle.IsValid() && !SpawnQueue.IsEmpty())
+    {
+        GetWorldTimerManager()
+            .SetTimer(SpawnQueueHandle, this, &AMapGenerator::ProcessNextSpawn, SpawnInterval, true);
     }
 }
 
@@ -69,8 +101,17 @@ void AMapGenerator::StartGenerateMap_Implementation(int32 GenerateSeed)
     if (HasAuthority())
     {
         SetRandomSeed(GenerateSeed);
+        Multicast_RequestPrefabLoad();
     }
-    
+}
+
+void AMapGenerator::Multicast_RequestPrefabLoad_Implementation()
+{
+    RequestAsyncLoadAllPrefabs();
+}
+
+void AMapGenerator::RequestAsyncLoadAllPrefabs()
+{
     // BlockPrefabSets -> BlockPrefabAssetsByZone 변환
     for (const FZonePrefabSet& Set : BlockPrefabSets)
     {
@@ -92,6 +133,38 @@ void AMapGenerator::StartGenerateMap_Implementation(int32 GenerateSeed)
 
 }
 
+void AMapGenerator::Server_ReportPrefabLoaded_Implementation()
+{
+    // 호출한 플레이어 상태를 집어넣는다
+    APlayerController* PC = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
+    if (PC && PC->PlayerState)
+    {
+        ReadyClients.Add(PC->PlayerState);
+    }
+    TryStartWhenAllReady();
+}
+
+void AMapGenerator::TryStartWhenAllReady()
+{
+    // 서버에서만 동작
+    if (!HasAuthority()) return;
+
+    // 현재 연결된 플레이어 수 가져오기
+    AGameStateBase* GS = GetWorld()->GetGameState<AGameStateBase>();
+    int32 Expected = GS ? GS->PlayerArray.Num() : 1;
+
+    if (ReadyClients.Num() >= Expected)
+    {
+        GenerateMap();
+        Multicast_PropSpawnComplete();
+    }
+}
+
+void AMapGenerator::Multicast_PropSpawnComplete_Implementation()
+{
+    OnPropSpawnComplete.Broadcast();
+}
+
 void AMapGenerator::OnPrefabsLoaded()
 {
     for (const auto& Pair : BlockPrefabAssetsByZone)
@@ -107,30 +180,16 @@ void AMapGenerator::OnPrefabsLoaded()
         }
     }
 
-    if (HasAuthority())
+    if (GetNetMode() == NM_Client)
     {
-        GenerateMap();
-        OnPropSpawnComplete.Broadcast();
+        Server_ReportPrefabLoaded();
+    }
+    else if (HasAuthority())
+    {
+        ReadyClients.Add(GetWorld()->GetFirstPlayerController()->PlayerState);
     }
     
-    ENetMode NetMode = GetWorld()->GetNetMode();
-    if (NetMode == NM_Client)
-    {
-        // GPU 명령어가 완전히 끝날 때까지 대기
-        ENQUEUE_RENDER_COMMAND(AMapGenerator_WaitForGPU)(
-            [this](FRHICommandListImmediate& RHICmdList)
-            {
-                // RHI 스레드까지 완전히 밀어넣고
-                RHICmdList.ImmediateFlush(EImmediateFlushType::FlushRHIThread);
-
-                // GameThread로 돌아와서 한 번만 브로드캐스트
-                AsyncTask(ENamedThreads::GameThread, [this]()
-                    {
-                        OnPropSpawnComplete.Broadcast();
-                    });
-            });
-    }
-
+    TryStartWhenAllReady();
 }
 
 void AMapGenerator::SetRandomSeed(int32 NewSeed)
@@ -535,6 +594,13 @@ FVector AMapGenerator::GetWorldFromGrid(FIntPoint GridPos)
 
 void AMapGenerator::GenerateMap()
 {
+    // 순차스폰시 초기화
+    if (bIsUsingSpawnQueue)
+    {
+        SpawnQueue.Empty();
+        GetWorldTimerManager().ClearTimer(SpawnQueueHandle);
+    }
+    
     if (CachedPrefabsByZone.Num() == 0)
     {
         UE_LOG(LogTemp, Warning, TEXT("MapGenerator: CachedPrefabsByZone is empty!"));
@@ -579,10 +645,22 @@ void AMapGenerator::GenerateMap()
         FVector Location = GetActorLocation() + FVector(GridPos.X * TileSize, GridPos.Y * TileSize, 0.f);
         FRotator Rotation = Cell.PreferredRotation;
 
-        AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(Selected, Location, Rotation);
-        if (ACityBlockBase* Block = Cast<ACityBlockBase>(SpawnedActor))
+        if (!bIsUsingSpawnQueue)
         {
-            Block->InitializeBlock(GridPos, Cell.bIsCrossroad, Cell.RoadDirection);
+            AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(Selected, Location, Rotation);
+            if (ACityBlockBase* Block = Cast<ACityBlockBase>(SpawnedActor))
+            {
+                Block->InitializeBlock(GridPos, Cell.bIsCrossroad, Cell.RoadDirection);
+            }
+        }
+        else
+        {
+            FSpawnQueueData Data;
+            Data.ActorClass = Selected;
+            Data.Location = Location;
+            Data.Rotation = Cell.PreferredRotation;
+
+            EnqueueSpawnData(Data);
         }
 
         UE_LOG(LogTemp, Log, TEXT("Spawned (infra): %s at (%d, %d)"), *Selected->GetName(), GridPos.X, GridPos.Y);
@@ -667,16 +745,30 @@ void AMapGenerator::GenerateMap()
                 Info.Origin.Y * TileSize + (Info.Height - 1) * 0.5f * TileSize,
                 0.f);
 
-        AActor* Spawned = GetWorld()->SpawnActor<AActor>(Selected, Location, Info.Rotation);
-
-        if (ACityBlockBase* Block = Cast<ACityBlockBase>(Spawned))
+        if (!bIsUsingSpawnQueue)
         {
-            Block->InitializeBlock(Info.Origin, false, ERoadDirection::None);
+            AActor* Spawned = GetWorld()->SpawnActor<AActor>(Selected, Location, Info.Rotation);
+
+            if (ACityBlockBase* Block = Cast<ACityBlockBase>(Spawned))
+            {
+                Block->InitializeBlock(Info.Origin, false, ERoadDirection::None);
+            }
+        }
+        else
+        {
+            FSpawnQueueData Data;
+            Data.ActorClass = Selected;
+            Data.Location = Location;
+            Data.Rotation = Info.Rotation;
+
+            EnqueueSpawnData(Data);
         }
 
         UE_LOG(LogTemp, Log, TEXT("Spawned (building): %s at (%d,%d) size (%d x %d)"),
             *Selected->GetName(), Info.Origin.X, Info.Origin.Y, Info.Width, Info.Height);
     }
+
+    if(bIsUsingSpawnQueue) StartSpawnSequence();
 
     // 도로 프랍 스폰
     SpawnSidewalkProps();
