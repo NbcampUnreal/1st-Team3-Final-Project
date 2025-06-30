@@ -156,7 +156,10 @@ void AMapGenerator::TryStartWhenAllReady()
     if (ReadyClients.Num() >= Expected)
     {
         GenerateMap();
-        Multicast_PropSpawnComplete();
+        GetWorldTimerManager().SetTimerForNextTick([this]()
+            {
+                Multicast_PropSpawnComplete();
+            });
     }
 }
 

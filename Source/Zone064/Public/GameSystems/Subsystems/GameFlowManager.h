@@ -45,6 +45,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "GameFlow")
 	EGamePhase GetCurGamePhaseCache();
 	UFUNCTION(BlueprintCallable, Category = "GameFlow")
+	EGamePhase GetPrevGamePhaseCache();
+	UFUNCTION(BlueprintCallable, Category = "GameFlow")
 	int32 GetCurRepeatCountCache();
 	UFUNCTION(BlueprintCallable, Category = "GameFlow")
 	FName GetCurDestinationNumCache();
@@ -61,6 +63,7 @@ public:
 private:
 	/* GameFlow Data Cache*/
 	EGamePhase CurGamePhaseCache;
+	EGamePhase PrevGamePhaseCache;
 	FName CurMapNameCache;
 	FName CurDestinationNumCache;
 	EMapType CurDestinationTypeCache;
