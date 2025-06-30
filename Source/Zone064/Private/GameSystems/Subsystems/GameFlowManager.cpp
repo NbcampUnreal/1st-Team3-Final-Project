@@ -65,6 +65,7 @@ void UGameFlowManager::RequestPhaseTransition(EGamePhase _NextGamePhase, ELevelT
 	const FMapDataRow& SelectedRow = (*RowArray)[SelectedIndex];
 
 	// Cache GameFlow Data (on GameFlowManager)
+	PrevGamePhaseCache = CurGamePhaseCache;
 	CurGamePhaseCache = _NextGamePhase;
 	CurMapNameCache = SelectedRow.InternalMapName;
 
@@ -124,6 +125,11 @@ EGamePhase UGameFlowManager::GetCurGamePhaseCache()
 	return CurGamePhaseCache;
 }
 
+EGamePhase UGameFlowManager::GetPrevGamePhaseCache()
+{
+	return PrevGamePhaseCache;
+}
+
 int32 UGameFlowManager::GetCurRepeatCountCache()
 {
 	return CurRepeatCountCache;
@@ -162,11 +168,15 @@ void UGameFlowManager::SetCurDestinationTypeCache(EMapType _MapType)
 void UGameFlowManager::InitCurrentRepeatCount()
 {
 	CurRepeatCountCache = 0;
+
+	UpdateGameFlowData();
 }
 
 void UGameFlowManager::AddCurrentRepeatCount()
 {
 	CurRepeatCountCache += 1;
+
+	UpdateGameFlowData();
 }
 
 bool UGameFlowManager::CheckMaxRepeatCount()
