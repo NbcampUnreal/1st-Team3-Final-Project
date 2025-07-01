@@ -1,0 +1,4 @@
+---,ChoiceName,SubEventItems
+OnSurvivor1,OnSurvivor1,"((""ProteinDrink"", 2))"
+OnSneak1,OnSneak1,"((""ProteinDrink"", 2))"
+OnInjuredDog1,OnInjuredDog1,"((""CanMeat"", 2))"
