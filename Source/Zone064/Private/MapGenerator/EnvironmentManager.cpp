@@ -8,6 +8,7 @@
 
 AEnvironmentManager::AEnvironmentManager()
 {
+    PrimaryActorTick.bCanEverTick = false;
     bReplicates = true;
 
     Box = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("FogBox"));
