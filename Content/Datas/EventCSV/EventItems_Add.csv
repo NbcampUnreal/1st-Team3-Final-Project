@@ -1,0 +1,9 @@
+---,ChoiceName,AddEventItems
+OnElk1,OnElk1,"((""ProteinDrink"", 2),(""Cloth"", 3))"
+OnElk2,OnElk2,"((""CanMeat"", 1))"
+OnSurvivor1,OnSurvivor1,"((""Bandage"", 3))"
+OnCorpse1,OnCorpse1,"((""Grenade"", 4))"
+OnDroppedBag1,OnDroppedBag1,"((""Bandage"", 4),(""ChocolateBar"", 4))"
+OnSuspiciousSign1,OnSuspiciousSign1,"((""ChocolateBar"", 4))"
+OnGasStation1,OnGasStation1,"((""Fuel"", 4))"
+OnVendingMachine1,OnVendingMachine1,"((""SodaCan"", 4))"
