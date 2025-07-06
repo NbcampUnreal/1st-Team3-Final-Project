@@ -5,14 +5,14 @@
 
 ---
 
-## 🎮 게임 플레이 영상 및 스크린샷
+## 🎮 게임 트레일러 및 스크린샷
 
-[![게임 플레이 영상](https://img.youtube.com/vi/유튜브영상ID/0.jpg)](https://youtu.be/bgwEXZA_5Tc?si=ZEXcr4aCSJkWcZuE)
+[![게임 플레이 영상](https://private-user-images.githubusercontent.com/192657116/462874052-f56cfbf5-5002-461b-8b9f-975155ced02c.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NTE3ODA0NDcsIm5iZiI6MTc1MTc4MDE0NywicGF0aCI6Ii8xOTI2NTcxMTYvNDYyODc0MDUyLWY1NmNmYmY1LTUwMDItNDYxYi04YjlmLTk3NTE1NWNlZDAyYy5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUwNzA2JTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MDcwNlQwNTM1NDdaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT1lY2I2MzBhOWVhNTEwODM0M2Q5M2NlY2NkMDRhYWZkNDk1MTFkOTY5OWFhMzNjZjliZWFlNTUzZmY1MTlmNGNlJlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.HyZ1ulVEFHj40cPvUaCo3jcs0_KdbNsskiX5buTjm7c)](https://youtu.be/bgwEXZA_5Tc?si=ZEXcr4aCSJkWcZuE)
 *(이미지를 클릭하면 유튜브 영상으로 연결됩니다.)*
 
 | | | |
 |:----------------------------------------------------------:|:------------------------------------------------------------:|:------------------------------------------------------------:|
-| <img src="스크린샷1_링크" width="100%"> | <img src="스크린샷2_링크" width="100%"> | <img src="스크린샷3_링크" width="100%"> |
+| <img src="https://private-user-images.githubusercontent.com/192657116/462873966-6be1782f-ffe7-4cf2-aaa0-e616570837b2.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NTE3ODA0NDcsIm5iZiI6MTc1MTc4MDE0NywicGF0aCI6Ii8xOTI2NTcxMTYvNDYyODczOTY2LTZiZTE3ODJmLWZmZTctNGNmMi1hYWEwLWU2MTY1NzA4MzdiMi5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUwNzA2JTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MDcwNlQwNTM1NDdaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT0zODkwMjVjODQyYTA1NWI5YTNmMmIzNjk1MTBjYzE0ZmRlYzdhOTE0ODRiYmMwZTg4Y2NlMTE1MDE1ZWMxMDkwJlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.xMrGO-EsXD8-G-KFoCaJSyglbQ4t97kE9cnhizZbg3w" width="90%"> | <img src="https://private-user-images.githubusercontent.com/192657116/462874593-84a15abb-1252-4c8c-b4c9-9ab832099d32.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NTE3ODA0NDcsIm5iZiI6MTc1MTc4MDE0NywicGF0aCI6Ii8xOTI2NTcxMTYvNDYyODc0NTkzLTg0YTE1YWJiLTEyNTItNGM4Yy1iNGM5LTlhYjgzMjA5OWQzMi5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUwNzA2JTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MDcwNlQwNTM1NDdaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT1lNmE2M2QwYmQxMjk5OTBiMmJlOWQ1YzhiMjdlOTk0M2Q0M2RlZDg1NDIwNzFkMWIyYTM2YjgxNzM3NTYwY2E3JlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.6NGLWl8KKnaBQZnt_2SPO8SFnlqjtPmVvaEqMEX3RPY" width="100%"> | <img src="https://private-user-images.githubusercontent.com/192657116/462874284-f6ba4e05-e0c7-4dec-be73-b0fc61cb3c25.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NTE3ODA0NDcsIm5iZiI6MTc1MTc4MDE0NywicGF0aCI6Ii8xOTI2NTcxMTYvNDYyODc0Mjg0LWY2YmE0ZTA1LWUwYzctNGRlYy1iZTczLWIwZmM2MWNiM2MyNS5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUwNzA2JTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MDcwNlQwNTM1NDdaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT02NThiMTYwYjQxOGQyNDUzYmQwNjQ2MGJlMjA5YTZmMTJjMTI3M2I0YWY1MTg5Zjg1OTA5MTZkMTY2NzUxYWZjJlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.EbBQa95l8xPINzPBF_b5oDxudQSQeSZxmo7gHRI2yl8" width="100%"> |
 | *좀비 호드로부터 살아남아 안전지대로 향하세요* | *다음 목적지로 떠나기 위해 차량의 연료를 수집하세요* | *다양한 무기를 사용해서 좀비를 물리치세요* |
 
 ---
@@ -99,16 +99,16 @@
     * 빌드가 성공하면, `.uproject` 파일을 더블클릭하여 언리얼 에디터에서 프로젝트를 엽니다.
     * 에디터 상단의 'Play' 버튼을 눌러 게임을 시작합니다.
 
-## 👨‍👩‍👧‍👦 KU-A Studio 소개
+## 👨‍👩‍👧‍👦 KU-A Studio 소개 및 담당 기능
 
-* **김재석** (팀장, 프로그래밍, 기획) - [기술 블로그](https://velog.io/@cmgeugene/posts)
-* **조영환** (프로그래밍, 기획) - [기술 블로그](https://alwaysyoung2.tistory.com/)
-* **김태완** (프로그래밍, 기획) 
-* **정재훈** (프로그래밍) - [기술 블로그](https://velog.io/@sotakqmf01/posts)
-* **양준모** (프로그래밍) - [기술 블로그](https://junmo.tistory.com/)
-* **김동현** (프로그래밍) - [기술 블로그](https://dong-grae.tistory.com/)
-* **박지윤** (프로그래밍) - [기술 블로그](https://unreality.tistory.com/)
-* **최지한** (프로그래밍) - [기술 블로그](https://ji-han.tistory.com/)
+* **김재석** (팀장, 프로그래밍, 기획) - `맵 생성 알고리즘`, `환경 시스템`, `캐릭터 시야`/ [기술 블로그](https://velog.io/@cmgeugene/posts)
+* **조영환** (프로그래밍, 기획) - `플레이어 캐릭터`, `AI`/ [기술 블로그](https://alwaysyoung2.tistory.com/)
+* **김태완** (프로그래밍, 기획) - `플레이어 캐릭터`, `아웃라인 시스템`, `엠비언트 사운드`
+* **정재훈** (프로그래밍) - `인벤토리`, `아이템`, `텍스트 이벤트` / [기술 블로그](https://velog.io/@sotakqmf01/posts)
+* **양준모** (프로그래밍) - `인벤토리`, `아이템`, `크래프팅`, `수리 시스템` / [기술 블로그](https://junmo.tistory.com/)
+* **김동현** (프로그래밍) - `인벤토리`, `아이템`, `크래프팅`, `미니맵`, `VOIP 보이스 채팅`, `동적 발소리 시스템` / [기술 블로그](https://dong-grae.tistory.com/)
+* **박지윤** (프로그래밍) - `게임모드 - 게임 플로우 설계` / [기술 블로그](https://unreality.tistory.com/)
+* **최지한** (프로그래밍) - `게임모드 - 세션`, `이벤트 - 투표 시스템`, `로딩 스크린` / [기술 블로그](https://ji-han.tistory.com/)
 
 ## 💡 개발 과정 및 배운 점
 
