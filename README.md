@@ -81,14 +81,14 @@
 
 ### 사전 요구사항
 
-* Unreal Engine `5.5 +`
-* Visual Studio `2022` (C++ 데스크톱 개발 워크로드 포함)
+* `Unreal Engine 5.5+`
+* `Visual Studio 2022` (C++ 데스크톱 개발 워크로드 포함)
 
 ### 빌드 및 실행 방법
 
 1.  **저장소 클론:**
     ```bash
-    git clone [https://github.com/](https://github.com/)[당신의깃허브ID]/[프로젝트이름].git
+    git clone https://github.com/NbcampUnreal/1st-Team3-Final-Project.git
     ```
 2.  **프로젝트 파일 생성:**
     * 클론된 폴더의 `.uproject` 파일을 우클릭하여 **'Generate Visual Studio project files'** 를 선택합니다.
