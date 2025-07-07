@@ -1,6 +1,13 @@
 # Visual Studio 2015 user specific files
 .vs/
 
+# VSCode
+.vscode/
+*.code-workspace
+
+# Rider
+.idea/
+
 # Compiled Object files
 *.slo
 *.lo
@@ -82,3 +89,5 @@ DerivedDataCache/*
 
 # Assets
 Content/Assets/PostCity/*
+.idea/.idea.Zone064/.idea/vcs.xml
+.idea/.idea.Zone064/.idea/workspace.xml
