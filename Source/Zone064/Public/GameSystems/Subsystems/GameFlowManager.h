@@ -26,8 +26,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "GameFlow")
 	void RequestPhaseTransition(EGamePhase _NextGamePhase, ELevelTravelType _TravelType);
 
-	/*UFUNCTION(BlueprintCallable, Category = "GameFlow")
-	FName GetInternalMapNameByPhase(EGamePhase _GamePhase);*/
+	/* Update GameState */
+	UFUNCTION(BlueprintCallable, Category = "GameFlow")
+	void UpdateGameFlowData();
 
 	/* Repeat Count Methods */
 	UFUNCTION(BlueprintCallable, Category = "GameFlow")
@@ -37,9 +38,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "GameFlow")
 	bool CheckMaxRepeatCount();
 
-	/* Update GameState */
+	/* Destination Methods */
 	UFUNCTION(BlueprintCallable, Category = "GameFlow")
-	void UpdateGameFlowData();
+	void InitPastDestinationsCache();
+	UFUNCTION(BlueprintCallable, Category = "GameFlow")
+	void AddPastDestinationCache(FName _PastDestination);
 
 	/* Getter, Setter */
 	UFUNCTION(BlueprintCallable, Category = "GameFlow")
@@ -54,6 +57,8 @@ public:
 	EMapType GetCurDestinationTypeCache();
 	UFUNCTION(BlueprintCallable, Category = "GameFlow")
 	FDestinationDataRow GetDestDataCacheRow(FName _RowName) const;
+	UFUNCTION(BlueprintCallable, Category = "GameFlow")
+	TArray<FName> GetPastDestinationsCache();
 
 	UFUNCTION(BlueprintCallable, Category = "GameFlow")
 	void SetCurDestinationNumCache(FName _DestinationNum);
@@ -64,13 +69,16 @@ private:
 	/* GameFlow Data Cache*/
 	EGamePhase CurGamePhaseCache;
 	EGamePhase PrevGamePhaseCache;
-	FName CurMapNameCache;
-	FName CurDestinationNumCache;
-	EMapType CurDestinationTypeCache;
-	int32 CurRepeatCountCache;
 
+	FName CurMapNameCache;
+
+	int32 CurRepeatCountCache;
 	UPROPERTY(EditDefaultsOnly)
 	int32 MaxRepeatCount = 4;
+
+	FName CurDestinationNumCache;
+	EMapType CurDestinationTypeCache;
+	TArray<FName> PastDestinationsCache;
 
 	/* DataTable Cache */
 	TMap<EGamePhase, TArray<FMapDataRow>> MapDataCache;

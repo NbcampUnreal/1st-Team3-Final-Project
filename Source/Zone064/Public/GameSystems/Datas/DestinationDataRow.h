@@ -32,5 +32,5 @@ public:
 	TArray<FString> NextDestinations;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UTexture2D* Thumbnail;
+	FVector2D MarkerPosition;
 };

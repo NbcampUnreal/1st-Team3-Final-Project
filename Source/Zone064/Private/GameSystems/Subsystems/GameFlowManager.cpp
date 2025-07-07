@@ -155,6 +155,11 @@ FDestinationDataRow UGameFlowManager::GetDestDataCacheRow(FName _RowName) const
 	return FDestinationDataRow();
 }
 
+TArray<FName> UGameFlowManager::GetPastDestinationsCache()
+{
+	return PastDestinationsCache;
+}
+
 void UGameFlowManager::SetCurDestinationNumCache(FName _DestinationNum)
 {
 	CurDestinationNumCache = _DestinationNum;
@@ -163,6 +168,16 @@ void UGameFlowManager::SetCurDestinationNumCache(FName _DestinationNum)
 void UGameFlowManager::SetCurDestinationTypeCache(EMapType _MapType)
 {
 	CurDestinationTypeCache = _MapType;
+}
+
+void UGameFlowManager::InitPastDestinationsCache()
+{
+	PastDestinationsCache.Empty();
+}
+
+void UGameFlowManager::AddPastDestinationCache(FName _PastDestination)
+{
+	PastDestinationsCache.Add(_PastDestination);
 }
 
 void UGameFlowManager::InitCurrentRepeatCount()
