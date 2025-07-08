@@ -53,7 +53,7 @@ public:
 	// 허기 회복
 	UFUNCTION(BlueprintCallable, Category="Hunger")
 	void IncreaseHunger(float Amount);
-
+	
 	// 현재 비율 (UI용)
 	UFUNCTION(BlueprintCallable, Category="Hunger")
 	float GetHungerPercent() const;
@@ -61,6 +61,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Hunger")
 	void TriggerTickHungerTimer(bool IsDead);
 
+	UFUNCTION(BlueprintPure, Category="Hunger")
+	bool IsCurrentMapIgnored() const;
+	
 	// 현재 허기 수치 반환
 	UFUNCTION()
 	void OnRep_Hunger();

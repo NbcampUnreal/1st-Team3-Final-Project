@@ -48,29 +48,9 @@ void UHungerComponent::TickHunger()
 
 void UHungerComponent::DecreaseHunger(float Amount)
 {
-
-	if (IgnoreMaps.Contains(CachedMapName))
-	{
-		return;
-	}
+	if (IsCurrentMapIgnored()) return;
 
 	Hunger = FMath::Clamp(Hunger - Amount, 0.f, MaxHunger);
-
-	//APawn* PawnOwner = Cast<APawn>(GetOwner());
-	//if (PawnOwner->HasAuthority())
-	//{
-	//	if (!PawnOwner->IsLocallyControlled())
-	//	{
-	//		UE_LOG(LogTemp, Warning, TEXT("Hunger : %f, Owner : %s"), Hunger, *GetOwner()->GetName());
-	//	}
-	//}
-	//else
-	//{
-	//	if (PawnOwner->IsLocallyControlled())
-	//	{
-	//		UE_LOG(LogTemp, Warning, TEXT("Hunger : %f, Owner : %s"), Hunger, *GetOwner()->GetName());
-	//	}
-	//}
 }
 
 void UHungerComponent::IncreaseHunger(float Amount)
@@ -108,6 +88,11 @@ void UHungerComponent::TriggerTickHungerTimer(bool IsDead)
 			);
 		}
 	}
+}
+
+bool UHungerComponent::IsCurrentMapIgnored() const
+{
+	return IgnoreMaps.Contains(CachedMapName);
 }
 
 void UHungerComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
