@@ -32,7 +32,18 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Object Pool")
     int32 PoolSize = 20;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Object Pool")
+    bool bGradualInitialization = false;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Object Pool", meta = (EditCondition = "bGradualInitialization", ClampMin = "0.1"))
+    float GradualSpawnRate = 10.0f; // Actors per second
+
 private:
     UPROPERTY()
     TArray<AActor*> ObjectPool;
+
+    FTimerHandle GradualSpawnTimerHandle;
+    int32 CurrentSpawnedCount;
+    void SpawnSinglePooledObject();
+    void SpawnNextPooledObject();
 };

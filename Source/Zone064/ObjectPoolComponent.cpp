@@ -1,5 +1,7 @@
 #include "ObjectPoolComponent.h"
 #include "GameFramework/Actor.h"
+#include "Engine/World.h"
+#include "TimerManager.h"
 
 UObjectPoolComponent::UObjectPoolComponent()
 {
@@ -21,28 +23,66 @@ void UObjectPoolComponent::InitializePool()
     }
 
     UWorld* World = GetWorld();
-    if (World)
+    if (!World) return;
+
+    CurrentSpawnedCount = 0;
+    ObjectPool.Empty(); // Clear existing pool if re-initializing
+
+    if (bGradualInitialization && GradualSpawnRate > 0)
     {
+        // Start gradual spawning
+        float TimeBetweenSpawns = 1.0f / GradualSpawnRate;
+        World->GetTimerManager().SetTimer(GradualSpawnTimerHandle, this, &UObjectPoolComponent::SpawnNextPooledObject, TimeBetweenSpawns, true);
+    }
+    else
+    {
+        // Spawn all at once (original behavior)
         for (int32 i = 0; i < PoolSize; ++i)
         {
-            AActor* PooledObject = World->SpawnActor<AActor>(PooledObjectClass, FVector::ZeroVector, FRotator::ZeroRotator);
-            if (PooledObject)
-            {
-                PooledObject->SetActorHiddenInGame(true);
-                PooledObject->SetActorEnableCollision(false);
-                PooledObject->SetActorTickEnabled(false);
-
-                IPoolable* Poolable = Cast<IPoolable>(PooledObject);
-                if (Poolable)
-                {
-                    Poolable->Execute_OnPoolEnd(PooledObject);
-                }
-
-                ObjectPool.Add(PooledObject);
-            }
+            SpawnSinglePooledObject();
         }
     }
 }
+
+void UObjectPoolComponent::SpawnNextPooledObject()
+{
+    if (CurrentSpawnedCount < PoolSize)
+    {
+        SpawnSinglePooledObject();
+        CurrentSpawnedCount++;
+    }
+    else
+    {
+        // All objects spawned, clear timer
+        if (UWorld* World = GetWorld())
+        {
+            World->GetTimerManager().ClearTimer(GradualSpawnTimerHandle);
+        }
+    }
+}
+
+void UObjectPoolComponent::SpawnSinglePooledObject()
+{
+    UWorld* World = GetWorld();
+    if (!World) return;
+
+    AActor* PooledObject = World->SpawnActor<AActor>(PooledObjectClass, FVector::ZeroVector, FRotator::ZeroRotator);
+    if (PooledObject)
+    {
+        PooledObject->SetActorHiddenInGame(true);
+        PooledObject->SetActorEnableCollision(false);
+        PooledObject->SetActorTickEnabled(false);
+
+        IPoolable* Poolable = Cast<IPoolable>(PooledObject);
+        if (Poolable)
+        {
+            Poolable->Execute_OnPoolEnd(PooledObject);
+        }
+
+        ObjectPool.Add(PooledObject);
+    }
+}
+
 
 AActor* UObjectPoolComponent::SpawnPooledObject(const FTransform& SpawnTransform)
 {
