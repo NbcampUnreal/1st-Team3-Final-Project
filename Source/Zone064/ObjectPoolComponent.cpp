@@ -11,7 +11,10 @@ UObjectPoolComponent::UObjectPoolComponent()
 void UObjectPoolComponent::BeginPlay()
 {
     Super::BeginPlay();
-    InitializePool();
+    if (GetOwner()->HasAuthority())
+    {
+        InitializePool();
+    }
 }
 
 void UObjectPoolComponent::InitializePool()
@@ -42,6 +45,8 @@ void UObjectPoolComponent::InitializePool()
             SpawnSinglePooledObject();
         }
     }
+    UE_LOG(LogTemp, Warning, TEXT("InitializePoll Called: %s"),*GetOwner()->GetName());
+
 }
 
 void UObjectPoolComponent::SpawnNextPooledObject()
