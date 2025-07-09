@@ -100,7 +100,7 @@ public:
     void SpawnLocalInstance(const FGlobalDebrisSpawnData& D);
 
     UPROPERTY(EditAnywhere, Category = "Debris")
-    int32 RPCChunkSize = 25;
+    int32 RPCChunkSize = 10;
 
     UFUNCTION(NetMulticast, Reliable)
     void Multicast_FinalizeSpawn();

@@ -271,7 +271,7 @@ void AGlobalDebrisGenerator::SpawnAllDebris()
             BatchTimerHandle,
             this,
             &AGlobalDebrisGenerator::SendNextChunk,
-            0.05f,
+            0.1f,
             true /* 함수에서 타이머 정지 */
         );
     }
