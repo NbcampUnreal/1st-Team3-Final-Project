@@ -135,6 +135,7 @@ void UAILODComponent::ApplyLODSettings(const FAILODSetting& NewLODSetting)
 			UE_LOG(LogTemp, Display, TEXT("[AI LOD] High : AIPerception active"));
 		}
 		OwnerMovementComponent->bUseRVOAvoidance = true;
+
 		UE_LOG(LogTemp, Display, TEXT("[AI LOD] High : RVO true"));
 		OwnerMesh->SetAnimationMode(EAnimationMode::AnimationBlueprint);
 		break;
@@ -163,7 +164,7 @@ void UAILODComponent::ApplyLODSettings(const FAILODSetting& NewLODSetting)
 		break;
 
 	case EAILODLevel::Low:
-		// 대부분 비활성화 
+		// 대부분 비활성화
 		OwnerPawn->SetActorHiddenInGame(false);
 		OwnerPawn->SetActorTickEnabled(true);
 		OwnerPawn->SetActorEnableCollision(true);
@@ -194,6 +195,29 @@ void UAILODComponent::ApplyLODSettings(const FAILODSetting& NewLODSetting)
 
 		break;
 
+	case EAILODLevel::VeryLow:
+		// Low보다 더 비활성화, 이동은 AI Move To 로만 가능
+		OwnerPawn->SetActorHiddenInGame(true);
+		OwnerPawn->SetActorTickEnabled(true);
+		OwnerPawn->SetActorEnableCollision(false);
+
+		if (auto Brain = OwnerAIController->GetBrainComponent())
+		{
+			Brain->StopLogic("");
+			UE_LOG(LogTemp, Display, TEXT("[AI LOD] VeryLow : StopLogic"));
+		}
+		if (auto Perception = OwnerAIController->GetAIPerceptionComponent())
+		{
+			Perception->SetActive(false);
+			UE_LOG(LogTemp, Display, TEXT("[AI LOD] VeryLow : AIPerception inactive"));
+		}
+		OwnerMovementComponent->bUseRVOAvoidance = false;
+		UE_LOG(LogTemp, Display, TEXT("[AI LOD] VeryLow : RVO false"));
+
+		// 애니메이션 정지
+		OwnerMesh->Stop();
+		break;
+
 	case EAILODLevel::Culled:
 		// 모든 기능 정지
 		OwnerPawn->SetActorHiddenInGame(true);    
@@ -203,16 +227,15 @@ void UAILODComponent::ApplyLODSettings(const FAILODSetting& NewLODSetting)
 		if (auto Brain = OwnerAIController->GetBrainComponent())
 		{
 			Brain->StopLogic("");
-			UE_LOG(LogTemp, Display, TEXT("[AI LOD] Low : StopLogic"));
+			UE_LOG(LogTemp, Display, TEXT("[AI LOD] Culled : StopLogic"));
 		}
 		if (auto Perception = OwnerAIController->GetAIPerceptionComponent())
 		{
 			Perception->SetActive(false);
-			UE_LOG(LogTemp, Display, TEXT("[AI LOD] Low : AIPerception inactive"));
+			UE_LOG(LogTemp, Display, TEXT("[AI LOD] Culled : AIPerception inactive"));
 		}
 
 		OwnerMovementComponent->bUseRVOAvoidance = false;
-		OwnerAIController->StopMovement(); // 현재 움직임 정지
 		// 애니메이션을 단일 애셋 반복 재생으로 변경
 		OwnerMesh->Stop();
 		break;

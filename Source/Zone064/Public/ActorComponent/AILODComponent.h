@@ -17,6 +17,7 @@ enum class EAILODLevel : uint8
 	High,
 	Medium,
 	Low,
+	VeryLow,
 	Culled
 };
 
