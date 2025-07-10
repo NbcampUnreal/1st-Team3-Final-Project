@@ -8,25 +8,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ad18e44d-431e-4ba1-a905-566182d4eb4c" name="변경" comment="">
-      <change beforePath="$PROJECT_DIR$/Content/Characters/Full/SKM_Manny_Skeleton.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Characters/Full/SKM_Manny_Skeleton.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/MPTD_Shooter/Blueprints/AI/AI_Controller_Master.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/MPTD_Shooter/Blueprints/AI/AI_Controller_Master.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/MPTD_Shooter/Blueprints/AI/Characters/Human/BP_Enemy_Ranged.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/MPTD_Shooter/Blueprints/AI/Characters/Human/BP_Enemy_Ranged.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/MPTD_Shooter/Blueprints/AI/Characters/Zombie/BP_AI_Zombie.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/MPTD_Shooter/Blueprints/AI/Characters/Zombie/BP_AI_Zombie.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/MPTD_Shooter/Blueprints/Characters/MainMenuCharacters/BP_MainMenu_Character_Idle1.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/MPTD_Shooter/Blueprints/Characters/MainMenuCharacters/BP_MainMenu_Character_Idle1.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/MPTD_Shooter/Blueprints/Characters/MainMenuCharacters/BP_MainMenu_Character_Idle2.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/MPTD_Shooter/Blueprints/Characters/MainMenuCharacters/BP_MainMenu_Character_Idle2.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/MPTD_Shooter/Blueprints/Weapons/BP_BaseMeleeWeapon.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/MPTD_Shooter/Blueprints/Weapons/BP_BaseMeleeWeapon.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/MPTD_Shooter/Maps/L_Game1.umap" beforeDir="false" afterPath="$PROJECT_DIR$/Content/MPTD_Shooter/Maps/L_Game1.umap" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/MPTD_Shooter/Maps/L_MainMenu.umap" beforeDir="false" afterPath="$PROJECT_DIR$/Content/MPTD_Shooter/Maps/L_MainMenu.umap" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Zombie_Pack/Animations/InPlace/Attacks/IP_Attack_Neck_Montage.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Zombie_Pack/Animations/InPlace/Attacks/IP_Attack_Neck_Montage.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Zombie_Pack/Animations/InPlace/Attacks/IP_LeftAttack_01_Montage.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Zombie_Pack/Animations/InPlace/Attacks/IP_LeftAttack_01_Montage.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Zombie_Pack/Animations/InPlace/Attacks/IP_LeftAttack_Charged_01_Montage.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Zombie_Pack/Animations/InPlace/Attacks/IP_LeftAttack_Charged_01_Montage.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Zombie_Pack/Animations/InPlace/Attacks/IP_LeftAttack_Charged_02_Montage.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Zombie_Pack/Animations/InPlace/Attacks/IP_LeftAttack_Charged_02_Montage.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Zombie_Pack/Bonus_Audio_Animations/Attack/Zombie_as_attack2_one_shot_01.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Zombie_Pack/Bonus_Audio_Animations/Attack/Zombie_as_attack2_one_shot_01.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Zombie_Pack/Bonus_Audio_Animations/Attack/Zombie_as_attack_charged1_one_shot_01.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Zombie_Pack/Bonus_Audio_Animations/Attack/Zombie_as_attack_charged1_one_shot_01.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Zombie_Pack/Bonus_Audio_Animations/Attack/Zombie_as_attack_charged2_one_shot_01.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Zombie_Pack/Bonus_Audio_Animations/Attack/Zombie_as_attack_charged2_one_shot_01.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Zombie_Pack/Bonus_Audio_Animations/Eat/Zombie_as_eat1_one_shot_01.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Zombie_Pack/Bonus_Audio_Animations/Eat/Zombie_as_eat1_one_shot_01.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Zombie_Pack/Bonus_Audio_Animations/Eat/Zombie_as_eat1_one_shot_01_Cue.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Zombie_Pack/Bonus_Audio_Animations/Eat/Zombie_as_eat1_one_shot_01_Cue.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Zombie_Pack/Bonus_Audio_Animations/Eat/Zombie_as_eat1_one_shot_02.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Zombie_Pack/Bonus_Audio_Animations/Eat/Zombie_as_eat1_one_shot_02.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Maps/Test/BP_MediaBox.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Maps/Test/BP_MediaBox.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Maps/Test/EndingMap.umap" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Maps/Test/EndingMap.umap" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -50,22 +33,22 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "Uproject.Zone064.executor": "Debug",
-    "git-widget-placeholder": "cyh-146/캐릭터,적-AI-버그수정",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "ml.llm.LLMConfigurable",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;Uproject.Zone064.executor&quot;: &quot;Debug&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;cyh-146/캐릭터,적-AI-버그수정&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;ml.llm.LLMConfigurable&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager">
     <configuration name="Zone064" type="Uproject" factoryName="rider.uproject">
       <configuration_1 setup="1">
@@ -156,6 +139,7 @@
       <workItem from="1748503830462" duration="506000" />
       <workItem from="1749537688080" duration="3000" />
       <workItem from="1750668715510" duration="8000" />
+      <workItem from="1752134615457" duration="4000" />
     </task>
     <servers />
   </component>
