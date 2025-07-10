@@ -2,6 +2,7 @@
 #include "GameFramework/Actor.h"
 #include "Engine/World.h"
 #include "TimerManager.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 UObjectPoolComponent::UObjectPoolComponent()
 {
@@ -78,6 +79,11 @@ void UObjectPoolComponent::SpawnSinglePooledObject()
         PooledObject->SetActorEnableCollision(false);
         PooledObject->SetActorTickEnabled(false);
 
+        if (UCharacterMovementComponent* MovementComponent = PooledObject->FindComponentByClass<UCharacterMovementComponent>())
+        {
+            MovementComponent->SetMovementMode(EMovementMode::MOVE_None);
+        }
+
         IPoolable* Poolable = Cast<IPoolable>(PooledObject);
         if (Poolable)
         {
@@ -100,6 +106,11 @@ AActor* UObjectPoolComponent::SpawnPooledObject(const FTransform& SpawnTransform
             PooledObject->SetActorHiddenInGame(false);
             PooledObject->SetActorEnableCollision(true);
             PooledObject->SetActorTickEnabled(true);
+
+            if (UCharacterMovementComponent* MovementComponent = PooledObject->FindComponentByClass<UCharacterMovementComponent>())
+            {
+                MovementComponent->SetMovementMode(EMovementMode::MOVE_Walking);
+            }
 
             IPoolable* Poolable = Cast<IPoolable>(PooledObject);
             if (Poolable)
@@ -128,6 +139,11 @@ void UObjectPoolComponent::ReturnPooledObject(AActor* ActorToReturn)
         ActorToReturn->SetActorHiddenInGame(true);
         ActorToReturn->SetActorEnableCollision(false);
         ActorToReturn->SetActorTickEnabled(false);
+
+        if (UCharacterMovementComponent* MovementComponent = ActorToReturn->FindComponentByClass<UCharacterMovementComponent>())
+        {
+            MovementComponent->SetMovementMode(EMovementMode::MOVE_None);
+        }
         ObjectPool.Add(ActorToReturn);
     }
 }
