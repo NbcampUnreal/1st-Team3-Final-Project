@@ -3,6 +3,8 @@
 #include "Engine/World.h"
 #include "TimerManager.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "ActorComponent/AILODComponent.h"
+#include "GameFramework/Character.h"
 
 UObjectPoolComponent::UObjectPoolComponent()
 {
@@ -79,16 +81,21 @@ void UObjectPoolComponent::SpawnSinglePooledObject()
         PooledObject->SetActorEnableCollision(false);
         PooledObject->SetActorTickEnabled(false);
 
-        if (UCharacterMovementComponent* MovementComponent = PooledObject->FindComponentByClass<UCharacterMovementComponent>())
-        {
-            MovementComponent->SetMovementMode(EMovementMode::MOVE_None);
-        }
 
         IPoolable* Poolable = Cast<IPoolable>(PooledObject);
         if (Poolable)
         {
             Poolable->Execute_OnPoolEnd(PooledObject);
         }
+        
+        if (GetOwner()->HasAuthority())
+        {
+            if (UCharacterMovementComponent* MovementComponent = PooledObject->FindComponentByClass<UCharacterMovementComponent>())
+            {
+                MovementComponent->SetMovementMode(EMovementMode::MOVE_None);
+            }
+        }
+        
 
         ObjectPool.Add(PooledObject);
     }
@@ -106,10 +113,11 @@ AActor* UObjectPoolComponent::SpawnPooledObject(const FTransform& SpawnTransform
             PooledObject->SetActorHiddenInGame(false);
             PooledObject->SetActorEnableCollision(true);
             PooledObject->SetActorTickEnabled(true);
-
-            if (UCharacterMovementComponent* MovementComponent = PooledObject->FindComponentByClass<UCharacterMovementComponent>())
+            
+            ACharacter* Character = Cast<ACharacter>(PooledObject);
+            if (Character && GetOwner()->HasAuthority())
             {
-                MovementComponent->SetMovementMode(EMovementMode::MOVE_Walking);
+                Character->SpawnDefaultController();
             }
 
             IPoolable* Poolable = Cast<IPoolable>(PooledObject);
@@ -117,6 +125,22 @@ AActor* UObjectPoolComponent::SpawnPooledObject(const FTransform& SpawnTransform
             {
                 Poolable->Execute_OnPoolBegin(PooledObject);
             }
+            if (GetOwner()->HasAuthority())
+            {
+                if (UAILODComponent* LODComponent = PooledObject->FindComponentByClass<UAILODComponent>())
+                {
+                    LODComponent->Deactivate();
+                    LODComponent->SetIsPooled(false);
+                }
+
+                if (UCharacterMovementComponent* MovementComponent = PooledObject->FindComponentByClass<UCharacterMovementComponent>())
+                {
+                    MovementComponent->ResetMoveState();
+                    MovementComponent->SetMovementMode(EMovementMode::MOVE_Walking);
+                }
+            }
+            
+
 
             return PooledObject;
         }
@@ -130,6 +154,11 @@ void UObjectPoolComponent::ReturnPooledObject(AActor* ActorToReturn)
 {
     if (ActorToReturn)
     {
+        if (UAILODComponent* LODComponent = ActorToReturn->FindComponentByClass<UAILODComponent>())
+        {
+            LODComponent->SetIsPooled(true);
+        }
+
         IPoolable* Poolable = Cast<IPoolable>(ActorToReturn);
         if (Poolable)
         {
@@ -140,10 +169,14 @@ void UObjectPoolComponent::ReturnPooledObject(AActor* ActorToReturn)
         ActorToReturn->SetActorEnableCollision(false);
         ActorToReturn->SetActorTickEnabled(false);
 
-        if (UCharacterMovementComponent* MovementComponent = ActorToReturn->FindComponentByClass<UCharacterMovementComponent>())
+        if (GetOwner()->HasAuthority())
         {
-            MovementComponent->SetMovementMode(EMovementMode::MOVE_None);
+            if (UCharacterMovementComponent* MovementComponent = ActorToReturn->FindComponentByClass<UCharacterMovementComponent>())
+            {
+                MovementComponent->SetMovementMode(EMovementMode::MOVE_None);
+            }
         }
+        
         ObjectPool.Add(ActorToReturn);
     }
 }

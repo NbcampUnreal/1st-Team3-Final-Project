@@ -34,16 +34,14 @@ protected:
     void OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
         UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
-    // 멀티캐스트
-    UFUNCTION(NetMulticast, Reliable)
-    void MulticastPlaySound();
+    
+    UFUNCTION(Client, Reliable)
+    void ClientPlaySound();
 
-    UFUNCTION(NetMulticast, Reliable)
-    void MulticastStopSound();
+    UFUNCTION(Client, Reliable)
+    void ClientStopSound();
 
-    int32 OverlappingCharacters = 0;
-
-    static TMap<USoundCue*, int32> SoundCueActiveCount;
+    
 
 public:
     UPROPERTY(EditAnywhere, Category = "Sound")

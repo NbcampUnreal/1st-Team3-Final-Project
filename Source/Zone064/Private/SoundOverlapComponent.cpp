@@ -5,12 +5,10 @@
 #include "GameFramework/Character.h"
 #include "Net/UnrealNetwork.h"
 
-TMap<USoundCue*, int32> USoundOverlapComponent::SoundCueActiveCount;
-
 USoundOverlapComponent::USoundOverlapComponent()
 {
     PrimaryComponentTick.bCanEverTick = false;
-    SetIsReplicatedByDefault(true); // 네트워크 복제
+    SetIsReplicatedByDefault(true); 
 }
 
 void USoundOverlapComponent::BeginPlay()
@@ -53,49 +51,26 @@ void USoundOverlapComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedComp,
     UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
     bool bFromSweep, const FHitResult& SweepResult)
 {
-    if (!GetOwner()->HasAuthority()) return;
 
     ACharacter* Char = Cast<ACharacter>(OtherActor);
     if (Char && Char->IsPlayerControlled())
     {
-        OverlappingCharacters++;
-
-        if (OverlappingCharacters == 1 && SoundCue)
-        {
-            int32& CurrentCount = SoundCueActiveCount.FindOrAdd(SoundCue);
-            if (CurrentCount < MaxInstancesPerCue)
-            {
-                MulticastPlaySound();
-                CurrentCount++;
-            }
-        }
+        ClientPlaySound();
     }
 }
 
 void USoundOverlapComponent::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
     UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-    if (!GetOwner()->HasAuthority()) return;
 
     ACharacter* Char = Cast<ACharacter>(OtherActor);
     if (Char && Char->IsPlayerControlled())
     {
-        OverlappingCharacters = FMath::Max(0, OverlappingCharacters - 1);
-
-        if (OverlappingCharacters == 0 && AudioComponent && AudioComponent->IsPlaying())
-        {
-            MulticastStopSound();
-
-            if (SoundCueActiveCount.Contains(SoundCue))
-            {
-                int32& Count = SoundCueActiveCount[SoundCue];
-                Count = FMath::Max(0, Count - 1);
-            }
-        }
+        ClientStopSound();
     }
 }
 
-void USoundOverlapComponent::MulticastPlaySound_Implementation()
+void USoundOverlapComponent::ClientPlaySound_Implementation()
 {
     if (AudioComponent && !AudioComponent->IsPlaying())
     {
@@ -103,7 +78,7 @@ void USoundOverlapComponent::MulticastPlaySound_Implementation()
     }
 }
 
-void USoundOverlapComponent::MulticastStopSound_Implementation()
+void USoundOverlapComponent::ClientStopSound_Implementation()
 {
     if (AudioComponent && AudioComponent->IsPlaying())
     {

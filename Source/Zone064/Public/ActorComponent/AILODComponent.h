@@ -49,18 +49,23 @@ protected:
 
 public:	
 	void CheckLOD();
+	bool GetIsPooled();
+	void SetIsPooled(bool NewbIsPooled);
+	UFUNCTION()
+	void ApplyLODSettings(const FAILODSetting& NewLODLevel);
 
-protected:
 	// LOD 설정 배열 -> 에디터에서 조절
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI LOD")
 	TArray<FAILODSetting> LODSettings;
+
+protected:
+
 
 	// 몇 초마다 거리를 검사할 것인가?
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI LOD", meta = (ClampMin = "0.1", ClampMax = "2.0"))
 	float CheckInterval = 0.5f;
 
-	UFUNCTION()
-	void ApplyLODSettings(const FAILODSetting& NewLODLevel);
+
 
 	// 검색할 플레이어 캐릭터 클래스
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -88,5 +93,6 @@ private:
 	UPROPERTY()
 	TObjectPtr<USkeletalMeshComponent> OwnerMesh;
 
-
+	// 풀링 상태인지 판단 변수
+	bool bIsPooled = false;
 };

@@ -49,11 +49,43 @@ void UAILODComponent::BeginPlay()
 	}
 }
 
+bool UAILODComponent::GetIsPooled()
+{
+	return bIsPooled;
+}
+
+void UAILODComponent::SetIsPooled(bool NewbIsPooled)
+{
+	bIsPooled = NewbIsPooled;
+	CheckLOD();
+}
+
 void UAILODComponent::CheckLOD()
 {
 	if (!OwnerPawn || LODSettings.Num() == 0) return;
 
+	// 풀에 들어가있는 상태라면 culled로 설정
+	if (bIsPooled)
+	{
+		const FAILODSetting* SettingToApply = &LODSettings.Last();
+		for (const FAILODSetting& Setting : LODSettings)
+		{
+			if (Setting.LODLevel == EAILODLevel::Culled)
+			{
+				SettingToApply = &Setting;
+				break;
+			}
+		}
+		if (SettingToApply && SettingToApply->LODLevel != CurrentLODLevel)
+		{
+			ApplyLODSettings(*SettingToApply);
+			CurrentLODLevel = SettingToApply->LODLevel;
+		}
+		return;
+	}
+
 	float MinDistanceSquared = -1.0f;
+
 
 	// 게임 스테이트의 플레이어 어레이 순회해서 가장 가까운 플레이어 탐색
 	AGameStateBase* GameState = GetWorld()->GetGameState();
@@ -114,6 +146,7 @@ void UAILODComponent::ApplyLODSettings(const FAILODSetting& NewLODSetting)
 
 	// 틱 주기 항상 설정
 	OwnerPawn->SetActorTickInterval(NewLODSetting.TickInterval);
+	OwnerAIController->SetActorTickInterval(NewLODSetting.TickInterval);
 
 	// 새로운 LOD 레벨에 따라 기능 제어
 	switch (NewLODSetting.LODLevel)
@@ -123,7 +156,10 @@ void UAILODComponent::ApplyLODSettings(const FAILODSetting& NewLODSetting)
 		OwnerPawn->SetActorHiddenInGame(false);
 		OwnerPawn->SetActorTickEnabled(true);
 		OwnerPawn->SetActorEnableCollision(true);
-
+		
+		OwnerMesh->AnimUpdateRateParams->UpdateRate = 1;
+		OwnerMesh->AnimUpdateRateParams->bInterpolateSkippedFrames = true;
+		
 		if (auto Brain = OwnerAIController->GetBrainComponent())
 		{
 			Brain->StartLogic();
@@ -146,6 +182,9 @@ void UAILODComponent::ApplyLODSettings(const FAILODSetting& NewLODSetting)
 		OwnerPawn->SetActorTickEnabled(true);
 		OwnerPawn->SetActorEnableCollision(true);
 
+		OwnerMesh->AnimUpdateRateParams->UpdateRate = 3;
+		OwnerMesh->AnimUpdateRateParams->bInterpolateSkippedFrames = true;
+
 		if (auto Brain = OwnerAIController->GetBrainComponent())
 		{
 			Brain->StartLogic();
@@ -158,6 +197,7 @@ void UAILODComponent::ApplyLODSettings(const FAILODSetting& NewLODSetting)
 		}
 		
 		OwnerMovementComponent->bUseRVOAvoidance = false;
+		
 		UE_LOG(LogTemp, Display, TEXT("[AI LOD] Medium : RVO false"));
 		OwnerMesh->SetAnimationMode(EAnimationMode::AnimationBlueprint);
 
@@ -168,6 +208,9 @@ void UAILODComponent::ApplyLODSettings(const FAILODSetting& NewLODSetting)
 		OwnerPawn->SetActorHiddenInGame(false);
 		OwnerPawn->SetActorTickEnabled(true);
 		OwnerPawn->SetActorEnableCollision(true);
+
+		OwnerMesh->AnimUpdateRateParams->UpdateRate = 5;
+		OwnerMesh->AnimUpdateRateParams->bInterpolateSkippedFrames = false;
 
 		if (auto Brain = OwnerAIController->GetBrainComponent())
 		{
@@ -180,6 +223,7 @@ void UAILODComponent::ApplyLODSettings(const FAILODSetting& NewLODSetting)
 			UE_LOG(LogTemp, Display, TEXT("[AI LOD] Low : AIPerception inactive"));
 		}
 		OwnerMovementComponent->bUseRVOAvoidance = false;
+
 		UE_LOG(LogTemp, Display, TEXT("[AI LOD] Low : RVO false"));
 		
 		// 애니메이션을 단일 애셋 반복 재생으로 변경
@@ -201,6 +245,9 @@ void UAILODComponent::ApplyLODSettings(const FAILODSetting& NewLODSetting)
 		OwnerPawn->SetActorTickEnabled(true);
 		OwnerPawn->SetActorEnableCollision(false);
 
+		OwnerMesh->AnimUpdateRateParams->UpdateRate = 30;
+		OwnerMesh->AnimUpdateRateParams->bInterpolateSkippedFrames = false;
+
 		if (auto Brain = OwnerAIController->GetBrainComponent())
 		{
 			Brain->StopLogic("");
@@ -212,6 +259,7 @@ void UAILODComponent::ApplyLODSettings(const FAILODSetting& NewLODSetting)
 			UE_LOG(LogTemp, Display, TEXT("[AI LOD] VeryLow : AIPerception inactive"));
 		}
 		OwnerMovementComponent->bUseRVOAvoidance = false;
+
 		UE_LOG(LogTemp, Display, TEXT("[AI LOD] VeryLow : RVO false"));
 
 		// 애니메이션 정지
@@ -223,6 +271,9 @@ void UAILODComponent::ApplyLODSettings(const FAILODSetting& NewLODSetting)
 		OwnerPawn->SetActorHiddenInGame(true);    
 		OwnerPawn->SetActorEnableCollision(false); 
 		OwnerPawn->SetActorTickEnabled(false);     
+
+		OwnerMesh->AnimUpdateRateParams->UpdateRate = 30;
+		OwnerMesh->AnimUpdateRateParams->bInterpolateSkippedFrames = false;
 
 		if (auto Brain = OwnerAIController->GetBrainComponent())
 		{
