@@ -22,72 +22,47 @@ void UObjectPoolComponent::BeginPlay()
 
 void UObjectPoolComponent::InitializePool()
 {
-    if (!PooledObjectClass)
+    if (PooledActorInfos.Num() == 0)
     {
-        UE_LOG(LogTemp, Warning, TEXT("PooledObjectClass is not set in ObjectPoolComponent."));
+        UE_LOG(LogTemp, Warning, TEXT("No PooledActorInfos set in ObjectPoolComponent."));
         return;
     }
 
-    UWorld* World = GetWorld();
-    if (!World) return;
-
-    CurrentSpawnedCount = 0;
-    ObjectPool.Empty(); // Clear existing pool if re-initializing
-
-    if (bGradualInitialization && GradualSpawnRate > 0)
+    for (const FPooledActorInfo& ActorInfo : PooledActorInfos)
     {
-        // Start gradual spawning
-        float TimeBetweenSpawns = 1.0f / GradualSpawnRate;
-        World->GetTimerManager().SetTimer(GradualSpawnTimerHandle, this, &UObjectPoolComponent::SpawnNextPooledObject, TimeBetweenSpawns, true);
-    }
-    else
-    {
-        // Spawn all at once (original behavior)
-        for (int32 i = 0; i < PoolSize; ++i)
+        if (!ActorInfo.ActorClass)
         {
-            SpawnSinglePooledObject();
+            UE_LOG(LogTemp, Warning, TEXT("Null ActorClass found in PooledActorInfos array."));
+            continue;
+        }
+
+        FObjectPool& Pool = PoolMap.FindOrAdd(ActorInfo.ActorClass);
+        for (int32 i = 0; i < ActorInfo.InitialSize; ++i)
+        {
+            CreateAndPoolObject(ActorInfo.ActorClass);
         }
     }
-    UE_LOG(LogTemp, Warning, TEXT("InitializePoll Called: %s"),*GetOwner()->GetName());
-
+    UE_LOG(LogTemp, Warning, TEXT("InitializePool Called for %d classes on %s"), PooledActorInfos.Num(), *GetOwner()->GetName());
 }
 
-void UObjectPoolComponent::SpawnNextPooledObject()
-{
-    if (CurrentSpawnedCount < PoolSize)
-    {
-        SpawnSinglePooledObject();
-        CurrentSpawnedCount++;
-    }
-    else
-    {
-        // All objects spawned, clear timer
-        if (UWorld* World = GetWorld())
-        {
-            World->GetTimerManager().ClearTimer(GradualSpawnTimerHandle);
-        }
-    }
-}
-
-void UObjectPoolComponent::SpawnSinglePooledObject()
+void UObjectPoolComponent::CreateAndPoolObject(TSubclassOf<AActor> ActorClass)
 {
     UWorld* World = GetWorld();
-    if (!World) return;
+    if (!World || !ActorClass) return;
 
-    AActor* PooledObject = World->SpawnActor<AActor>(PooledObjectClass, FVector::ZeroVector, FRotator::ZeroRotator);
+    AActor* PooledObject = World->SpawnActor<AActor>(ActorClass, FVector::ZeroVector, FRotator::ZeroRotator);
     if (PooledObject)
     {
         PooledObject->SetActorHiddenInGame(true);
         PooledObject->SetActorEnableCollision(false);
         PooledObject->SetActorTickEnabled(false);
 
-
         IPoolable* Poolable = Cast<IPoolable>(PooledObject);
         if (Poolable)
         {
             Poolable->Execute_OnPoolEnd(PooledObject);
         }
-        
+
         if (GetOwner()->HasAuthority())
         {
             if (UCharacterMovementComponent* MovementComponent = PooledObject->FindComponentByClass<UCharacterMovementComponent>())
@@ -95,65 +70,101 @@ void UObjectPoolComponent::SpawnSinglePooledObject()
                 MovementComponent->SetMovementMode(EMovementMode::MOVE_None);
             }
         }
-        
 
-        ObjectPool.Add(PooledObject);
+        FObjectPool& Pool = PoolMap.FindOrAdd(ActorClass);
+        Pool.AvailableActors.Add(PooledObject);
     }
 }
 
-
-AActor* UObjectPoolComponent::SpawnPooledObject(const FTransform& SpawnTransform)
+AActor* UObjectPoolComponent::SpawnPooledObject(TSubclassOf<AActor> ActorClass, const FTransform& SpawnTransform)
 {
-    if (ObjectPool.Num() > 0)
+    if (!ActorClass)
     {
-        AActor* PooledObject = ObjectPool.Pop();
-        if (PooledObject)
+        UE_LOG(LogTemp, Warning, TEXT("SpawnPooledObject called with null ActorClass."));
+        return nullptr;
+    }
+
+    FObjectPool* Pool = PoolMap.Find(ActorClass);
+    if (!Pool)
+    {        
+        UE_LOG(LogTemp, Warning, TEXT("No pool found for class %s. Make sure it's in PooledActorInfos and initialized."), *ActorClass->GetName());
+        return nullptr;
+    }
+
+    AActor* PooledObject = nullptr;
+    if (Pool->AvailableActors.Num() > 0)
+    {
+        PooledObject = Pool->AvailableActors.Pop();
+    }
+    else
+    {
+        // Dynamically expand the pool if no actors are available
+        UE_LOG(LogTemp, Log, TEXT("No available objects for %s, expanding pool size."), *ActorClass->GetName());
+        CreateAndPoolObject(ActorClass);
+        if (Pool->AvailableActors.Num() > 0)
         {
-            PooledObject->SetActorTransform(SpawnTransform);
-            PooledObject->SetActorHiddenInGame(false);
-            PooledObject->SetActorEnableCollision(true);
-            PooledObject->SetActorTickEnabled(true);
-            
-            ACharacter* Character = Cast<ACharacter>(PooledObject);
-            if (Character && GetOwner()->HasAuthority())
-            {
-                Character->SpawnDefaultController();
-            }
-
-            IPoolable* Poolable = Cast<IPoolable>(PooledObject);
-            if (Poolable)
-            {
-                Poolable->Execute_OnPoolBegin(PooledObject);
-            }
-            if (GetOwner()->HasAuthority())
-            {
-                if (UAILODComponent* LODComponent = PooledObject->FindComponentByClass<UAILODComponent>())
-                {
-                    LODComponent->Deactivate();
-                    LODComponent->SetIsPooled(false);
-                }
-
-                if (UCharacterMovementComponent* MovementComponent = PooledObject->FindComponentByClass<UCharacterMovementComponent>())
-                {
-                    MovementComponent->ResetMoveState();
-                    MovementComponent->SetMovementMode(EMovementMode::MOVE_Walking);
-                }
-            }
-            
-
-
-            return PooledObject;
+            PooledObject = Pool->AvailableActors.Pop();
         }
     }
 
-    UE_LOG(LogTemp, Warning, TEXT("No available objects in pool. Consider increasing pool size."));
+    if (PooledObject)
+    {
+        Pool->InUseActors.Add(PooledObject);
+
+        PooledObject->SetActorTransform(SpawnTransform);
+        PooledObject->SetActorHiddenInGame(false);
+        PooledObject->SetActorEnableCollision(true);
+        PooledObject->SetActorTickEnabled(true);
+
+        ACharacter* Character = Cast<ACharacter>(PooledObject);
+        if (Character && GetOwner()->HasAuthority())
+        {
+            if (!Character->GetController())
+            {
+                Character->SpawnDefaultController();
+            }
+        }
+
+        IPoolable* Poolable = Cast<IPoolable>(PooledObject);
+        if (Poolable)
+        {
+            Poolable->Execute_OnPoolBegin(PooledObject);
+        }
+
+        if (GetOwner()->HasAuthority())
+        {
+            if (UAILODComponent* LODComponent = PooledObject->FindComponentByClass<UAILODComponent>())
+            {
+                LODComponent->Deactivate();
+                LODComponent->SetIsPooled(false);
+            }
+
+            if (UCharacterMovementComponent* MovementComponent = PooledObject->FindComponentByClass<UCharacterMovementComponent>())
+            {
+                MovementComponent->ResetMoveState();
+                MovementComponent->SetMovementMode(EMovementMode::MOVE_Walking);
+            }
+        }
+
+        return PooledObject;
+    }
+
+    UE_LOG(LogTemp, Warning, TEXT("Failed to spawn an object for class %s."), *ActorClass->GetName());
     return nullptr;
 }
 
 void UObjectPoolComponent::ReturnPooledObject(AActor* ActorToReturn)
 {
-    if (ActorToReturn)
+    if (!ActorToReturn) return;
+
+    TSubclassOf<AActor> ActorClass = ActorToReturn->GetClass();
+    FObjectPool* Pool = PoolMap.Find(ActorClass);
+
+    if (Pool && Pool->InUseActors.Contains(ActorToReturn))
     {
+        Pool->InUseActors.Remove(ActorToReturn);
+        Pool->AvailableActors.Add(ActorToReturn);
+
         if (UAILODComponent* LODComponent = ActorToReturn->FindComponentByClass<UAILODComponent>())
         {
             LODComponent->SetIsPooled(true);
@@ -176,7 +187,12 @@ void UObjectPoolComponent::ReturnPooledObject(AActor* ActorToReturn)
                 MovementComponent->SetMovementMode(EMovementMode::MOVE_None);
             }
         }
-        
-        ObjectPool.Add(ActorToReturn);
+    }
+    else
+    {
+        // This actor doesn't belong to this pool or was already returned.
+        // You might want to destroy it or log a warning.
+        UE_LOG(LogTemp, Warning, TEXT("Returned actor %s does not belong to any managed pool or was already returned. Destroying it."), *ActorToReturn->GetName());
+        ActorToReturn->Destroy();
     }
 }

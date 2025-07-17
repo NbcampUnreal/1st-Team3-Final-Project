@@ -5,6 +5,33 @@
 #include "Poolable.h"
 #include "ObjectPoolComponent.generated.h"
 
+// Forward declaration
+class AActor;
+
+USTRUCT(BlueprintType)
+struct FObjectPool
+{
+    GENERATED_BODY()
+
+    UPROPERTY()
+    TArray<AActor*> AvailableActors;
+
+    UPROPERTY()
+    TArray<AActor*> InUseActors;
+};
+
+USTRUCT(BlueprintType)
+struct FPooledActorInfo
+{
+    GENERATED_BODY()
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Object Pool")
+    TSubclassOf<AActor> ActorClass;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Object Pool")
+    int32 InitialSize = 20; // Default value
+};
+
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class ZONE064_API UObjectPoolComponent : public UActorComponent
 {
@@ -16,8 +43,8 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Object Pool")
     void InitializePool();
 
-    UFUNCTION(BlueprintCallable, Category = "Object Pool")
-    AActor* SpawnPooledObject(const FTransform& SpawnTransform);
+    UFUNCTION(BlueprintCallable, Category = "Object Pool", meta = (DisplayName = "Spawn Pooled Object By Class"))
+    AActor* SpawnPooledObject(TSubclassOf<AActor> ActorClass, const FTransform& SpawnTransform);
 
     UFUNCTION(BlueprintCallable, Category = "Object Pool")
     void ReturnPooledObject(AActor* ActorToReturn);
@@ -27,23 +54,11 @@ protected:
 
 public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Object Pool")
-    TSubclassOf<AActor> PooledObjectClass;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Object Pool")
-    int32 PoolSize = 20;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Object Pool")
-    bool bGradualInitialization = false;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Object Pool", meta = (EditCondition = "bGradualInitialization", ClampMin = "0.1"))
-    float GradualSpawnRate = 10.0f; // Actors per second
+    TArray<FPooledActorInfo> PooledActorInfos;
 
 private:
     UPROPERTY()
-    TArray<AActor*> ObjectPool;
+    TMap<TSubclassOf<AActor>, FObjectPool> PoolMap;
 
-    FTimerHandle GradualSpawnTimerHandle;
-    int32 CurrentSpawnedCount;
-    void SpawnSinglePooledObject();
-    void SpawnNextPooledObject();
+    void CreateAndPoolObject(TSubclassOf<AActor> ActorClass);
 };
