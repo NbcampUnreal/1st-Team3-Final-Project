@@ -107,12 +107,12 @@ void AWaveManager::SpawnWave(FName TagName)
 		UE_LOG(LogTemp, Warning, TEXT("[WaveManager] SpawnWave : No Spawners found"));
 		return;
 
-		if (WaveTimerHandles.Contains(TagName))
-		{
-			GetWorld()->GetTimerManager().ClearTimer(WaveTimerHandles[TagName]);
-			WaveTimerHandles.Remove(TagName);
-		}
-		return;
+		//if (WaveTimerHandles.Contains(TagName))
+		//{
+		//	GetWorld()->GetTimerManager().ClearTimer(WaveTimerHandles[TagName]);
+		//	WaveTimerHandles.Remove(TagName);
+		//}
+		//return;
 	}
 
 	const TArray<TObjectPtr<AActor>>& Spawners = *SpawnersPtr;
@@ -146,23 +146,23 @@ void AWaveManager::SpawnWave(FName TagName)
 
 		if (SelectedActorClass)
 		{
-			// 오브젝트 풀의 스폰 함수 호출 -> 오브젝트풀 코드 수정 필요 : 종류별로 스폰하도록
-			UObjectPoolComponent* ObjectPool = GetComponentByClass<UObjectPoolComponent>();
+			//// 오브젝트 풀의 스폰 함수 호출 -> 오브젝트풀 코드 수정 필요 : 종류별로 스폰하도록
+			//UObjectPoolComponent* ObjectPool = GetComponentByClass<UObjectPoolComponent>();
 
-			if (ObjectPool)
-			{
-				FTransform SpawnTransform = FTransform(
-					FRotator(0.f, FMath::FRandRange(0.f, 180.f), 0.f),
-					Spawner->GetActorLocation(),
-					FVector(1.f)
-				);
+			//if (ObjectPool)
+			//{
+			//	FTransform SpawnTransform = FTransform(
+			//		FRotator(0.f, FMath::FRandRange(0.f, 180.f), 0.f),
+			//		Spawner->GetActorLocation(),
+			//		FVector(1.f)
+			//	);
 
-				ObjectPool->SpawnPooledObject(SpawnTransform);
-			}
-			else
-			{
-				UE_LOG(LogTemp, Warning, TEXT("[WaveManager] SpawnWave : ObjectPoolComponent is not valid."));
-			}
+			//	ObjectPool->SpawnPooledObject(SpawnTransform);
+			//}
+			//else
+			//{
+			//	UE_LOG(LogTemp, Warning, TEXT("[WaveManager] SpawnWave : ObjectPoolComponent is not valid."));
+			//}
 		}
 	}
 }
