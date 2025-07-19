@@ -15,20 +15,23 @@ struct FZNInventorySlotInfo : public FFastArraySerializerItem
 	GENERATED_BODY()
 
 public:
-	FZNInventorySlotInfo() : Quantity(0) {}
-	FZNInventorySlotInfo(FPrimaryAssetId InId, int32 InQuantity) : ItemId(InId), Quantity(InQuantity) {}
+	FZNInventorySlotInfo() : SlotIndex(-1), Quantity(0), Durability(0) {}
+	FZNInventorySlotInfo(int32 InSlotIndex, FPrimaryAssetId InId, int32 InQuantity, int32 InDurability)
+	: SlotIndex(InSlotIndex), ItemId(InId), Quantity(InQuantity), Durability(InDurability) {}
 
-	UPROPERTY(BlueprintReadOnly, Category = "Inventory")
+	UPROPERTY(BlueprintReadWrite, Category = "Inventory")
+	int32 SlotIndex;
+
+	UPROPERTY(BlueprintReadWrite, Category = "Inventory")
 	FPrimaryAssetId ItemId;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Inventory")
+	UPROPERTY(BlueprintReadWrite, Category = "Inventory")
 	int32 Quantity;
 
+	UPROPERTY(BlueprintReadWrite, Category = "Inventory")
+	int32 Durability;
+	
 	bool IsValid() const { return ItemId.IsValid() && Quantity > 0; }
-
-	void PreReplicatedRemove(const struct FZNInventoryList& InArraySerializer);
-	void PostReplicatedAdd(const struct FZNInventoryList& InArraySerializer);
-	void PostReplicatedChange(const struct FZNInventoryList& InArraySerializer);
 };
 
 USTRUCT(BlueprintType)
@@ -39,8 +42,7 @@ struct FZNInventoryList : public FFastArraySerializer
 public:
 	UPROPERTY()
 	TArray<FZNInventorySlotInfo> Items;
-
-	void PostReplicatedChange(const TArray<int32, TInlineAllocator<8>>& ChangedIndices, int32 FinalSize);
+	
 	bool NetDeltaSerialize(FNetDeltaSerializeInfo& DeltaParms);
 
 	UPROPERTY()
@@ -56,7 +58,7 @@ struct TStructOpsTypeTraits<FZNInventoryList> : public TStructOpsTypeTraitsBase2
 	};
 };
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnInventoryUpdated);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnInventoryUpdated, const FZNInventorySlotInfo&, UpdatedSlotInfo);
 
 UCLASS(Blueprintable, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class ZONE064_API UZNBaseStorageComponent : public UActorComponent
@@ -84,48 +86,87 @@ public:
 	/*
 	* --- Storage 기본 기능 ---
 	*/
-
-	// 아이템을 추가. (클라이언트/서버 양용)
+	
+	// 아이템 추가
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
-	void AddItem(FPrimaryAssetId ItemId, int32 Quantity);
+	void AddItem(const FPrimaryAssetId& ItemId, const int32& Quantity, const int32& Durability);
 
-	// 아이템을 제거. (클라이언트/서버 양용)
+	// 아이템 제거 
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
-	void RemoveItem(FPrimaryAssetId ItemId, int32 Quantity);
+	void RemoveItem(const FPrimaryAssetId& ItemId, const int32& Quantity, const int32& Durability);
 
-	// 인벤토리의 모든 아이템 슬롯 정보 반환. (빈 슬롯 포함)
+	// 지정된 슬롯에서 아이템 제거
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
-	const TArray<FZNInventorySlotInfo>& GetInventoryItems() const { return InventoryList.Items; }
+	void RemoveItemFromSlot(int32 SlotIndex, int32 Quantity);
 
-	// PrimaryAssetId로부터 아이템의 PDA 반환.
-	UFUNCTION(BlueprintPure, Category = "Inventory", meta = (DisplayName = "GetItemDataById"))
-	static UZNItemData* GetItemData(FPrimaryAssetId ItemId);
+	// 인벤토리 정렬(Type-Quantity-Name 순서 정렬)
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	void SortInventory();
 
-	// 인벤토리 변경이 감지되었을 때 호출 (UI 업데이트용)
-	void HandleInventoryUpdated();
+	// 소비 아이템 사용
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	void UseConsumableItemFromSlot(APawn* PlayerPawn, int32 SlotIndex);
 
+	// 다른 보관함의 특정 슬롯과 현재 보관함의 특정 슬롯 간에 아이템을 이동/교환 (래퍼 함수 - 범용 RPC 호출)
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	void RequestTransferItemBetweenSlots(UZNBaseStorageComponent* OtherStorage, int32 SourceSlotIndex, int32 TargetSlotIndex);
+	
+	// 내부 로직: 특정 슬롯 간 아이템 이동/교환 (서버 RPC에서 직접 호출)
+	void TransferItemBetweenSlots(UZNBaseStorageComponent* OtherStorage, int32 SourceSlotIndex, int32 TargetSlotIndex);
 
 	/*
 	* --- 유틸리티 함수 ---
 	*/
 
+	// 슬롯 초기화 (ReplicationID 보존하면서 데이터만 초기화)
+	void ClearSlot(FZNInventorySlotInfo& Slot);
+	
 	UFUNCTION(BlueprintPure, Category = "Inventory")
 	int32 GetMaxSlots() const { return MaxSlots; }
 
 	UFUNCTION(BlueprintPure, Category = "Inventory")
+	int32 GetMaxStackSize(const FPrimaryAssetId& ItemId) const;
+	
+	UFUNCTION(BlueprintPure, Category = "Inventory")
 	bool IsFull() const;
 
 	UFUNCTION(BlueprintPure, Category = "Inventory")
-	bool HasItem(FPrimaryAssetId ItemId) const;
+	bool HasItem(const FPrimaryAssetId& ItemId) const;
 
 	UFUNCTION(BlueprintPure, Category = "Inventory")
-	int32 GetItemCount(FPrimaryAssetId ItemId) const;
+	int32 GetItemCount(const FPrimaryAssetId& ItemId) const;
 
 	UFUNCTION(BlueprintPure, Category = "Inventory")
-	bool FindItem(FPrimaryAssetId ItemId, FZNInventorySlotInfo& OutSlotInfo) const;
+	bool FindItem(const FPrimaryAssetId& ItemId, FZNInventorySlotInfo& OutSlotInfo) const;
 
+	// GameplayTag로 아이템을 저장할 수 있는지 확인
 	UFUNCTION(BlueprintPure, Category = "Inventory")
-	bool CanStoreItem(FPrimaryAssetId ItemId) const;
+	bool CanStoreItem(const FPrimaryAssetId& ItemId) const;
+
+	// 지정된 아이템과 수량을 추가할 수 있는지 확인하고, 실제 추가 가능한 수량을 반환
+	UFUNCTION(BlueprintPure, Category = "Inventory")
+	int32 CheckAddableQuantity(const FPrimaryAssetId& ItemId, int32 Quantity) const;
+
+	// 인덱스로 슬롯 정보 직접 반환
+	UFUNCTION(BlueprintPure, Category = "Inventory")
+	FZNInventorySlotInfo GetSlotByIndex(int32 SlotIndex) const;
+
+	// 인벤토리의 모든 아이템 슬롯 정보 반환 (빈 슬롯 포함)
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	const TArray<FZNInventorySlotInfo>& GetInventoryItems() const { return InventoryList.Items; }
+
+	// PrimaryAssetId로부터 아이템의 PDA 반환
+	UFUNCTION(BlueprintPure, Category = "Inventory", meta = (DisplayName = "Get Item Data By Id"))
+	static UZNItemData* GetItemData(const FPrimaryAssetId& ItemId);
+
+	// 통합 UI 업데이트 함수 (소유권 기반 자동 분기)
+	void NotifyInventorySlotUpdated(const FZNInventorySlotInfo& SlotInfo);
+	
+	// 인벤토리 변경이 감지되었을 때 호출 (UI 업데이트용)
+	void HandleInventoryUpdated(const FZNInventorySlotInfo& UpdatedSlotInfo);
+
+	// 플레이어 Storage 컴포넌트 찾기 (범용 RPC 호출용)
+	UZNBaseStorageComponent* GetPlayerStorageComponent() const;
 
 protected:
 	UPROPERTY(Replicated)
@@ -135,13 +176,51 @@ protected:
 	* --- Server RPC ---
 	*/
 
-	UFUNCTION(Server, Reliable, WithValidation)
-	void Server_AddItem(FPrimaryAssetId ItemId, int32 Quantity);
-	bool Server_AddItem_Validate(FPrimaryAssetId ItemId, int32 Quantity);
-	void Server_AddItem_Implementation(FPrimaryAssetId ItemId, int32 Quantity);
+	UFUNCTION(Server, Reliable, WithValidation, Category = "Inventory")
+	void Server_AddItem(FPrimaryAssetId ItemId, int32 Quantity, int32 Durability);
+	bool Server_AddItem_Validate(FPrimaryAssetId ItemId, int32 Quantity, int32 Durability);
+	void Server_AddItem_Implementation(FPrimaryAssetId ItemId, int32 Quantity, int32 Durability);
 
-	UFUNCTION(Server, Reliable, WithValidation)
-	void Server_RemoveItem(FPrimaryAssetId ItemId, int32 Quantity);
-	bool Server_RemoveItem_Validate(FPrimaryAssetId ItemId, int32 Quantity);
-	void Server_RemoveItem_Implementation(FPrimaryAssetId ItemId, int32 Quantity);
+	UFUNCTION(Server, Reliable, WithValidation, Category = "Inventory")
+	void Server_RemoveItem(FPrimaryAssetId ItemId, int32 Quantity, int32 Durability);
+	bool Server_RemoveItem_Validate(FPrimaryAssetId ItemId, int32 Quantity, int32 Durability);
+	void Server_RemoveItem_Implementation(FPrimaryAssetId ItemId, int32 Quantity, int32 Durability);
+
+	// 지정된 슬롯에서 아이템을 제거
+	UFUNCTION(Server, Reliable, Category = "Inventory")
+	void Server_RemoveItemFromSlot(int32 SlotIndex, int32 Quantity);
+	void Server_RemoveItemFromSlot_Implementation(int32 SlotIndex, int32 Quantity);
+
+	// UI 전용: 모든 Storage 간 아이템 이동/교환 (플레이어 Storage에서만 호출)
+	UFUNCTION(Server, Reliable, Category = "Inventory")
+	void Server_TransferBetweenAnyStorages(UZNBaseStorageComponent* SourceStorage, UZNBaseStorageComponent* TargetStorage, int32 SourceSlotIndex, int32 TargetSlotIndex);
+	void Server_TransferBetweenAnyStorages_Implementation(UZNBaseStorageComponent* SourceStorage, UZNBaseStorageComponent* TargetStorage, int32 SourceSlotIndex, int32 TargetSlotIndex);
+	
+	// 인벤토리 정렬
+	UFUNCTION(Server, Reliable, Category = "Inventory")
+	void Server_SortInventory();
+	void Server_SortInventory_Implementation();
+
+	// 소비 아이템 사용
+	UFUNCTION(Server, Reliable, Category = "Inventory")
+	void Server_UseConsumableItemFromSlot(APawn* PlayerPawn, int32 SlotIndex);
+	void Server_UseConsumableItemFromSlot_Implementation(APawn* PlayerPawn, int32 SlotIndex);
+
+	/*
+	* --- Client RPC ---
+	*/
+
+	// UI 업데이트를 위한 Client RPC (플레이어 소유 Storage용)
+	UFUNCTION(Client, Reliable, Category = "Inventory")
+	void Client_NotifyInventorySlotUpdated(const FZNInventorySlotInfo& SlotInfo);
+	void Client_NotifyInventorySlotUpdated_Implementation(const FZNInventorySlotInfo& SlotInfo);
+
+	/*
+	* --- Multicast RPC ---
+	*/
+	
+	// UI 업데이트를 위한 Multicast RPC (공유 Storage용)
+	UFUNCTION(NetMulticast, Reliable, Category = "Inventory")
+	void Multicast_NotifyInventorySlotUpdated(const FZNInventorySlotInfo& SlotInfo);
+	void Multicast_NotifyInventorySlotUpdated_Implementation(const FZNInventorySlotInfo& SlotInfo);
 };

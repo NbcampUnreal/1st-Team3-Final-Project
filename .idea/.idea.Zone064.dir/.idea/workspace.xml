@@ -8,8 +8,26 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ad18e44d-431e-4ba1-a905-566182d4eb4c" name="변경" comment="">
-      <change beforePath="$PROJECT_DIR$/Content/Maps/Test/BP_MediaBox.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Maps/Test/BP_MediaBox.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Maps/Test/EndingMap.umap" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Maps/Test/EndingMap.umap" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Source/Zone064/Private/Item/ZNWeaponBase.cpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Source/Zone064/Public/Item/ZNWeaponBase.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.Zone064.dir/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Zone064.dir/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.Zone064.dir/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Zone064.dir/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.Zone064/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Zone064/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Config/DefaultEngine.ini" beforeDir="false" afterPath="$PROJECT_DIR$/Config/DefaultEngine.ini" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Config/DefaultGameplayTags.ini" beforeDir="false" afterPath="$PROJECT_DIR$/Config/DefaultGameplayTags.ini" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Items/Test/BPC_InteractionManager.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Items/Test/BPC_InteractionManager.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Items/Test/Library/BFL_Inventory.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Items/Test/Library/BFL_Inventory.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Items/Test/UI/Widgets/Inventory/WBP_Inventory_JJH.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Items/Test/UI/Widgets/Inventory/WBP_Inventory_JJH.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Items/Test/UI/Widgets/Inventory/WBP_SlotsContainer.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Items/Test/UI/Widgets/Inventory/WBP_SlotsContainer.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/MPTD_Shooter/Blueprints/Characters/BP_DefaultCharacter.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/MPTD_Shooter/Blueprints/Characters/BP_DefaultCharacter.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/MPTD_Shooter/Blueprints/Weapons/BP_MasterWeapon.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/MPTD_Shooter/Blueprints/Weapons/BP_MasterWeapon.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/MPTD_Shooter/Blueprints/Widgets/Gameplay/W_HUD.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/MPTD_Shooter/Blueprints/Widgets/Gameplay/W_HUD.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Maps/Test/KDH_TestMap.umap" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Maps/Test/KDH_TestMap.umap" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Zone064/Private/ActorComponent/Storage/ZNBaseStorageComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Zone064/Private/ActorComponent/Storage/ZNBaseStorageComponent.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Zone064/Private/Data/ZNItemData.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Zone064/Private/Data/ZNItemData.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Zone064/Public/ActorComponent/Storage/ZNBaseStorageComponent.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Zone064/Public/ActorComponent/Storage/ZNBaseStorageComponent.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Zone064/Public/Data/ZNItemData.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Zone064/Public/Data/ZNItemData.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../cpp_assignment_4/BookManager.cpp" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -37,9 +55,10 @@
   &quot;keyToString&quot;: {
     &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;Uproject.Zone064.executor&quot;: &quot;Debug&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;cyh-146/캐릭터,적-AI-버그수정&quot;,
+    &quot;Uproject.Zone064.executor&quot;: &quot;Run&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;KDH-161/InventoryComponent리펙토링&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
@@ -55,10 +74,10 @@
         <option name="CONFIGURATION" value="DebugGame Editor" />
         <option name="PLATFORM" value="Win64" />
         <option name="CURRENT_LAUNCH_PROFILE" value="Local" />
-        <option name="EXECUTABLE_PATH" value="C:\Program Files\Epic Games\UE_5.5\Engine\Binaries\Win64\UnrealEditor-Win64-DebugGame.exe" />
-        <option name="MANDATORY_PROGRAM_PARAMETERS" value=" &quot;F:\GitHub\1st-Team3-Final-Project\Zone064.uproject&quot;" />
+        <option name="EXECUTABLE_PATH" value="E:\UE_5.5\Engine\Binaries\Win64\UnrealEditor-Win64-DebugGame.exe" />
+        <option name="MANDATORY_PROGRAM_PARAMETERS" value=" &quot;E:\Git\1st-Team3-Final-Project\Zone064.uproject&quot;" />
         <option name="CUSTOM_PROGRAM_PARAMETERS" value="" />
-        <option name="WORKING_DIRECTORY" value="C:\Program Files\Epic Games\UE_5.5" />
+        <option name="WORKING_DIRECTORY" value="E:\UE_5.5" />
         <option name="PASS_PARENT_ENVS" value="1" />
         <option name="USE_EXTERNAL_CONSOLE" value="1" />
         <option name="TERMINAL_INTERACTION_BEHAVIOR" value="FORCE_CONSOLE" />
@@ -68,10 +87,10 @@
         <option name="CONFIGURATION" value="DebugGame" />
         <option name="PLATFORM" value="Win64" />
         <option name="CURRENT_LAUNCH_PROFILE" value="Local" />
-        <option name="EXECUTABLE_PATH" value="F:\GitHub\1st-Team3-Final-Project\Binaries\Win64\Zone064-Win64-DebugGame.exe" />
+        <option name="EXECUTABLE_PATH" value="E:\Git\1st-Team3-Final-Project\Binaries\Win64\Zone064-Win64-DebugGame.exe" />
         <option name="MANDATORY_PROGRAM_PARAMETERS" value="" />
         <option name="CUSTOM_PROGRAM_PARAMETERS" value="" />
-        <option name="WORKING_DIRECTORY" value="C:\Program Files\Epic Games\UE_5.5" />
+        <option name="WORKING_DIRECTORY" value="E:\UE_5.5" />
         <option name="PASS_PARENT_ENVS" value="1" />
         <option name="USE_EXTERNAL_CONSOLE" value="1" />
         <option name="TERMINAL_INTERACTION_BEHAVIOR" value="FORCE_CONSOLE" />
@@ -81,10 +100,10 @@
         <option name="CONFIGURATION" value="Development Editor" />
         <option name="PLATFORM" value="Win64" />
         <option name="CURRENT_LAUNCH_PROFILE" value="Local" />
-        <option name="EXECUTABLE_PATH" value="C:\Program Files\Epic Games\UE_5.5\Engine\Binaries\Win64\UnrealEditor.exe" />
-        <option name="MANDATORY_PROGRAM_PARAMETERS" value=" &quot;F:\GitHub\1st-Team3-Final-Project\Zone064.uproject&quot;" />
+        <option name="EXECUTABLE_PATH" value="E:\UE_5.5\Engine\Binaries\Win64\UnrealEditor.exe" />
+        <option name="MANDATORY_PROGRAM_PARAMETERS" value=" &quot;E:\Git\1st-Team3-Final-Project\Zone064.uproject&quot;" />
         <option name="CUSTOM_PROGRAM_PARAMETERS" value="" />
-        <option name="WORKING_DIRECTORY" value="C:\Program Files\Epic Games\UE_5.5" />
+        <option name="WORKING_DIRECTORY" value="E:\UE_5.5" />
         <option name="PASS_PARENT_ENVS" value="1" />
         <option name="USE_EXTERNAL_CONSOLE" value="1" />
         <option name="TERMINAL_INTERACTION_BEHAVIOR" value="FORCE_CONSOLE" />
@@ -94,10 +113,10 @@
         <option name="CONFIGURATION" value="Development" />
         <option name="PLATFORM" value="Win64" />
         <option name="CURRENT_LAUNCH_PROFILE" value="Local" />
-        <option name="EXECUTABLE_PATH" value="F:\GitHub\1st-Team3-Final-Project\Binaries\Win64\Zone064.exe" />
+        <option name="EXECUTABLE_PATH" value="E:\Git\1st-Team3-Final-Project\Binaries\Win64\Zone064.exe" />
         <option name="MANDATORY_PROGRAM_PARAMETERS" value="" />
         <option name="CUSTOM_PROGRAM_PARAMETERS" value="" />
-        <option name="WORKING_DIRECTORY" value="C:\Program Files\Epic Games\UE_5.5" />
+        <option name="WORKING_DIRECTORY" value="E:\UE_5.5" />
         <option name="PASS_PARENT_ENVS" value="1" />
         <option name="USE_EXTERNAL_CONSOLE" value="1" />
         <option name="TERMINAL_INTERACTION_BEHAVIOR" value="FORCE_CONSOLE" />
@@ -107,15 +126,93 @@
         <option name="CONFIGURATION" value="Shipping" />
         <option name="PLATFORM" value="Win64" />
         <option name="CURRENT_LAUNCH_PROFILE" value="Local" />
-        <option name="EXECUTABLE_PATH" value="F:\GitHub\1st-Team3-Final-Project\Binaries\Win64\Zone064-Win64-Shipping.exe" />
+        <option name="EXECUTABLE_PATH" value="E:\Git\1st-Team3-Final-Project\Binaries\Win64\Zone064-Win64-Shipping.exe" />
         <option name="MANDATORY_PROGRAM_PARAMETERS" value="" />
         <option name="CUSTOM_PROGRAM_PARAMETERS" value="" />
-        <option name="WORKING_DIRECTORY" value="C:\Program Files\Epic Games\UE_5.5" />
+        <option name="WORKING_DIRECTORY" value="E:\UE_5.5" />
         <option name="PASS_PARENT_ENVS" value="1" />
         <option name="USE_EXTERNAL_CONSOLE" value="1" />
         <option name="TERMINAL_INTERACTION_BEHAVIOR" value="FORCE_CONSOLE" />
         <option name="PROJECT_FILE_PATH" value="$PROJECT_DIR$/Zone064.uproject" />
       </configuration_5>
+      <configuration_6 setup="1">
+        <option name="CONFIGURATION" value="DebugGame" />
+        <option name="PLATFORM" value="Linux" />
+        <option name="CURRENT_LAUNCH_PROFILE" value="Local" />
+        <option name="EXECUTABLE_PATH" value="E:\Git\1st-Team3-Final-Project\Binaries\Linux\Zone064-Linux-DebugGame" />
+        <option name="MANDATORY_PROGRAM_PARAMETERS" value="" />
+        <option name="CUSTOM_PROGRAM_PARAMETERS" value="" />
+        <option name="WORKING_DIRECTORY" value="E:\UE_5.5" />
+        <option name="PASS_PARENT_ENVS" value="1" />
+        <option name="USE_EXTERNAL_CONSOLE" value="1" />
+        <option name="TERMINAL_INTERACTION_BEHAVIOR" value="FORCE_CONSOLE" />
+        <option name="PROJECT_FILE_PATH" value="$PROJECT_DIR$/Zone064.uproject" />
+      </configuration_6>
+      <configuration_7 setup="1">
+        <option name="CONFIGURATION" value="DebugGame" />
+        <option name="PLATFORM" value="LinuxArm64" />
+        <option name="CURRENT_LAUNCH_PROFILE" value="Local" />
+        <option name="EXECUTABLE_PATH" value="E:\Git\1st-Team3-Final-Project\Binaries\LinuxArm64\Zone064-LinuxArm64-DebugGame" />
+        <option name="MANDATORY_PROGRAM_PARAMETERS" value="" />
+        <option name="CUSTOM_PROGRAM_PARAMETERS" value="" />
+        <option name="WORKING_DIRECTORY" value="E:\UE_5.5" />
+        <option name="PASS_PARENT_ENVS" value="1" />
+        <option name="USE_EXTERNAL_CONSOLE" value="1" />
+        <option name="TERMINAL_INTERACTION_BEHAVIOR" value="FORCE_CONSOLE" />
+        <option name="PROJECT_FILE_PATH" value="$PROJECT_DIR$/Zone064.uproject" />
+      </configuration_7>
+      <configuration_8 setup="1">
+        <option name="CONFIGURATION" value="Development" />
+        <option name="PLATFORM" value="Linux" />
+        <option name="CURRENT_LAUNCH_PROFILE" value="Local" />
+        <option name="EXECUTABLE_PATH" value="E:\Git\1st-Team3-Final-Project\Binaries\Linux\Zone064" />
+        <option name="MANDATORY_PROGRAM_PARAMETERS" value="" />
+        <option name="CUSTOM_PROGRAM_PARAMETERS" value="" />
+        <option name="WORKING_DIRECTORY" value="E:\UE_5.5" />
+        <option name="PASS_PARENT_ENVS" value="1" />
+        <option name="USE_EXTERNAL_CONSOLE" value="1" />
+        <option name="TERMINAL_INTERACTION_BEHAVIOR" value="FORCE_CONSOLE" />
+        <option name="PROJECT_FILE_PATH" value="$PROJECT_DIR$/Zone064.uproject" />
+      </configuration_8>
+      <configuration_9 setup="1">
+        <option name="CONFIGURATION" value="Development" />
+        <option name="PLATFORM" value="LinuxArm64" />
+        <option name="CURRENT_LAUNCH_PROFILE" value="Local" />
+        <option name="EXECUTABLE_PATH" value="E:\Git\1st-Team3-Final-Project\Binaries\LinuxArm64\Zone064" />
+        <option name="MANDATORY_PROGRAM_PARAMETERS" value="" />
+        <option name="CUSTOM_PROGRAM_PARAMETERS" value="" />
+        <option name="WORKING_DIRECTORY" value="E:\UE_5.5" />
+        <option name="PASS_PARENT_ENVS" value="1" />
+        <option name="USE_EXTERNAL_CONSOLE" value="1" />
+        <option name="TERMINAL_INTERACTION_BEHAVIOR" value="FORCE_CONSOLE" />
+        <option name="PROJECT_FILE_PATH" value="$PROJECT_DIR$/Zone064.uproject" />
+      </configuration_9>
+      <configuration_10 setup="1">
+        <option name="CONFIGURATION" value="Shipping" />
+        <option name="PLATFORM" value="Linux" />
+        <option name="CURRENT_LAUNCH_PROFILE" value="Local" />
+        <option name="EXECUTABLE_PATH" value="E:\Git\1st-Team3-Final-Project\Binaries\Linux\Zone064-Linux-Shipping" />
+        <option name="MANDATORY_PROGRAM_PARAMETERS" value="" />
+        <option name="CUSTOM_PROGRAM_PARAMETERS" value="" />
+        <option name="WORKING_DIRECTORY" value="E:\UE_5.5" />
+        <option name="PASS_PARENT_ENVS" value="1" />
+        <option name="USE_EXTERNAL_CONSOLE" value="1" />
+        <option name="TERMINAL_INTERACTION_BEHAVIOR" value="FORCE_CONSOLE" />
+        <option name="PROJECT_FILE_PATH" value="$PROJECT_DIR$/Zone064.uproject" />
+      </configuration_10>
+      <configuration_11 setup="1">
+        <option name="CONFIGURATION" value="Shipping" />
+        <option name="PLATFORM" value="LinuxArm64" />
+        <option name="CURRENT_LAUNCH_PROFILE" value="Local" />
+        <option name="EXECUTABLE_PATH" value="E:\Git\1st-Team3-Final-Project\Binaries\LinuxArm64\Zone064-LinuxArm64-Shipping" />
+        <option name="MANDATORY_PROGRAM_PARAMETERS" value="" />
+        <option name="CUSTOM_PROGRAM_PARAMETERS" value="" />
+        <option name="WORKING_DIRECTORY" value="E:\UE_5.5" />
+        <option name="PASS_PARENT_ENVS" value="1" />
+        <option name="USE_EXTERNAL_CONSOLE" value="1" />
+        <option name="TERMINAL_INTERACTION_BEHAVIOR" value="FORCE_CONSOLE" />
+        <option name="PROJECT_FILE_PATH" value="$PROJECT_DIR$/Zone064.uproject" />
+      </configuration_11>
       <option name="DEFAULT_PROJECT_PATH" value="$PROJECT_DIR$/Zone064.uproject" />
       <option name="PROJECT_FILE_PATH" value="$PROJECT_DIR$/Zone064.uproject" />
       <option name="AUTO_SELECT_PRIORITY" value="10010" />
@@ -140,6 +237,8 @@
       <workItem from="1749537688080" duration="3000" />
       <workItem from="1750668715510" duration="8000" />
       <workItem from="1752134615457" duration="4000" />
+      <workItem from="1752473923849" duration="8269000" />
+      <workItem from="1752721471389" duration="72000" />
     </task>
     <servers />
   </component>
