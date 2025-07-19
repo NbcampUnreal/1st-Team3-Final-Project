@@ -52,7 +52,7 @@ public:
 
 	// 허기 회복
 	UFUNCTION(BlueprintCallable, Category="Hunger")
-	void IncreaseHunger(float Amount);
+	void IncreaseHunger(const float& Amount);
 	
 	// 현재 비율 (UI용)
 	UFUNCTION(BlueprintCallable, Category="Hunger")
