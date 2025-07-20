@@ -8,25 +8,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ad18e44d-431e-4ba1-a905-566182d4eb4c" name="변경" comment="">
-      <change afterPath="$PROJECT_DIR$/Source/Zone064/Private/Item/ZNWeaponBase.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Source/Zone064/Public/Item/ZNWeaponBase.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.Zone064.dir/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Zone064.dir/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Zone064.dir/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Zone064.dir/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.Zone064/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Zone064/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Config/DefaultEngine.ini" beforeDir="false" afterPath="$PROJECT_DIR$/Config/DefaultEngine.ini" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Config/DefaultGameplayTags.ini" beforeDir="false" afterPath="$PROJECT_DIR$/Config/DefaultGameplayTags.ini" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Items/BP_MasterPickup_Test.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Items/BP_MasterPickup_Test.uasset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/Items/Test/BPC_InteractionManager.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Items/Test/BPC_InteractionManager.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Items/Test/Library/BFL_Inventory.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Items/Test/Library/BFL_Inventory.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Items/Test/UI/Widgets/Inventory/WBP_Inventory_JJH.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Items/Test/UI/Widgets/Inventory/WBP_Inventory_JJH.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Items/Test/UI/Widgets/Inventory/WBP_SlotsContainer.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Items/Test/UI/Widgets/Inventory/WBP_SlotsContainer.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/MPTD_Shooter/Blueprints/Characters/BP_DefaultCharacter.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/MPTD_Shooter/Blueprints/Characters/BP_DefaultCharacter.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/MPTD_Shooter/Blueprints/Weapons/BP_MasterWeapon.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/MPTD_Shooter/Blueprints/Weapons/BP_MasterWeapon.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/MPTD_Shooter/Blueprints/Widgets/Gameplay/W_HUD.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/MPTD_Shooter/Blueprints/Widgets/Gameplay/W_HUD.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Maps/Test/KDH_TestMap.umap" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Maps/Test/KDH_TestMap.umap" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Zone064/Private/ActorComponent/Storage/ZNBaseStorageComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Zone064/Private/ActorComponent/Storage/ZNBaseStorageComponent.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Zone064/Private/Data/ZNItemData.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Zone064/Private/Data/ZNItemData.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Zone064/Public/ActorComponent/Storage/ZNBaseStorageComponent.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Zone064/Public/ActorComponent/Storage/ZNBaseStorageComponent.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Zone064/Public/Data/ZNItemData.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Zone064/Public/Data/ZNItemData.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Items/UI/BP_MasterPickup_Test.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Items/UI/BP_MasterPickup_Test.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/MPTD_Shooter/GameInstance/BP_MPTD_GI.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/MPTD_Shooter/GameInstance/BP_MPTD_GI.uasset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../cpp_assignment_4/BookManager.cpp" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -239,6 +225,8 @@
       <workItem from="1752134615457" duration="4000" />
       <workItem from="1752473923849" duration="8269000" />
       <workItem from="1752721471389" duration="72000" />
+      <workItem from="1752984808709" duration="18738000" />
+      <workItem from="1753006488099" duration="369000" />
     </task>
     <servers />
   </component>
