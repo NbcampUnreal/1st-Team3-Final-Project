@@ -187,9 +187,9 @@ void UZNBaseStorageComponent::TransferItemBetweenSlots(
     {
         // --- Case 2 & 3: 다른 아이템(교환) 또는 빈 슬롯(이동) ---
 
-        // 각 아이템이 상대방 인벤토리에 들어갈 수 있는지 태그 검사
-        const bool bCanSourceGoToTarget = !SourceSlot.IsValid() || OtherStorage->CanStoreItem(SourceSlot.ItemId);
-        const bool bCanTargetGoToSource = !TargetSlot.IsValid() || CanStoreItem(TargetSlot.ItemId);
+        // 각 아이템이 상대방 인벤토리의 특정 슬롯에 들어갈 수 있는지 검사
+        const bool bCanSourceGoToTarget = !SourceSlot.IsValid() || OtherStorage->CanStoreItemInSlot(SourceSlot.ItemId, TargetSlotIndex);
+        const bool bCanTargetGoToSource = !TargetSlot.IsValid() || CanStoreItemInSlot(TargetSlot.ItemId, SourceSlotIndex);
 
         if (bCanSourceGoToTarget && bCanTargetGoToSource)
         {
@@ -316,6 +316,12 @@ bool UZNBaseStorageComponent::CanStoreItem(const FPrimaryAssetId& ItemId) const
 	}
 
 	return false;
+}
+
+bool UZNBaseStorageComponent::CanStoreItemInSlot(const FPrimaryAssetId& ItemId, int32 TargetSlotIndex) const
+{
+	// 기본 구현: 일반 인벤토리는 모든 슬롯이 동일하므로 CanStoreItem만 확인
+	return CanStoreItem(ItemId);
 }
 
 UZNItemData* UZNBaseStorageComponent::GetItemData(const FPrimaryAssetId& ItemId)

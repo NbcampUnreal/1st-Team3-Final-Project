@@ -150,6 +150,15 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Inventory")
 	bool CanStoreItem(const FPrimaryAssetId& ItemId) const;
 
+	// 특정 슬롯에 아이템을 저장할 수 있는지 확인
+	// 플레이어 장비 슬롯 Component에서 특정 슬롯에 Item이 장착 가능한지 판단하기 위한 가상함수
+	// 1. TransferItemBetweenSlots 함수에서 CanStoreItem 함수 대신에 사용
+	// 2. override 하지 않으면 기존 CanStoreItem 함수 사용
+	// 3. 플레이어 장비 슬롯 Component에서 Override하여, CanStoreItem 함수 먼저 호출해서 Tag기반으로 슬롯에 장착 가능한지 체크
+	// 4. 이후 각 장비 슬롯 타입(무기, 헬멧, 갑옷, 부츠, 소비, 투척) 종류에 따라 장착 가능한지 체크하는 로직 구현 필요 
+	UFUNCTION(BlueprintPure, Category = "Inventory")
+	virtual bool CanStoreItemInSlot(const FPrimaryAssetId& ItemId, int32 TargetSlotIndex) const;
+
 	// 지정된 아이템과 수량을 추가할 수 있는지 확인하고, 실제 추가 가능한 수량을 반환
 	UFUNCTION(BlueprintPure, Category = "Inventory")
 	int32 CheckAddableQuantity(const FPrimaryAssetId& ItemId, int32 Quantity) const;

@@ -14,14 +14,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="4a01c224-ac5f-4371-950c-3816425deea2" name="변경" comment="">
-      <change afterPath="$PROJECT_DIR$/Source/Zone064/Private/Item/ZNBasePickup.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Source/Zone064/Public/Item/ZNBasePickup.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Items/DT_ItemList.uasset" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/MPTD_Shooter/GameInstance/BP_MPTD_GI.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/MPTD_Shooter/GameInstance/BP_MPTD_GI.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Zone064/Private/GameInstance/ZNBaseGameInstance.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Zone064/Private/GameInstance/ZNBaseGameInstance.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Zone064/Public/Data/ZNItemData.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Zone064/Public/Data/ZNItemData.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/Zone064/Public/GameInstance/ZNBaseGameInstance.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Zone064/Public/GameInstance/ZNBaseGameInstance.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Zone064.sln.DotSettings.user" beforeDir="false" afterPath="$PROJECT_DIR$/Zone064.sln.DotSettings.user" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.Zone064.dir/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Zone064.dir/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.Zone064/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Zone064/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Config/DefaultGameplayTags.ini" beforeDir="false" afterPath="$PROJECT_DIR$/Config/DefaultGameplayTags.ini" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/Items/DataAssets/Weapon/MeleeWeapon/DA_NailedPlank_Test.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Items/DataAssets/Weapon/MeleeWeapon/DA_NailedPlank_Test.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Zone064/Private/ActorComponent/Storage/ZNBaseStorageComponent.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Zone064/Private/ActorComponent/Storage/ZNBaseStorageComponent.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/Zone064/Public/ActorComponent/Storage/ZNBaseStorageComponent.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/Zone064/Public/ActorComponent/Storage/ZNBaseStorageComponent.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../cpp_assignment_4/BookManager.cpp" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -228,6 +226,7 @@
       <workItem from="1752904468460" duration="23618000" />
       <workItem from="1752933349302" duration="234000" />
       <workItem from="1752980519498" duration="4272000" />
+      <workItem from="1753019543678" duration="8137000" />
     </task>
     <servers />
   </component>

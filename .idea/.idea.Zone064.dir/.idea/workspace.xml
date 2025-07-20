@@ -8,11 +8,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ad18e44d-431e-4ba1-a905-566182d4eb4c" name="변경" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.Zone064.dir/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Zone064.dir/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Items/BP_MasterPickup_Test.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Items/BP_MasterPickup_Test.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Items/Test/BPC_InteractionManager.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Items/Test/BPC_InteractionManager.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/Items/UI/BP_MasterPickup_Test.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Items/UI/BP_MasterPickup_Test.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/MPTD_Shooter/GameInstance/BP_MPTD_GI.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/MPTD_Shooter/GameInstance/BP_MPTD_GI.uasset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../cpp_assignment_4/BookManager.cpp" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -226,7 +221,7 @@
       <workItem from="1752473923849" duration="8269000" />
       <workItem from="1752721471389" duration="72000" />
       <workItem from="1752984808709" duration="18738000" />
-      <workItem from="1753006488099" duration="369000" />
+      <workItem from="1753006488099" duration="470000" />
     </task>
     <servers />
   </component>
