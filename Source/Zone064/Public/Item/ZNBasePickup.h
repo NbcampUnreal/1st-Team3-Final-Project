@@ -17,16 +17,22 @@ class ZONE064_API AZNBasePickup : public AActor
 public:
 	AZNBasePickup();
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pickup")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, ReplicatedUsing = OnRep_ItemRowName, Category = "Pickup")
 	FName ItemRowName;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pickup")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = "Pickup")
 	int32 ItemQuantity = 1;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pickup")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category = "Pickup")
 	int32 ItemDurability = -1;  // -1이면 ItemData의 기본 내구도 사용
 
 protected:
+	virtual void BeginPlay() override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	UFUNCTION()
+	void OnRep_ItemRowName();
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<USkeletalMeshComponent> SkeletalMeshComponent;
 	
@@ -39,7 +45,6 @@ protected:
 	UPROPERTY()
 	TObjectPtr<UZNItemData> CachedItemData = nullptr;
 
-	virtual void BeginPlay() override;
 	
 public:
 	// 런타임에 RowName 설정 (드롭 시 사용)

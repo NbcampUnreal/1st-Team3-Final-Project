@@ -4,6 +4,8 @@
 #include "Data/ZNItemData.h"
 #include "ActorComponent/HealthComponent.h"
 #include "ActorComponent/HungerComponent.h"
+#include "Item/ZNBasePickup.h"
+#include "GameInstance/ZNBaseGameInstance.h"
 
 /*
 * --- FZNInventoryList ---
@@ -31,6 +33,8 @@ void UZNBaseStorageComponent::BeginPlay()
 	Super::BeginPlay();
 
 	InventoryList.OwningComponent = this;
+	
+	CachePickupActorClass();
 
 	if (GetOwner()->HasAuthority())
 	{
@@ -617,6 +621,64 @@ void UZNBaseStorageComponent::NotifyInventorySlotUpdated(const FZNInventorySlotI
 	{
 		// 공유 Storage (차량, 상자 등) → 모든 클라이언트에게 Multicast RPC
 		Multicast_NotifyInventorySlotUpdated(SlotInfo);
+	}
+}
+
+void UZNBaseStorageComponent::RequestDropItemToWorld(APawn* PlayerPawn, const FZNInventorySlotInfo& SlotInfo)
+{
+	UZNBaseStorageComponent* PlayerStorage = GetPlayerStorageComponent();
+	
+	if (PlayerStorage)
+	{
+		// 플레이어 Storage의 RPC를 통해 처리 (권한 문제 해결)
+		PlayerStorage->Server_DropItemFromAnyStorage(this, PlayerPawn, SlotInfo);
+	}
+}
+
+void UZNBaseStorageComponent::Server_DropItemFromAnyStorage_Implementation(UZNBaseStorageComponent* SourceStorage, APawn* PlayerPawn, const FZNInventorySlotInfo& SlotInfo)
+{
+	// 유효성 검사
+	if (!SourceStorage || !PlayerPawn || !SlotInfo.IsValid() || !GetWorld()) return;
+	
+	// ItemData 로드하여 PickupRowName 확인
+	UZNItemData* ItemData = GetItemData(SlotInfo.ItemId);
+	if (!ItemData || ItemData->PickupRowName.IsNone()) return;
+	
+	// 드롭 위치 계산 (PlayerPawn 앞쪽 위쪽)
+	FVector PlayerLocation = PlayerPawn->GetActorLocation();
+	FVector PlayerForward = PlayerPawn->GetActorForwardVector();
+	FVector DropLocation = PlayerLocation + (PlayerForward * 70.0f) + FVector(0, 0, 100.0f);
+	
+	if (!CachedPickupActorClass)
+	{
+		CachePickupActorClass();
+	}
+
+	if (CachedPickupActorClass)
+	{
+		AZNBasePickup* PickupActor = GetWorld()->SpawnActor<AZNBasePickup>(CachedPickupActorClass);
+		if (!PickupActor) return;
+	
+		// 아이템 데이터 설정
+		PickupActor->SetActorLocation(DropLocation);
+		PickupActor->SetItemData(ItemData->PickupRowName, SlotInfo.Quantity, SlotInfo.Durability);
+	
+		// SourceStorage에서 아이템 제거
+		SourceStorage->RemoveItemFromSlot(SlotInfo.SlotIndex, SlotInfo.Quantity);	
+	}
+	else
+	{
+		NotifyInventorySlotUpdated(SlotInfo);
+	}
+}
+
+void UZNBaseStorageComponent::CachePickupActorClass()
+{
+	if (CachedPickupActorClass) return; 
+	
+	if (UZNBaseGameInstance* GameInstance = Cast<UZNBaseGameInstance>(GetWorld()->GetGameInstance()))
+	{
+		CachedPickupActorClass = GameInstance->DefaultPickupActorClass;
 	}
 }
 

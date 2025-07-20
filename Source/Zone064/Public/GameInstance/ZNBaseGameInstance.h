@@ -20,9 +20,13 @@ public:
 
 	UPROPERTY(EditDefaultsOnly)
 	UDataTable* ItemPickupDataTable;
+
+	// UPROPERTY(EditDefaultsOnly)
+	// UDataTable* WidgetDataTable;
 	
-	//UPROPERTY(EditDefaultsOnly)
-	//UDataTable* WidgetDataTable;
+	// 기본 아이템 픽업 액터 클래스 (모든 Storage에서 공통 사용)
+	UPROPERTY(EditDefaultsOnly, Category = "ItemPickup")
+	TSubclassOf<class AZNBasePickup> DefaultPickupActorClass;
 
 	/* Utility Function */
 	const FItemPickupDataRow* GetItemPickupDataRow(const FName& RowName) const;

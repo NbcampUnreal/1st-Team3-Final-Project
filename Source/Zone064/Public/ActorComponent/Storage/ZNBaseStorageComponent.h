@@ -114,6 +114,13 @@ public:
 	// 내부 로직: 특정 슬롯 간 아이템 이동/교환 (서버 RPC에서 직접 호출)
 	void TransferItemBetweenSlots(UZNBaseStorageComponent* OtherStorage, int32 SourceSlotIndex, int32 TargetSlotIndex);
 
+	// 아이템을 월드에 드롭 (래퍼 함수 - 범용 RPC 호출)
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	void RequestDropItemToWorld(APawn* PlayerPawn, const FZNInventorySlotInfo& SlotInfo);
+	
+	// 내부 로직: 아이템 월드 드롭 (서버 RPC에서 직접 호출)
+	void DropItemToWorld(APawn* PlayerPawn, const FZNInventorySlotInfo& SlotInfo);
+
 	/*
 	* --- 유틸리티 함수 ---
 	*/
@@ -172,6 +179,10 @@ protected:
 	UPROPERTY(Replicated)
 	FZNInventoryList InventoryList;
 
+	// GameInstance에서 캐싱된 픽업 액터 클래스 (성능 최적화)
+	UPROPERTY()
+	TSubclassOf<class AZNBasePickup> CachedPickupActorClass;
+
 	/*
 	* --- Server RPC ---
 	*/
@@ -206,6 +217,11 @@ protected:
 	void Server_UseConsumableItemFromSlot(APawn* PlayerPawn, int32 SlotIndex);
 	void Server_UseConsumableItemFromSlot_Implementation(APawn* PlayerPawn, int32 SlotIndex);
 
+	// UI 전용: 모든 Storage에서 아이템 월드 드롭 (플레이어 Storage에서만 호출)
+	UFUNCTION(Server, Reliable, Category = "Inventory")
+	void Server_DropItemFromAnyStorage(UZNBaseStorageComponent* SourceStorage, APawn* PlayerPawn, const FZNInventorySlotInfo& SlotInfo);
+	void Server_DropItemFromAnyStorage_Implementation(UZNBaseStorageComponent* SourceStorage, APawn* PlayerPawn, const FZNInventorySlotInfo& SlotInfo);
+
 	/*
 	* --- Client RPC ---
 	*/
@@ -223,4 +239,8 @@ protected:
 	UFUNCTION(NetMulticast, Reliable, Category = "Inventory")
 	void Multicast_NotifyInventorySlotUpdated(const FZNInventorySlotInfo& SlotInfo);
 	void Multicast_NotifyInventorySlotUpdated_Implementation(const FZNInventorySlotInfo& SlotInfo);
+
+private:
+	// 픽업 액터 클래스 캐싱 (실패 시 재시도 가능)
+	void CachePickupActorClass();
 };

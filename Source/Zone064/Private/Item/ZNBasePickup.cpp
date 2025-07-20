@@ -3,6 +3,7 @@
 #include "Data/ZNItemData.h"
 #include "Engine/Engine.h"
 #include "Components/MeshComponent.h"
+#include "Net/UnrealNetwork.h"
 
 AZNBasePickup::AZNBasePickup()
 {
@@ -38,6 +39,23 @@ void AZNBasePickup::BeginPlay()
 		{
 			SetItemData(ItemRowName, 1,CachedItemData->Durability);
 		}
+	}
+}
+
+void AZNBasePickup::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	DOREPLIFETIME(AZNBasePickup, ItemRowName);
+	DOREPLIFETIME(AZNBasePickup, ItemQuantity);
+	DOREPLIFETIME(AZNBasePickup, ItemDurability);
+}
+
+void AZNBasePickup::OnRep_ItemRowName()
+{
+	if (!ItemRowName.IsNone())
+	{
+		SetupMeshFromItemData();
 	}
 }
 
