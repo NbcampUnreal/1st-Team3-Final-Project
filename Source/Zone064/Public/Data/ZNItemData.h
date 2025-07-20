@@ -9,6 +9,15 @@
 * 모든 아이템의 기본 정보를 담는 Primary Data Asset
 */
 
+USTRUCT(BlueprintType)
+struct FItemPickupDataRow : public FTableRowBase
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TObjectPtr<UZNItemData> ItemData;
+};
+
 UENUM(BlueprintType)
 enum class EItemType : uint8
 {
@@ -36,7 +45,7 @@ public:
 	UZNItemData();
 	
 	/*
-	* --- Item Info ---
+	* --- Item Data Info ---
 	*/
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
@@ -51,12 +60,28 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item", meta = (ClampMin = "-1"))
 	int32 Durability;
 
+	/*
+	* --- Pickup Item Info ---
+	*/
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item")
+	FName PickupRowName;
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item")
 	USkeletalMesh* SkeletalMesh;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item")
+	UStaticMesh* StaticMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Display")
+	FVector PickupScale = FVector(1.0f, 1.0f, 1.0f);
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item")
 	TSubclassOf<class AZNWeaponBase> HoldableWeaponClass;
 
+	/*
+	* --- Consumable Item Info ---
+	*/
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Consumable", meta = (EditCondition = "ItemType == EItemType::Consumable"))       
 	EConsumableSubType ConsumableSubType;
 
@@ -77,6 +102,13 @@ public:
 	UTexture2D* ItemIcon;
 
 public:
+	/*
+	* --- Primary Asset Id Functions ---
+	*/
+	
+	UFUNCTION(BlueprintPure, Category = "Item")
+	FPrimaryAssetId GetItemPrimaryAssetId() const;
+	
 	virtual FPrimaryAssetId GetPrimaryAssetId() const override
 	{
 		return FPrimaryAssetId(FPrimaryAssetType("Item"), GetFName());
@@ -93,5 +125,4 @@ public:
 	// 유효한 스택 크기 반환 (최소 1)
 	UFUNCTION(BlueprintPure, Category = "Item") 
 	int32 GetEffectiveStackSize() const;
-
 };
