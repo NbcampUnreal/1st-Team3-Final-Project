@@ -50,7 +50,7 @@ void UObjectPoolComponent::CreateAndPoolObject(TSubclassOf<AActor> ActorClass)
     UWorld* World = GetWorld();
     if (!World || !ActorClass) return;
 
-    AActor* PooledObject = World->SpawnActor<AActor>(ActorClass, FVector::ZeroVector, FRotator::ZeroRotator);
+    AActor* PooledObject = World->SpawnActor<AActor>(ActorClass, FVector(0.f, 0.f, -999.f), FRotator::ZeroRotator);
     if (PooledObject)
     {
         PooledObject->SetActorHiddenInGame(true);
