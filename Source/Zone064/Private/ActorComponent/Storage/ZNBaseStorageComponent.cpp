@@ -13,6 +13,18 @@
 
 bool FZNInventoryList::NetDeltaSerialize(FNetDeltaSerializeInfo& DeltaParms)
 {
+	if (DeltaParms.Writer)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("FastArray SENDING: %d items, Connection: %s"), 
+			   Items.Num(), 
+			   DeltaParms.Connection ? *DeltaParms.Connection->GetName() : TEXT("None"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("FastArray RECEIVING: Connection: %s"), 
+			   DeltaParms.Connection ? *DeltaParms.Connection->GetName() : TEXT("None"));
+	}
+	
 	return FFastArraySerializer::FastArrayDeltaSerialize<FZNInventorySlotInfo, FZNInventoryList>(Items, DeltaParms, *this);
 }
 
