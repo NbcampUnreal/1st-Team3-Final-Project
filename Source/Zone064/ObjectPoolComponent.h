@@ -37,6 +37,8 @@ class ZONE064_API UObjectPoolComponent : public UActorComponent
 {
     GENERATED_BODY()
 
+    friend class AWaveManager;
+
 public:
     UObjectPoolComponent();
 
@@ -57,8 +59,8 @@ public:
     TArray<FPooledActorInfo> PooledActorInfos;
 
 private:
+
     UPROPERTY()
     TMap<TSubclassOf<AActor>, FObjectPool> PoolMap;
-
     void CreateAndPoolObject(TSubclassOf<AActor> ActorClass);
 };
