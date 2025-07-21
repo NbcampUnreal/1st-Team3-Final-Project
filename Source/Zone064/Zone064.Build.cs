@@ -27,6 +27,7 @@ public class Zone064 : ModuleRules
             "RHI",
             "RenderCore",
             "AIModule",
+            "NavigationSystem",
             "GameplayTags",
             "HeadMountedDisplay",
             "AudioMixer"

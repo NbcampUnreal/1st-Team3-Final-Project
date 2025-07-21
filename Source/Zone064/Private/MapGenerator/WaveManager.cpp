@@ -8,6 +8,7 @@
 #include "GameFramework/Pawn.h"
 #include "AIController.h"
 #include "BrainComponent.h"
+#include "NavigationSystem.h"
 
 AWaveManager::AWaveManager()
 {
@@ -22,6 +23,10 @@ void AWaveManager::BeginPlay()
 	Super::BeginPlay();
 
 	GetAllTaggedActors();
+	if (HasAuthority())
+	{
+		ObjectPoolComponent = this->FindComponentByClass<UObjectPoolComponent>();
+	}
 }
 
 void AWaveManager::GetAllTaggedActors()
@@ -53,69 +58,38 @@ void AWaveManager::GetAllTaggedActors()
 	}
 }
 
-void AWaveManager::ActivateSpawners(FName TagName)
+void AWaveManager::StartWave(FName TagName, int32 NumberToSpawn, float PreparationTime)
 {
-	/*
-	*	1.WaveInfos와 SpawnerGroup 순회
-	*	2.TagName에 맞는 Spawner 목록 캐싱
-	*	3.SpawnInterval 마다 반복하도록 타이머 설정
-	*/
 	if (!HasAuthority()) return;
-	
-	if (TagName == NAME_None)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("[WaveManager] ActivateSpawners : Invalid Tag"));
-		return;
-	}
-	
-	const FWaveSpawnerGroup* FoundGroup = SpawnerGroup.FindByPredicate([&](const FWaveSpawnerGroup& Group)
-	{
-		return Group.TagName == TagName;
-	});
 
-	if (!FoundGroup || FoundGroup->SpawnInterval <= 0.0f)
+	if (TagName == NAME_None || NumberToSpawn <= 0)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("[WaveManager] ActivateSpawners : Tag '%s' is not found or Invalid SpawnInterval"), *TagName.ToString());
+		UE_LOG(LogTemp, Warning, TEXT("[WaveManager] StartWave: Invalid TagName or NumberToSpawn."))
 		return;
 	}
 
-	if (WaveTimerHandles.Contains(TagName) && GetWorld()->GetTimerManager().IsTimerActive(WaveTimerHandles[TagName]))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("[WaveManager] ActivateSpawners : Tag '%s' is already active."), *TagName.ToString());
-	}
+	UE_LOG(LogTemp, Display, TEXT("[WaveManager] Preparing wave for tag '%s'. Spawning %d actors in %f seconds."), *TagName.ToString(), NumberToSpawn, PreparationTime);
 
-	FTimerHandle NewTimerHandle;
-	FTimerDelegate NewTimerDelegate;
+	FTimerHandle WaveStartTimerHandle;
+	FTimerDelegate TimerDelegate;
+	TimerDelegate.BindUObject(this, &AWaveManager::ExecuteWaveSpawn, TagName, NumberToSpawn);
 	
-	NewTimerDelegate.BindUObject(this, &AWaveManager::SpawnWave, TagName);
-	GetWorld()->GetTimerManager().SetTimer(NewTimerHandle, NewTimerDelegate, FoundGroup->SpawnInterval, true, 0.0f);
-
-	WaveTimerHandles.Add(TagName, NewTimerHandle);
-
-	UE_LOG(LogTemp, Display, TEXT("[WaveManager] ActivateSpawners : Tag '%s' activated. Interval : %f"), *TagName.ToString(), FoundGroup->SpawnInterval);
-
+	GetWorld()->GetTimerManager().SetTimer(WaveStartTimerHandle, TimerDelegate, PreparationTime, false);
 }
 
-void AWaveManager::SpawnWave(FName TagName)
+
+void AWaveManager::ExecuteWaveSpawn(FName TagName, int32 NumberToSpawn)
 {
-	/*
-	*	실제 스폰 함수
-	*/
+	if (!HasAuthority() || !ObjectPoolComponent) return;
+
 	const TArray<TObjectPtr<AActor>>* SpawnersPtr = SpawnerMap.Find(TagName);
 	if (!SpawnersPtr || SpawnersPtr->IsEmpty())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("[WaveManager] SpawnWave : No Spawners found"));
+		UE_LOG(LogTemp, Warning, TEXT("[WaveManager] ExecuteWaveSpawn: No spawners found for tag '%s'."), *TagName.ToString());
 		return;
-
-		//if (WaveTimerHandles.Contains(TagName))
-		//{
-		//	GetWorld()->GetTimerManager().ClearTimer(WaveTimerHandles[TagName]);
-		//	WaveTimerHandles.Remove(TagName);
-		//}
-		//return;
 	}
-
 	const TArray<TObjectPtr<AActor>>& Spawners = *SpawnersPtr;
+
 	TArray<FWaveInfo> Infos;
 	float TotalWeight = 0.f;
 	for (const FWaveInfo& Info : WaveInfos)
@@ -127,14 +101,22 @@ void AWaveManager::SpawnWave(FName TagName)
 		}
 	}
 
-	for (const auto& Spawner : Spawners)
+	if (Infos.IsEmpty())
 	{
-		if (!Spawner) continue;
+		UE_LOG(LogTemp, Warning, TEXT("[WaveManager] ExecuteWaveSpawn: No wave info found for tag '%s'."), *TagName.ToString());
+		return;
+	}
+
+	int32 SpawnedCount = 0;
+	for (int32 i = 0; i < NumberToSpawn; ++i)
+	{
+		const TObjectPtr<AActor> RandomSpawner = Spawners[FMath::RandRange(0, Spawners.Num() - 1)];
+		if (!RandomSpawner) continue;
 
 		const float RandomFloat = FMath::FRandRange(0.f, TotalWeight);
 		float CurrentWeight = 0.f;
 		TSubclassOf<AActor> SelectedActorClass;
-		for (const FWaveInfo& Info : WaveInfos)
+		for (const FWaveInfo& Info : Infos)
 		{
 			CurrentWeight += Info.SpawnChance;
 			if (RandomFloat <= CurrentWeight)
@@ -144,27 +126,75 @@ void AWaveManager::SpawnWave(FName TagName)
 			}
 		}
 
-		if (SelectedActorClass)
+		FNavLocation RandomNavLocation;
+		UNavigationSystemV1* NavSys = FNavigationSystem::GetCurrent<UNavigationSystemV1>(GetWorld());
+		bool bFoundLocation = false;
+		if (NavSys)
 		{
-			//// 오브젝트 풀의 스폰 함수 호출 -> 오브젝트풀 코드 수정 필요 : 종류별로 스폰하도록
-			//UObjectPoolComponent* ObjectPool = GetComponentByClass<UObjectPoolComponent>();
+			bFoundLocation = NavSys->GetRandomPointInNavigableRadius(RandomSpawner->GetActorLocation(), SpawnSpreadRadius, RandomNavLocation);
+		}
 
-			//if (ObjectPool)
-			//{
-			//	FTransform SpawnTransform = FTransform(
-			//		FRotator(0.f, FMath::FRandRange(0.f, 180.f), 0.f),
-			//		Spawner->GetActorLocation(),
-			//		FVector(1.f)
-			//	);
-
-			//	ObjectPool->SpawnPooledObject(SpawnTransform);
-			//}
-			//else
-			//{
-			//	UE_LOG(LogTemp, Warning, TEXT("[WaveManager] SpawnWave : ObjectPoolComponent is not valid."));
-			//}
+		if (SelectedActorClass && bFoundLocation)
+		{
+			FTransform SpawnTransform = FTransform(
+				FRotator(0.f, FMath::FRandRange(0.f, 360.f), 0.f),
+				RandomNavLocation.Location,
+				FVector(1.f)
+			);
+			
+			AActor* SpawnedActor = ObjectPoolComponent->SpawnPooledObject(SelectedActorClass, SpawnTransform);
+			if(SpawnedActor) 
+			{
+				GetAIControllerAndStartLogic(SpawnedActor);
+				SpawnedCount++;
+			}
+		}
+		else
+		{
+			// 네비게이션 위치를 찾지 못했을 때
+			FTransform SpawnTransform = FTransform(
+				FRotator(0.f, FMath::FRandRange(0.f, 360.f), 0.f),
+				RandomSpawner->GetActorLocation(),
+				FVector(1.f)
+			);
+			AActor* SpawnedActor = ObjectPoolComponent->SpawnPooledObject(SelectedActorClass, SpawnTransform);
+			if(SpawnedActor) 
+			{
+				GetAIControllerAndStartLogic(SpawnedActor);
+				SpawnedCount++;
+			}
 		}
 	}
+
+	// 모든 활성화된 AI에게 이동 명령
+	for (auto& PoolPair : ObjectPoolComponent->PoolMap)
+	{
+		FObjectPool& Pool = PoolPair.Value;
+		for (AActor* Actor : Pool.InUseActors)
+		{
+			APawn* AIPawn = Cast<APawn>(Actor);
+			if (AIPawn)
+			{
+				AAIController* AIController = Cast<AAIController>(AIPawn->GetController());
+				if (AIController)
+				{
+					// 각 AI마다 다른 무작위 플레이어를 목표로 설정
+					APawn* TargetPlayerPawn = GetRandomPlayerPawn();
+					if (TargetPlayerPawn)
+					{
+						AIController->MoveToActor(TargetPlayerPawn, 100.f);
+					}
+				}
+			}
+		}
+	}
+	
+	UE_LOG(LogTemp, Display, TEXT("[WaveManager] Wave executed for tag '%s'. %d actors spawned. All in-use actors are now moving to different random targets."), *TagName.ToString(), SpawnedCount);
+}
+
+void AWaveManager::MoveWave()
+{
+
 }
 
 void AWaveManager::GetAIControllerAndStartLogic(AActor* SpawnedActor)
@@ -194,18 +224,16 @@ void AWaveManager::GetAIControllerAndStartLogic(AActor* SpawnedActor)
 
 }
 
-void AWaveManager::NotifyRandomPlayerLocation()
+
+APawn* AWaveManager::GetRandomPlayerPawn()
 {
-	// ObjectPool 에서 현재 활성화된 좀비 배열이 필요함
-	
 	AGameStateBase* GameState = GetWorld()->GetGameState();
 	if (!GameState)
 	{
-		UE_LOG(LogTemp, Display, TEXT("[WaveManager] NotifyRandomPlayerLocation : GameState fail"));
-		return;
+		UE_LOG(LogTemp, Display, TEXT("[WaveManager] GetRandomPlayerPawn : GameState fail"));
+		return nullptr;
 	}
 
-	// 무작위 플레이어 위치로 이동
 	int32 RandomPlayerIndex = FMath::RandRange(0, GameState->PlayerArray.Num() - 1);
 
 	if (GameState)
@@ -214,15 +242,14 @@ void AWaveManager::NotifyRandomPlayerLocation()
 		if (RandomPlayerState)
 		{
 			APawn* RandomPlayerPawn = RandomPlayerState->GetPawn();
-			if (/*AIPawn &&*/ RandomPlayerPawn)
+			if (RandomPlayerPawn)
 			{
-				/* AIPawn->GetController
-				*  AIController->MoveToActor(RandomPlayerPawn, 100.f);
-				*/
-
+				return RandomPlayerPawn;
 			}
 		}
 	}
+	
+	return nullptr;
 }
 
 
