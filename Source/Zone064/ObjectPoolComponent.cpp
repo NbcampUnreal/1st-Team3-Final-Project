@@ -53,6 +53,12 @@ void UObjectPoolComponent::CreateAndPoolObject(TSubclassOf<AActor> ActorClass)
     AActor* PooledObject = World->SpawnActor<AActor>(ActorClass, FVector::ZeroVector, FRotator::ZeroRotator);
     if (PooledObject)
     {
+        UAILODComponent* LODComp = PooledObject->FindComponentByClass<UAILODComponent>();
+        if (LODComp)
+        {
+            LODComp->SetIsPooled(true);
+        }
+
         PooledObject->SetActorHiddenInGame(true);
         PooledObject->SetActorEnableCollision(false);
         PooledObject->SetActorTickEnabled(false);
