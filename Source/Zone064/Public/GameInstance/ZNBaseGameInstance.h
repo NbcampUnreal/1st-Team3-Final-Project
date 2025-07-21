@@ -28,10 +28,12 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "ItemPickup")
 	TSubclassOf<class AZNBasePickup> DefaultPickupActorClass;
 
+	UPROPERTY(EditAnywhere, Category = "ItemData")
+	int32 TotalFuelPerPhase = 10;
+	
 	/* Utility Function */
 	const FItemPickupDataRow* GetItemPickupDataRow(const FName& RowName) const;
 	
 	UFUNCTION(BlueprintCallable, Category = "ItemData")
 	UZNItemData* GetItemDataFromPickup(const FName& RowName) const;
-
 };

@@ -159,6 +159,10 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Inventory")
 	virtual bool CanStoreItemInSlot(const FPrimaryAssetId& ItemId, int32 TargetSlotIndex) const;
 
+	// 허용된 아이템 태그 반환
+	UFUNCTION(BlueprintPure, Category = "Inventory")
+	FGameplayTagContainer GetAllowedItemTags() const { return AllowedItemTags; }
+
 	// 지정된 아이템과 수량을 추가할 수 있는지 확인하고, 실제 추가 가능한 수량을 반환
 	UFUNCTION(BlueprintPure, Category = "Inventory")
 	int32 CheckAddableQuantity(const FPrimaryAssetId& ItemId, int32 Quantity) const;

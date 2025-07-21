@@ -25,7 +25,8 @@ enum class EItemType : uint8
 	Weapon UMETA(DisplayName = "무기"),
 	Armor UMETA(DisplayName = "방어구"),
 	Crafting UMETA(DisplayName = "제작"),
-	Consumable UMETA(DisplayName = "소비")
+	Consumable UMETA(DisplayName = "소비"),
+	RepairKit UMETA(DisplayName = "수리키트")
 };
 
 UENUM(BlueprintType)
@@ -63,6 +64,7 @@ public:
 	/*
 	* --- Pickup Item Info ---
 	*/
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item")
 	FName PickupRowName;
 	
@@ -89,6 +91,22 @@ public:
 	float ConsumableEffectAmount;
 	
 	/*
+	* --- Spawn System Info ---
+	*/
+	
+	// 이 아이템이 스폰되기 시작하는 최소 RepeatCount
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spawn", meta = (ClampMin = "1"))
+	int32 MinRepeatCount = 1;
+
+	// 같은 타입 내에서의 스폰 가중치 (높을수록 자주 등장)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spawn", meta = (ClampMin = "0.1"))
+	float SpawnWeight = 1.0f;
+
+	// 스폰 시 수량 범위 (Stackable 아이템용, X=Min, Y=Max)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spawn", meta = (EditCondition = "MaxStackSize > 1"))
+	FIntPoint SpawnQuantityRange = FIntPoint(1, 1);
+	
+	/*
 	* --- UI ---
 	*/
 
@@ -100,6 +118,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Display")
 	UTexture2D* ItemIcon;
+	
 
 public:
 	/*
@@ -125,4 +144,16 @@ public:
 	// 유효한 스택 크기 반환 (최소 1)
 	UFUNCTION(BlueprintPure, Category = "Item") 
 	int32 GetEffectiveStackSize() const;
+	
+	/*
+	* --- Spawn Utility Functions ---
+	*/
+	
+	// 현재 RepeatCount에서 스폰 가능한지 확인
+	UFUNCTION(BlueprintPure, Category = "Spawn")
+	bool CanSpawnAtRepeatCount(int32 CurrentRepeatCount) const;
+
+	// 스폰 시 실제 수량 계산
+	UFUNCTION(BlueprintPure, Category = "Spawn")
+	int32 GetRandomSpawnQuantity() const;
 };

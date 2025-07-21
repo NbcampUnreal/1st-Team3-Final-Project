@@ -190,7 +190,7 @@ void UGameFlowManager::InitCurrentRepeatCount()
 void UGameFlowManager::AddCurrentRepeatCount()
 {
 	CurRepeatCountCache += 1;
-
+	
 	UpdateGameFlowData();
 }
 

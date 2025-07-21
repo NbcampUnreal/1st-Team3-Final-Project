@@ -14,7 +14,7 @@ protected:
 
 public:
 	UPROPERTY(ReplicatedUsing=OnRep_CurrentHealth, BlueprintReadWrite, Category = "Health")
-	float CurrentHealth;
+	float CurrentHealth = 100.0f;
 	
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnRep_CurrentHealth();

@@ -14,13 +14,14 @@
 /**
  * 
  */
+
 UCLASS(BlueprintType)
 class ZONE064_API UGameFlowManager : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
 	
 public:
-	void Initialize(FSubsystemCollectionBase& Collection) override;
+	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	
 	/* Flow Control Methods */
 	UFUNCTION(BlueprintCallable, Category = "GameFlow")
