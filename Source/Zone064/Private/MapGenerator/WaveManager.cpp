@@ -9,6 +9,8 @@
 #include "AIController.h"
 #include "BrainComponent.h"
 #include "NavigationSystem.h"
+#include "GameFramework/Character.h"
+#include "Components/CapsuleComponent.h"
 
 AWaveManager::AWaveManager()
 {
@@ -136,9 +138,20 @@ void AWaveManager::ExecuteWaveSpawn(FName TagName, int32 NumberToSpawn)
 
 		if (SelectedActorClass && bFoundLocation)
 		{
+			// 스폰할 액터의 기본 콜리전 컴포넌트 높이를 가져옴
+			float ActorHalfHeight = 50.f;
+			if (ACharacter* DefaultCharacter = SelectedActorClass->GetDefaultObject<ACharacter>())
+			{
+				if (UCapsuleComponent* Capsule = DefaultCharacter->GetCapsuleComponent())
+				{
+					ActorHalfHeight = Capsule->GetScaledCapsuleHalfHeight();
+				}
+			}
+
+			FVector SpawnLocation = RandomNavLocation.Location + FVector(0.f, 0.f, ActorHalfHeight);
 			FTransform SpawnTransform = FTransform(
 				FRotator(0.f, FMath::FRandRange(0.f, 360.f), 0.f),
-				RandomNavLocation.Location,
+				SpawnLocation,
 				FVector(1.f)
 			);
 			
@@ -195,6 +208,28 @@ void AWaveManager::ExecuteWaveSpawn(FName TagName, int32 NumberToSpawn)
 void AWaveManager::MoveWave()
 {
 
+}
+
+int32 AWaveManager::GetActiveActorCount() const
+{
+	if (!ObjectPoolComponent)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[WaveManager] GetActiveActorCount: ObjectPoolComponent is not valid."));
+		return 0;
+	}
+	
+	int32 TotalInUseActors = 0;
+	for (const auto& PoolPair : ObjectPoolComponent->PoolMap)
+	{
+		TotalInUseActors += PoolPair.Value.InUseActors.Num();
+	}
+
+	return TotalInUseActors;
+}
+
+bool AWaveManager::CanSpawnMoreActors(int32 Threshold) const
+{
+	return GetActiveActorCount() < Threshold;
 }
 
 void AWaveManager::GetAIControllerAndStartLogic(AActor* SpawnedActor)

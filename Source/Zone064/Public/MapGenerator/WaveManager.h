@@ -50,6 +50,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "WaveManager")
 	void StartWave(FName TagName, int32 NumberToSpawn, float PreparationTime);
 	void MoveWave();
+	UFUNCTION(BlueprintCallable, Category = "WaveManager")
+	int32 GetActiveActorCount() const;
+	UFUNCTION(BlueprintCallable, Category = "WaveManager")
+	bool CanSpawnMoreActors(int32 Threshold) const;
 
 	// AI 명시적 시작, 랜덤 플레이어
 	void GetAIControllerAndStartLogic(AActor* SpawnedActor);
