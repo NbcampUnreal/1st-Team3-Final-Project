@@ -53,7 +53,7 @@ void UHungerComponent::DecreaseHunger(float Amount)
 	Hunger = FMath::Clamp(Hunger - Amount, 0.f, MaxHunger);
 }
 
-void UHungerComponent::IncreaseHunger(float Amount)
+void UHungerComponent::IncreaseHunger(const float& Amount)
 {
 	Hunger = FMath::Clamp(Hunger + Amount, 0.f, MaxHunger);
 }
@@ -105,6 +105,5 @@ void UHungerComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 
 void UHungerComponent::OnRep_Hunger()
 {
-	UE_LOG(LogTemp, Log, TEXT("OnRep_Hunger called. Hunger = %f"), Hunger);
 
 }

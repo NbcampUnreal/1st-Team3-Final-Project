@@ -9,22 +9,103 @@
 * 모든 아이템의 기본 정보를 담는 Primary Data Asset
 */
 
+USTRUCT(BlueprintType)
+struct FItemPickupDataRow : public FTableRowBase
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TObjectPtr<UZNItemData> ItemData;
+};
+
+UENUM(BlueprintType)
+enum class EItemType : uint8
+{
+	None UMETA(DisplayName = "없음"),
+	Weapon UMETA(DisplayName = "무기"),
+	Armor UMETA(DisplayName = "방어구"),
+	Crafting UMETA(DisplayName = "제작"),
+	Consumable UMETA(DisplayName = "소비"),
+	RepairKit UMETA(DisplayName = "수리키트")
+};
+
+UENUM(BlueprintType)
+enum class EConsumableSubType : uint8
+{
+	None UMETA(DisplayName = "없음"),
+	Health UMETA(DisplayName = "체력"),
+	Hunger UMETA(DisplayName = "포만감")
+};
+
 UCLASS(BlueprintType)
 class ZONE064_API UZNItemData : public UPrimaryDataAsset
 {
 	GENERATED_BODY()
 	
 public:
+	UZNItemData();
+	
 	/*
-	* --- Item Info ---
+	* --- Item Data Info ---
 	*/
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
 	FGameplayTagContainer ItemTags;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item", meta = (ClampMax = "1"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item")
+	EItemType ItemType;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item", meta = (ClampMin = "1"))
 	int32 MaxStackSize;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item", meta = (ClampMin = "-1"))
+	int32 Durability;
+
+	/*
+	* --- Pickup Item Info ---
+	*/
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item")
+	FName PickupRowName;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item")
+	USkeletalMesh* SkeletalMesh;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item")
+	UStaticMesh* StaticMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Display")
+	FVector PickupScale = FVector(1.0f, 1.0f, 1.0f);
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item")
+	TSubclassOf<class AZNWeaponBase> HoldableWeaponClass;
+
+	/*
+	* --- Consumable Item Info ---
+	*/
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Consumable", meta = (EditCondition = "ItemType == EItemType::Consumable"))       
+	EConsumableSubType ConsumableSubType;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Consumable", meta = (EditCondition = "ItemType == EItemType::Consumable"))       
+	float ConsumableEffectAmount;
+	
+	/*
+	* --- Spawn System Info ---
+	*/
+	
+	// 이 아이템이 스폰되기 시작하는 최소 RepeatCount
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spawn", meta = (ClampMin = "1"))
+	int32 MinRepeatCount = 1;
+
+	// 같은 타입 내에서의 스폰 가중치 (높을수록 자주 등장)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spawn", meta = (ClampMin = "0.1"))
+	float SpawnWeight = 1.0f;
+
+	// 스폰 시 수량 범위 (Stackable 아이템용, X=Min, Y=Max)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spawn", meta = (EditCondition = "MaxStackSize > 1"))
+	FIntPoint SpawnQuantityRange = FIntPoint(1, 1);
+	
 	/*
 	* --- UI ---
 	*/
@@ -36,11 +117,43 @@ public:
 	FText ItemDescription;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Display")
-	TSoftObjectPtr<UTexture2D> ItemIcon;
+	UTexture2D* ItemIcon;
+	
 
 public:
+	/*
+	* --- Primary Asset Id Functions ---
+	*/
+	
+	UFUNCTION(BlueprintPure, Category = "Item")
+	FPrimaryAssetId GetItemPrimaryAssetId() const;
+	
 	virtual FPrimaryAssetId GetPrimaryAssetId() const override
 	{
 		return FPrimaryAssetId(FPrimaryAssetType("Item"), GetFName());
 	}
+
+	/*
+	* --- Stack Utility Functions ---
+	*/
+
+	// 스택 가능한지 확인
+	UFUNCTION(BlueprintPure, Category = "Item")
+	bool IsStackable() const;
+
+	// 유효한 스택 크기 반환 (최소 1)
+	UFUNCTION(BlueprintPure, Category = "Item") 
+	int32 GetEffectiveStackSize() const;
+	
+	/*
+	* --- Spawn Utility Functions ---
+	*/
+	
+	// 현재 RepeatCount에서 스폰 가능한지 확인
+	UFUNCTION(BlueprintPure, Category = "Spawn")
+	bool CanSpawnAtRepeatCount(int32 CurrentRepeatCount) const;
+
+	// 스폰 시 실제 수량 계산
+	UFUNCTION(BlueprintPure, Category = "Spawn")
+	int32 GetRandomSpawnQuantity() const;
 };
