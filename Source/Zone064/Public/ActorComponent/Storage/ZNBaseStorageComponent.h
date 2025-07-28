@@ -3,14 +3,13 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "UObject/PrimaryAssetId.h"
-#include "Net/Serialization/FastArraySerializer.h"
 #include "GameplayTagContainer.h"
 #include "ZNBaseStorageComponent.generated.h"
 
 class UZNItemData;
 
 USTRUCT(BlueprintType)
-struct FZNInventorySlotInfo : public FFastArraySerializerItem
+struct FZNInventorySlotInfo
 {
 	GENERATED_BODY()
 
@@ -35,7 +34,7 @@ public:
 };
 
 USTRUCT(BlueprintType)
-struct FZNInventoryList : public FFastArraySerializer
+struct FZNInventoryList
 {
 	GENERATED_BODY()
 
@@ -43,19 +42,8 @@ public:
 	UPROPERTY()
 	TArray<FZNInventorySlotInfo> Items;
 	
-	bool NetDeltaSerialize(FNetDeltaSerializeInfo& DeltaParms);
-
 	UPROPERTY()
 	UZNBaseStorageComponent* OwningComponent = nullptr;
-};
-
-template<>
-struct TStructOpsTypeTraits<FZNInventoryList> : public TStructOpsTypeTraitsBase2<FZNInventoryList>
-{
-	enum
-	{
-		WithNetDeltaSerializer = true,
-	};
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnInventoryUpdated, const FZNInventorySlotInfo&, UpdatedSlotInfo);

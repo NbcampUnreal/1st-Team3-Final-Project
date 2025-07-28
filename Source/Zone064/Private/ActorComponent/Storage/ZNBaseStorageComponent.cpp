@@ -7,26 +7,6 @@
 #include "Item/ZNBasePickup.h"
 #include "GameInstance/ZNBaseGameInstance.h"
 
-/*
-* --- FZNInventoryList ---
-*/
-
-bool FZNInventoryList::NetDeltaSerialize(FNetDeltaSerializeInfo& DeltaParms)
-{
-	if (DeltaParms.Writer)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("FastArray SENDING: %d items, Connection: %s"), 
-			   Items.Num(), 
-			   DeltaParms.Connection ? *DeltaParms.Connection->GetName() : TEXT("None"));
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("FastArray RECEIVING: Connection: %s"), 
-			   DeltaParms.Connection ? *DeltaParms.Connection->GetName() : TEXT("None"));
-	}
-	
-	return FFastArraySerializer::FastArrayDeltaSerialize<FZNInventorySlotInfo, FZNInventoryList>(Items, DeltaParms, *this);
-}
 
 /*
 * --- UZNBaseStorageComponent ---
@@ -59,8 +39,6 @@ void UZNBaseStorageComponent::BeginPlay()
 			{
 				InventoryList.Items[i].SlotIndex = i;
 			}
-			
-			InventoryList.MarkArrayDirty();
 		}
 	}
 }
@@ -187,9 +165,7 @@ void UZNBaseStorageComponent::TransferItemBetweenSlots(
 				{
 					ClearSlot(SourceSlot);
 				}
-				
-				InventoryList.MarkItemDirty(SourceSlot);
-				OtherStorage->InventoryList.MarkItemDirty(TargetSlot);
+
 				NotifyInventorySlotUpdated(SourceSlot);
 				OtherStorage->NotifyInventorySlotUpdated(TargetSlot);
 			}
@@ -220,8 +196,6 @@ void UZNBaseStorageComponent::TransferItemBetweenSlots(
             TargetSlot.Quantity = TempQuantity;
             TargetSlot.Durability = TempDurability;
         	
-            InventoryList.MarkItemDirty(SourceSlot);
-            OtherStorage->InventoryList.MarkItemDirty(TargetSlot);
             NotifyInventorySlotUpdated(SourceSlot);
             OtherStorage->NotifyInventorySlotUpdated(TargetSlot);
         }
@@ -427,7 +401,7 @@ void UZNBaseStorageComponent::Server_AddItem_Implementation(FPrimaryAssetId Item
 			const int32 AmountToAdd = FMath::Min(RemainingQuantity, MaxStackSize - Slot.Quantity);
 			Slot.Quantity += AmountToAdd;
 			RemainingQuantity -= AmountToAdd;
-			InventoryList.MarkItemDirty(Slot);
+
 			NotifyInventorySlotUpdated(Slot);
 		}
 	}
@@ -446,7 +420,7 @@ void UZNBaseStorageComponent::Server_AddItem_Implementation(FPrimaryAssetId Item
 				Slot.Durability = Durability;
 				Slot.SlotIndex = i;  // 슬롯 인덱스 설정
 				RemainingQuantity -= AmountToAdd;
-				InventoryList.MarkItemDirty(Slot);
+
 				Multicast_NotifyInventorySlotUpdated(Slot);
 			}
 		}
@@ -475,7 +449,7 @@ void UZNBaseStorageComponent::Server_RemoveItem_Implementation(FPrimaryAssetId I
 			{
 				ClearSlot(Slot);
 			}
-			InventoryList.MarkItemDirty(Slot);
+
 			NotifyInventorySlotUpdated(Slot);
 		}
 	}
@@ -496,7 +470,6 @@ void UZNBaseStorageComponent::Server_RemoveItemFromSlot_Implementation(int32 Slo
 		ClearSlot(Slot); 
 	}
 
-	InventoryList.MarkItemDirty(Slot);
 	NotifyInventorySlotUpdated(Slot);
 }
 
@@ -558,11 +531,8 @@ void UZNBaseStorageComponent::Server_SortInventory_Implementation()
 	{
 		InventoryList.Items[i].SlotIndex = i;
 	}
-
-	// 5. 마무리
-	InventoryList.MarkArrayDirty();
 	
-	// 6. 모든 슬롯 UI 업데이트 (정렬 후 전체 인벤토리 갱신)
+	// 5. 모든 슬롯 UI 업데이트 (정렬 후 전체 인벤토리 갱신)
 	for (const FZNInventorySlotInfo& Slot : InventoryList.Items)
 	{
 		// 추후 WBP 정렬 기능에서 수동으로 전체 슬롯 Refresh 함수 호출하도록 수정 필요

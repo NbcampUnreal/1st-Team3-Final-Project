@@ -14,31 +14,31 @@ void UZNContainerComponent::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	// if (GetOwner()->HasAuthority())
-	// {
-	// 	// 기본 확률 초기화
-	// 	InitializeDefaultSpawnChances();
-	// 	
-	// 	// ItemSpawnManager에서 아이템 생성
-	// 	if (UItemSpawnManager* SpawnManager = GetOwner()->GetGameInstance()->GetSubsystem<UItemSpawnManager>())
-	// 	{
-	// 		int32 ItemCount = FMath::RandRange(
-	// 			ItemCountRange.X,  // Min 값
-	// 			ItemCountRange.Y   // Max 값
-	// 		);
-	// 		
-	// 		TArray<FItemSpawnResult> SpawnResults = SpawnManager->GenerateRandomItems(
-	// 			ItemCount, 
-	// 			ItemTypeSpawnChances
-	// 		);
-	// 		
-	// 		// 생성된 아이템들을 Storage에 추가
-	// 		for (const FItemSpawnResult& Result : SpawnResults)
-	// 		{
-	// 			Server_AddItem_Implementation(Result.ItemId, Result.Quantity, Result.Durability);
-	// 		}
-	// 	}
-	// }
+	 if (GetOwner()->HasAuthority())
+	 {
+	 	// 기본 확률 초기화
+	 	InitializeDefaultSpawnChances();
+	 	
+	 	// ItemSpawnManager에서 아이템 생성
+	 	if (UItemSpawnManager* SpawnManager = GetOwner()->GetGameInstance()->GetSubsystem<UItemSpawnManager>())
+	 	{
+	 		int32 ItemCount = FMath::RandRange(
+	 			ItemCountRange.X,  // Min 값
+	 			ItemCountRange.Y   // Max 값
+	 		);
+	 		
+	 		TArray<FItemSpawnResult> SpawnResults = SpawnManager->GenerateRandomItems(
+	 			ItemCount, 
+	 			ItemTypeSpawnChances
+	 		);
+	 		
+	 		// 생성된 아이템들을 Storage에 추가
+	 		for (const FItemSpawnResult& Result : SpawnResults)
+	 		{
+	 			Server_AddItem_Implementation(Result.ItemId, Result.Quantity, Result.Durability);
+	 		}
+	 	}
+	 }
 }
 
 void UZNContainerComponent::InitializeDefaultSpawnChances()
